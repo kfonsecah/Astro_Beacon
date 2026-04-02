@@ -40,6 +40,60 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 - **Requerimientos detallados**: `project-requirements.md`
 - **Entregas**: 3 etapas (Base Inicial 10%, Aplicación Base 15%, Defensa 20%)
 
+## Project Structure
+
+Estructura oficial definida por la cátedra (obligatoria):
+
+```
+project/
+├── app/                          # Rutas principales (expo-router)
+│   ├── (auth)/                   # Grupo de rutas públicas
+│   │   ├── login.tsx
+│   │   └── register.tsx
+│   ├── (app)/                    # Grupo de rutas protegidas
+│   │   ├── _layout.tsx
+│   │   ├── (tabs)/
+│   │   │   ├── profile.tsx
+│   │   
+│   └── _layout.tsx               # Layout raíz
+│
+├── src/                          # Lógica de la app
+│   ├── components/               # Componentes reutilizables
+│   │   ├── ui/                   # Botones, inputs, etc.
+│   │   ├── common/               # Headers, footers, etc.
+│   │
+│   ├── hooks/                    # Custom hooks
+│   ├── services/                 # APIs y servicios externos
+│   │   ├── api.ts                # Configuración base
+│   │
+│   ├── context/                  # Context API y state global
+│   ├── constants/                # Constantes de la app
+│   │   ├── colors.ts
+│   │   ├── spacing.ts
+│   │   ├── typography.ts
+│   │   └── api.ts
+│   │
+│   ├── theme/                    # Sistema de temas
+│   │   ├── colors.ts
+│   │   ├── fonts.ts
+│   │   ├── dark.ts
+│   │   └── light.ts
+│   │
+│   ├── types-dtos/               # TypeScript types/interfaces
+│   ├── utils/                    # Funciones auxiliares
+│   └── screens/                  # Pantallas
+│       └── UserProfile/
+│           ├── UserProfile.tsx
+│           └── UserProfile.styles.ts
+│
+├── assets/
+│   ├── images/
+│   ├── icons/
+│   └── fonts/
+│
+└── package.json
+```
+
 ## Constraints
 
 - **[Tech Stack]**: React Native con Expo - obligatorio mantener compatibilidad con Expo en todo momento
@@ -47,6 +101,8 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 - **[Plataforma]**: Siempre React Native - no usar librerías web-only
 - **[Librerías]**: Permitidas las que sean necesarias, siempre que sean compatibles con Expo
 - **[Estilo visual]**: Replicar el estilo del proyecto `astro-beacon-reference/`
+- **[Estructura]**: Seguir la estructura de carpetas definida por la cátedra (ver Project Structure)
+- **[Design System]**: Obligatorio usar un design system consistente para toda la UI (colores, tipografía, espaciado, componentes reutilizables) — definido en `src/constants/` y `src/theme/`
 
 ## Key Decisions
 
