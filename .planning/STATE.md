@@ -1,0 +1,44 @@
+# State: Astro_Beacon
+
+## Current Status
+
+**Milestone:** v1.0 Base Inicial
+**Phase:** None in progress
+**Last Updated:** 2026-04-01
+
+## Project Reference
+
+See: `.planning/PROJECT.md` (updated 2026-04-01)
+
+**Core value:** Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
+**Current focus:** v1.0 Base Inicial - Arquitectura, diseño de datos, mockups, design system y base de la app
+
+## Active Context
+
+### Codebase Map
+- Main project: `.planning/codebase/` (7 documents)
+- Reference project: `astro-beacon-reference/.planning/codebase/` (7 documents)
+
+### Key Constraints
+- Expo + React Native siempre
+- Versiones compatibles con scaffold inicial
+- Estructura de carpetas del profesor
+- Design system obligatorio
+- Estilo visual basado en `astro-beacon-reference/`
+
+### Phase Status
+
+| Phase | Status | Plans |
+|-------|--------|-------|
+| 1. Arquitectura y Diseño | Not started | 0/2 |
+| 2. Diseño de Datos | Not started | 0/2 |
+| 3. Diseño Móvil (Mockups) | Not started | 0/2 |
+| 4. Design System y Estructura Visual | Not started | 0/3 |
+| 5. Base de la App y Conexión API | Not started | 0/4 |
+
+## Next Action
+
+Start Phase 1: Arquitectura y Diseño del Sistema
+
+---
+*State initialized with v1.0 Base Inicial milestone*

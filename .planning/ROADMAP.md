@@ -1,0 +1,106 @@
+# Roadmap: Astro_Beacon
+
+## Overview
+
+Desarrollo de una aplicación móvil de exploración planetaria para la materia EIF411 (UNACR). El proyecto simula la asistencia a una astronauta varada en un planeta desconocido, con funcionalidades de bitácora, gestión de recursos, navegación GPS y soporte offline. La referencia visual proviene del proyecto `astro-beacon-reference/` generado por Lovable.
+
+## Milestones
+
+- 🚧 **v1.0 Base Inicial** - Fases 1-5 (in progress) - Entrega 1: 08 de abril
+- 📋 **v1.1 Aplicación Base** - Fases 6-10 (planned) - Entrega 2: 06 de mayo
+- 📋 **v1.2 Defensa Final** - Fases 11-14 (planned) - Entrega: 03 de junio
+
+## Phases
+
+### 🚧 v1.0 Base Inicial (In Progress)
+
+**Milestone Goal:** Cumplir con los criterios de la primera entrega (10%): arquitectura y diseño del trabajo, diseño de datos, diseño móvil (mockups), y una base de la app con conexión a la API.
+
+#### Phase 1: Arquitectura y Diseño del Sistema
+**Goal**: Definir y documentar la arquitectura del sistema con diagramas claros
+**Depends on**: Nothing (first phase)
+**Requirements**: [Arquitectura y diseño del trabajo - Rúbrica Base Inicial]
+**Success Criteria** (what must be TRUE):
+  1. Diagrama de arquitectura draw.io (o similar) con componentes y relaciones
+  2. Separación clara entre frontend (React Native) y backend (API)
+  3. Documentación de la arquitectura en `.planning/docs/ARCHITECTURE-DESIGN.md`
+  4. Justificación de patrones de diseño y organización por capas
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01: Crear diagrama de arquitectura (frontend, backend, API, base de datos)
+- [ ] 01-02: Documentar arquitectura, patrones de diseño y justificaciones
+
+#### Phase 2: Diseño de Datos
+**Goal**: Definir entidades, documentos, atributos y relaciones del sistema
+**Depends on**: Phase 1
+**Requirements**: [Diseño de datos - Rúbrica Base Inicial]
+**Success Criteria** (what must be TRUE):
+  1. Diagrama de entidades/documentos con relaciones
+  2. Definición completa de tipos TypeScript (types-dtos)
+  3. Documentación del diseño de datos en `.planning/docs/DATA-DESIGN.md`
+  4. Entidades cubren: astronauta, recursos, bitácora, especies, viajes, suministros
+**Plans**: 2 plans
+
+Plans:
+- [ ] 02-01: Definir entidades y relaciones (diagrama + documentación)
+- [ ] 02-02: Implementar tipos TypeScript en `src/types-dtos/`
+
+#### Phase 3: Diseño Móvil (Mockups)
+**Goal**: Crear mockups completos de las principales pantallas de la app
+**Depends on**: Phase 1, Phase 2
+**Requirements**: [Diseño móvil - Rúbrica Base Inicial]
+**Success Criteria** (what must be TRUE):
+  1. Mockups de todas las pantallas principales (login, dashboard, bitácora, recursos, mapa, perfil)
+  2. Diseño coherente con la referencia visual de `astro-beacon-reference/`
+  3. Documentación de rutas y navegación en `.planning/docs/MOCKUPS.md`
+  4. Conocimiento de todas las posibles rutas de la app
+**Plans**: 2 plans
+
+Plans:
+- [ ] 03-01: Crear mockups basados en referencia visual de Lovable
+- [ ] 03-02: Documentar rutas, navegación y flujos de usuario
+
+#### Phase 4: Design System y Estructura Visual
+**Goal**: Implementar el design system y la estructura visual basada en la referencia
+**Depends on**: Phase 3
+**Requirements**: [Diseño, animaciones y estilos temáticos - Requerimientos Generales]
+**Success Criteria** (what must be TRUE):
+  1. Design system implementado en `src/constants/` (colores, spacing, typography)
+  2. Tema dark/light en `src/theme/` inspirado en estética espacial/HUD
+  3. Componentes UI base en `src/components/ui/` (Button, Card, Input, etc.)
+  4. Estructura de carpetas alineada con la requerida por la cátedra
+**Plans**: 3 plans
+
+Plans:
+- [ ] 04-01: Implementar constants (colors, spacing, typography)
+- [ ] 04-02: Implementar temas (dark.ts, light.ts, fonts.ts)
+- [ ] 04-03: Crear componentes UI base reutilizables
+
+#### Phase 5: Base de la App y Conexión API
+**Goal**: Establecer la estructura base de la app con rutas, layouts y conexión a la API
+**Depends on**: Phase 2, Phase 4
+**Requirements**: [Conexión con la API - Rúbrica Base Inicial]
+**Success Criteria** (what must be TRUE):
+  1. Rutas configuradas con expo-router: `(auth)/` y `(app)/` groups
+  2. Layouts raíz y de tabs implementados
+  3. Servicio de API configurado en `src/services/api.ts`
+  4. Al menos una pantalla funcional conectada a la API
+  5. Estructura de carpetas completa según requerimiento del profesor
+**Plans**: 4 plans
+
+Plans:
+- [ ] 05-01: Configurar rutas expo-router y layouts
+- [ ] 05-02: Implementar servicio de API base
+- [ ] 05-03: Crear pantallas base (login placeholder, dashboard placeholder)
+- [ ] 05-04: Integrar navegación con design system
+
+## Progress
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Arquitectura y Diseño | v1.0 | 0/2 | Not started | - |
+| 2. Diseño de Datos | v1.0 | 0/2 | Not started | - |
+| 3. Diseño Móvil (Mockups) | v1.0 | 0/2 | Not started | - |
+| 4. Design System y Estructura Visual | v1.0 | 0/3 | Not started | - |
+| 5. Base de la App y Conexión API | v1.0 | 0/4 | Not started | - |
