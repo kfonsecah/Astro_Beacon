@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "read": {
+      "C:/Users/Kendall Fonseca/Desktop/U/Moviles/Astro_Beacon/.opencode/get-shit-done/*": "allow"
+    },
+    "external_directory": {
+      "C:/Users/Kendall Fonseca/Desktop/U/Moviles/Astro_Beacon/.opencode/get-shit-done/*": "allow"
+    }
+  }
+}

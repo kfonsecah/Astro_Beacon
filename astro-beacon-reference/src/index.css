@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 68% 11%;
+    --foreground: 160 100% 70%;
+
+    --card: 240 100% 3%;
+    --card-foreground: 160 100% 70%;
+
+    --popover: 240 100% 3%;
+    --popover-foreground: 160 100% 70%;
+
+    --primary: 160 100% 70%;
+    --primary-foreground: 220 68% 11%;
+
+    --secondary: 220 18% 20%;
+    --secondary-foreground: 220 18% 61%;
+
+    --muted: 220 30% 15%;
+    --muted-foreground: 220 18% 61%;
+
+    --accent: 100 100% 70%;
+    --accent-foreground: 220 68% 11%;
+
+    --destructive: 20 100% 70%;
+    --destructive-foreground: 220 68% 11%;
+
+    --border: 160 100% 70%;
+    --input: 220 30% 20%;
+    --ring: 160 100% 70%;
+
+    --radius: 0rem;
+
+    --sidebar-background: 240 100% 3%;
+    --sidebar-foreground: 220 18% 61%;
+    --sidebar-primary: 160 100% 70%;
+    --sidebar-primary-foreground: 220 68% 11%;
+    --sidebar-accent: 220 30% 15%;
+    --sidebar-accent-foreground: 160 100% 70%;
+    --sidebar-border: 160 100% 70%;
+    --sidebar-ring: 160 100% 70%;
+
+    /* Custom space tokens */
+    --space-black: 240 100% 3%;
+    --deep-navy: 220 68% 11%;
+    --cyan-glow: 160 100% 70%;
+    --warning-orange: 20 100% 70%;
+    --alien-green: 100 100% 70%;
+    --faint-gray: 220 18% 61%;
+    --cosmic-blue: 217 91% 60%;
+
+    /* Gradients */
+    --glow-cyan: 0 0 20px hsl(160 100% 70% / 0.3);
+    --glow-orange: 0 0 20px hsl(20 100% 70% / 0.3);
+    --glow-green: 0 0 20px hsl(100 100% 70% / 0.3);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border/20;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-mono tracking-wider uppercase;
+  }
+}
+
+@layer utilities {
+  .text-glow-cyan {
+    text-shadow: 0 0 10px hsl(160 100% 70% / 0.5), 0 0 30px hsl(160 100% 70% / 0.2);
+  }
+
+  .text-glow-orange {
+    text-shadow: 0 0 10px hsl(20 100% 70% / 0.5), 0 0 30px hsl(20 100% 70% / 0.2);
+  }
+
+  .text-glow-green {
+    text-shadow: 0 0 10px hsl(100 100% 70% / 0.5), 0 0 30px hsl(100 100% 70% / 0.2);
+  }
+
+  .border-glow {
+    box-shadow: 0 0 10px hsl(160 100% 70% / 0.15), inset 0 0 10px hsl(160 100% 70% / 0.05);
+  }
+
+  .border-glow-orange {
+    box-shadow: 0 0 10px hsl(20 100% 70% / 0.15), inset 0 0 10px hsl(20 100% 70% / 0.05);
+  }
+
+  .scanline {
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      hsl(160 100% 70% / 0.03) 2px,
+      hsl(160 100% 70% / 0.03) 4px
+    );
+  }
+
+  .grid-pattern {
+    background-image:
+      linear-gradient(hsl(160 100% 70% / 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(160 100% 70% / 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  .flicker {
+    animation: flicker 3s infinite;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.8; }
+    94% { opacity: 1; }
+    96% { opacity: 0.9; }
+    97% { opacity: 1; }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px hsl(160 100% 70% / 0.3); }
+    50% { box-shadow: 0 0 20px hsl(160 100% 70% / 0.6); }
+  }
+
+  @keyframes scan-line {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  @keyframes data-stream {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-20px); opacity: 0; }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .animate-scan-line {
+    animation: scan-line 2s linear infinite;
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(240 100% 3%);
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(160 100% 70% / 0.3);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(160 100% 70% / 0.5);
+}
