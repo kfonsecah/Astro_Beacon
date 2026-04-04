@@ -1,24 +1,38 @@
 import { useState } from "react";
-import { Redirect, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import {
   View,
   Text,
-  TextInput,
-  TouchableOpacity,
   StyleSheet,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
+import { useAuth } from "@/context/auth.context";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 export default function LoginScreen() {
   const [agentId, setAgentId] = useState("");
   const [password, setPassword] = useState("");
-  const router = useRouter();
+  const [error, setError] = useState("");
+  const { login, isLoading } = useAuth();
 
-  const handleLogin = () => {
-    if (agentId.trim() && password.trim()) {
-      router.replace("/(tabs)/dashboard");
+  const handleLogin = async () => {
+    setError("");
+    if (!agentId.trim()) {
+      setError("Ingrese su ID de agente");
+      return;
+    }
+    if (!password.trim()) {
+      setError("Ingrese su clave de acceso");
+      return;
+    }
+    try {
+      await login(agentId, password);
+    } catch (err) {
+      setError("Credenciales inválidas");
     }
   };
 
@@ -36,29 +50,29 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.form}>
-          <Text style={styles.label}>AGENT_ID</Text>
-          <TextInput
-            style={styles.input}
+          <Input
+            label="AGENT_ID"
             value={agentId}
             onChangeText={setAgentId}
             placeholder="Ingrese ID de agente"
-            placeholderTextColor="#4B5563"
             autoCapitalize="none"
           />
 
-          <Text style={styles.label}>ACCESS_KEY</Text>
-          <TextInput
-            style={styles.input}
+          <Input
+            label="ACCESS_KEY"
             value={password}
             onChangeText={setPassword}
             placeholder="Ingrese clave de acceso"
-            placeholderTextColor="#4B5563"
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>INICIAR SESIÓN</Text>
-          </TouchableOpacity>
+          {error && <Text style={styles.error}>{error}</Text>}
+
+          <Button
+            title={isLoading ? "CONECTANDO..." : "INICIAR SESIÓN"}
+            onPress={handleLogin}
+            disabled={isLoading}
+          />
 
           <Text style={styles.footer}>
             Sistema de Asistencia Astronauta v1.0
@@ -109,38 +123,14 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   form: {
-    gap: 16,
+    gap: 0,
   },
-  label: {
-    color: "#6EE7B7",
+  error: {
+    color: "#EF4444",
     fontFamily: "monospace",
-    fontSize: 11,
-    letterSpacing: 2,
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: "#111827",
-    borderWidth: 1,
-    borderColor: "#1F2937",
-    borderRadius: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    color: "#E5E7EB",
-    fontFamily: "monospace",
-    fontSize: 14,
-  },
-  loginButton: {
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#6EE7B7",
-    paddingVertical: 16,
-    marginTop: 16,
-  },
-  loginButtonText: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 14,
-    letterSpacing: 3,
+    fontSize: 10,
+    letterSpacing: 1,
+    marginBottom: 8,
     textAlign: "center",
   },
   footer: {

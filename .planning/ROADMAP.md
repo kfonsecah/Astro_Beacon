@@ -73,9 +73,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: Implementar constants (colors, spacing, typography)
-- [ ] 04-02: Implementar temas (dark.ts, light.ts, fonts.ts)
-- [ ] 04-03: Crear componentes UI base reutilizables
+- [x] 04-01: Crear constantes de diseño (colores con opacidad, escala spacing, tipografía con Platform.OS)
+- [x] 04-02: Implementar temas dark/light con ThemeProvider, hooks y carga de fuentes
+- [x] 04-03: Crear componentes UI reutilizables (Button, Card, Input, Badge, ProgressBar, EmptyState, HudHeader)
 
 #### Phase 5: Base de la App y Conexión API
 **Goal**: Establecer la estructura base de la app con rutas, layouts y conexión a la API
@@ -90,10 +90,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 05-01: Configurar rutas expo-router y layouts
-- [ ] 05-02: Implementar servicio de API base
-- [ ] 05-03: Crear pantallas base (login placeholder, dashboard placeholder)
-- [ ] 05-04: Integrar navegación con design system
+- [x] 05-01: Configurar rutas expo-router y layouts
+- [x] 05-02: Implementar servicio de API base
+- [x] 05-03: Crear pantallas base (login placeholder, dashboard placeholder)
+- [x] 05-04: Integrar navegación con design system
 
 ## Progress
 
@@ -102,5 +102,5 @@ Plans:
 | 1. Arquitectura y Diseño | v1.0 | 2/2 | Complete | 2026-04-02 |
 | 2. Diseño de Datos | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 3. Diseño Móvil (Mockups) | v1.0 | 2/2 | Complete | 2026-04-03 |
-| 4. Design System y Estructura Visual | v1.0 | 0/3 | Not started | - |
-| 5. Base de la App y Conexión API | v1.0 | 0/4 | Not started | - |
+| 4. Design System y Estructura Visual | v1.0 | 3/3 | Complete | 2026-04-03 |
+| 5. Base de la App y Conexión API | v1.0 | 4/4 | Complete | 2026-04-03 |
