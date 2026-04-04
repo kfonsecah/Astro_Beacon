@@ -58,8 +58,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 03-01: Crear mockups basados en referencia visual de Lovable
-- [ ] 03-02: Documentar rutas, navegación y flujos de usuario
+- [x] 03-01: Crear mockups basados en referencia visual de Lovable
+- [x] 03-02: Documentar rutas, navegación y flujos de usuario
 
 #### Phase 4: Design System y Estructura Visual
 **Goal**: Implementar el design system y la estructura visual basada en la referencia
@@ -101,6 +101,6 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 1. Arquitectura y Diseño | v1.0 | 2/2 | Complete | 2026-04-02 |
 | 2. Diseño de Datos | v1.0 | 2/2 | Complete | 2026-04-03 |
-| 3. Diseño Móvil (Mockups) | v1.0 | 0/2 | Not started | - |
+| 3. Diseño Móvil (Mockups) | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 4. Design System y Estructura Visual | v1.0 | 0/3 | Not started | - |
 | 5. Base de la App y Conexión API | v1.0 | 0/4 | Not started | - |

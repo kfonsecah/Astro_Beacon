@@ -3,7 +3,7 @@
 ## Current Status
 
 **Milestone:** v1.0 Base Inicial
-**Phase:** 2 Complete — Moving to Phase 3
+**Phase:** 3 Complete — Moving to Phase 4
 **Last Updated:** 2026-04-03
 
 ## Project Reference
@@ -32,7 +32,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-01)
 |-------|--------|-------|
 | 1. Arquitectura y Diseño | Complete | 2/2 |
 | 2. Diseño de Datos | Complete | 2/2 |
-| 3. Diseño Móvil (Mockups) | Not started | 0/2 |
+| 3. Diseño Móvil (Mockups) | Complete | 2/2 |
 | 4. Design System y Estructura Visual | Not started | 0/3 |
 | 5. Base de la App y Conexión API | Not started | 0/4 |
 
