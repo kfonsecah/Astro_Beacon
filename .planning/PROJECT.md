@@ -94,6 +94,79 @@ project/
 └── package.json
 ```
 
+## Design System
+
+**Regla absoluta:** TODO el código UI debe usar el design system. Cero valores hardcodeados.
+
+### Ubicación
+- **Constants:** `src/constants/` — `colors.ts`, `spacing.ts`, `typography.ts`
+- **Themes:** `src/theme/` — `dark.ts`, `light.ts`, `fonts.ts`
+- **Components:** `src/components/ui/` — Button, Card, Input, Badge, ProgressBar, EmptyState, HudHeader
+- **Common:** `src/components/common/` — OfflineBanner
+
+### Cómo usar
+```tsx
+// ❌ NUNCA hacer esto
+backgroundColor: '#0B1120'
+padding: 16
+color: '#6EE7B7'
+
+// ✅ SIEMPRE hacer esto
+const theme = useTheme();
+const { colors: tc } = theme;
+backgroundColor: tc.background
+padding: theme.spacing.lg  // o 16 si no hay spacing token
+color: tc.primary
+```
+
+### Paleta (dark theme)
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `background` | `#0B1120` | Fondo principal |
+| `surface` | `#111827` | Tarjetas |
+| `primary` | `#6EE7B7` | Acentos, headers |
+| `warning` | `#FB923C` | Alertas |
+| `danger` | `#EF4444` | Errores, crítico |
+| `success` | `#22C55E` | Éxito, ingresos |
+| `text` | `#E5E7EB` | Texto principal |
+| `textMuted` | `#6B7280` | Texto secundario |
+
+### Estética HUD
+- Zero border-radius (esquinas rectas)
+- Tipografía monospace con letter-spacing amplio
+- Barras de progreso segmentadas
+- Bordes sutiles (`#1F2937`)
+- Overlays de scanlines (decorativo)
+
+## Cross-Platform (iOS + Android)
+
+**La app debe funcionar correctamente en ambas plataformas.**
+
+### Consideraciones obligatorias
+| Aspecto | iOS | Android |
+|---------|-----|---------|
+| **KeyboardAvoidingView** | `behavior="padding"` + `keyboardVerticalOffset={60}` | `behavior={undefined}` |
+| **SafeAreaView** | Respeta notch y home indicator | Respeta status bar y navegación |
+| **StatusBar** | `style="light"` (dark bg) | `style="light"` (dark bg) |
+| **Haptic feedback** | `expo-haptics` nativo | `expo-haptics` funciona igual |
+| **Fonts** | System monospace fallback | System monospace fallback |
+| **Touch targets** | Mínimo 44x44pt | Mínimo 48x48dp |
+| **Elevation** | Usar `elevation` + sombra | `elevation` nativo de Android |
+
+### Patrón recomendado
+```tsx
+<KeyboardAvoidingView
+  behavior={Platform.OS === "ios" ? "padding" : undefined}
+  keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0}
+>
+```
+
+### Testing
+- Probar en iOS Simulator (iPhone 15)
+- Probar en Android Emulator (Pixel 7)
+- Verificar que el teclado no tapa inputs en ambas plataformas
+- Verificar que SafeAreaView funciona en notch y sin notch
+
 ## Constraints
 
 - **[Tech Stack]**: React Native con Expo - obligatorio mantener compatibilidad con Expo en todo momento
@@ -102,7 +175,8 @@ project/
 - **[Librerías]**: Permitidas las que sean necesarias, siempre que sean compatibles con Expo
 - **[Estilo visual]**: Replicar el estilo del proyecto `astro-beacon-reference/`
 - **[Estructura]**: Seguir la estructura de carpetas definida por la cátedra (ver Project Structure)
-- **[Design System]**: Obligatorio usar un design system consistente para toda la UI (colores, tipografía, espaciado, componentes reutilizables) — definido en `src/constants/` y `src/theme/`
+- **[Design System]**: Obligatorio usar el design system para TODA la UI — cero valores hardcodeados (ver sección Design System arriba)
+- **[Cross-Platform]**: La app debe funcionar en iOS y Android — usar `Platform.OS` para diferencias específicas
 
 ## Key Decisions
 
@@ -110,8 +184,10 @@ project/
 |----------|-----------|---------|
 | Usar Expo como base | Requisito del curso, facilita desarrollo y deployment | ✓ Good |
 | TypeScript obligatorio | Requisito del curso, mejor mantenibilidad | ✓ Good |
-| Referencia visual de Lovable | Acelera diseño, mantiene coherencia visual | — Pending |
-| IA asistida en desarrollo | Requisito explícito del curso | — Pending |
+| Referencia visual de Lovable | Acelera diseño, mantiene coherencia visual | ✓ In progress |
+| IA asistida en desarrollo | Requisito explícito del curso | ✓ In progress |
+| New Architecture enabled | Reanimated 4 no necesita babel plugin | ✓ Good |
+| Cross-platform iOS + Android | Requisito del curso | ✓ In progress |
 
 ---
-*Last updated: 2026-04-01 after project initialization*
+*Last updated: 2026-04-04 — Design system + cross-platform constraints added*

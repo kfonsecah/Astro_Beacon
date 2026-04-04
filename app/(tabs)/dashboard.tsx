@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
 import { colors } from "@/constants/colors";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -19,6 +20,7 @@ const mockAlerts = [
 export default function DashboardScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
+  const router = useRouter();
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
@@ -56,7 +58,7 @@ export default function DashboardScreen() {
           </Card>
         </View>
 
-        <View style={{ flexDirection: "row", gap: 12, marginTop: 24, marginBottom: 32 }}>
+        <View style={{ flexDirection: "row", gap: 12, marginTop: 24, marginBottom: 12 }}>
           <View style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}>
             <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
@@ -66,6 +68,14 @@ export default function DashboardScreen() {
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
           </View>
         </View>
+
+        {/* UAT: Reanimated Test */}
+        <TouchableOpacity
+          style={{ borderWidth: 1, borderColor: tc.danger, paddingVertical: 14, alignItems: "center", marginTop: 8 }}
+          onPress={() => router.push("/reanimated-test")}
+        >
+          <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>🧪 UAT: REANIMATED TEST</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
