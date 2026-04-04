@@ -43,8 +43,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: Definir entidades y relaciones (diagrama + documentación)
-- [ ] 02-02: Implementar tipos TypeScript en `src/types-dtos/`
+- [x] 02-01: Definir entidades y relaciones (diagrama + documentación)
+- [x] 02-02: Implementar tipos TypeScript en `src/types-dtos/`
 
 #### Phase 3: Diseño Móvil (Mockups)
 **Goal**: Crear mockups completos de las principales pantallas de la app
@@ -100,7 +100,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Arquitectura y Diseño | v1.0 | 2/2 | Complete | 2026-04-02 |
-| 2. Diseño de Datos | v1.0 | 0/2 | Not started | - |
+| 2. Diseño de Datos | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 3. Diseño Móvil (Mockups) | v1.0 | 0/2 | Not started | - |
 | 4. Design System y Estructura Visual | v1.0 | 0/3 | Not started | - |
 | 5. Base de la App y Conexión API | v1.0 | 0/4 | Not started | - |

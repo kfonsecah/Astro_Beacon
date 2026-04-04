@@ -3,15 +3,15 @@
 ## Current Status
 
 **Milestone:** v1.0 Base Inicial
-**Phase:** None in progress
-**Last Updated:** 2026-04-01
+**Phase:** 2 Complete — Moving to Phase 3
+**Last Updated:** 2026-04-03
 
 ## Project Reference
 
 See: `.planning/PROJECT.md` (updated 2026-04-01)
 
 **Core value:** Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
-**Current focus:** v1.0 Base Inicial - Arquitectura, diseño de datos, mockups, design system y base de la app
+**Current focus:** v1.0 Base Inicial - Mockups, design system y base de la app
 
 ## Active Context
 
@@ -30,15 +30,15 @@ See: `.planning/PROJECT.md` (updated 2026-04-01)
 
 | Phase | Status | Plans |
 |-------|--------|-------|
-| 1. Arquitectura y Diseño | Not started | 0/2 |
-| 2. Diseño de Datos | Not started | 0/2 |
+| 1. Arquitectura y Diseño | Complete | 2/2 |
+| 2. Diseño de Datos | Complete | 2/2 |
 | 3. Diseño Móvil (Mockups) | Not started | 0/2 |
 | 4. Design System y Estructura Visual | Not started | 0/3 |
 | 5. Base de la App y Conexión API | Not started | 0/4 |
 
 ## Next Action
 
-Start Phase 1: Arquitectura y Diseño del Sistema
+Start Phase 3: Diseño Móvil (Mockups)
 
 ---
-*State initialized with v1.0 Base Inicial milestone*
+*State updated after Phase 2 completion*
