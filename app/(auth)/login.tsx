@@ -37,6 +37,7 @@ const STARS = Array.from({ length: 120 }, (_, i) => ({
   size: Math.random() > 0.7 ? (Math.random() > 0.5 ? 3 : 2) : 1,
 }));
 
+//animaciones estrellas
 const SHOOTING_STARS = [
   { id: 0, startX: 60, startY: 15, endX: 20, endY: 65, delay: 2, duration: 1.5 },
   { id: 1, startX: 75, startY: 20, endX: 30, endY: 75, delay: 6, duration: 1.2 },
