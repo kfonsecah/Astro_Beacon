@@ -28,13 +28,13 @@ Desarrollo de una aplicación móvil de exploración planetaria para la materia 
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: Crear diagrama de arquitectura (frontend, backend, API, base de datos)
-- [ ] 01-02: Documentar arquitectura, patrones de diseño y justificaciones
+- [x] 01-01: Crear diagrama de arquitectura (frontend, backend, API, base de datos)
+- [x] 01-02: Documentar arquitectura, patrones de diseño y justificaciones
 
 #### Phase 2: Diseño de Datos
 **Goal**: Definir entidades, documentos, atributos y relaciones del sistema
 **Depends on**: Phase 1
-**Requirements**: [Diseño de datos - Rúbrica Base Inicial]
+**Requirements**: Diseño de datos - Rúbrica Base Inicial
 **Success Criteria** (what must be TRUE):
   1. Diagrama de entidades/documentos con relaciones
   2. Definición completa de tipos TypeScript (types-dtos)
@@ -99,7 +99,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 1. Arquitectura y Diseño | v1.0 | 0/2 | Not started | - |
+| 1. Arquitectura y Diseño | v1.0 | 2/2 | Complete | 2026-04-02 |
 | 2. Diseño de Datos | v1.0 | 0/2 | Not started | - |
 | 3. Diseño Móvil (Mockups) | v1.0 | 0/2 | Not started | - |
 | 4. Design System y Estructura Visual | v1.0 | 0/3 | Not started | - |
