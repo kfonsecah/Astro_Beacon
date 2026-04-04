@@ -1,4 +1,4 @@
-import { Stack, Redirect } from "expo-router";
+import { Stack, Redirect, usePathname } from "expo-router";
 import { AuthProvider, useAuth } from "@/context/auth.context";
 import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator } from "react-native";
@@ -8,6 +8,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const theme = useTheme();
   const { colors: tc } = theme;
+  const pathname = usePathname();
 
   if (isLoading) {
     return (
@@ -17,7 +18,8 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated) {
+  // Only redirect if not authenticated AND not already on an auth screen
+  if (!isAuthenticated && !pathname?.includes("login")) {
     return <Redirect href="/(auth)/login" />;
   }
 
