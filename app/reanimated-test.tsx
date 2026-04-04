@@ -1,3 +1,4 @@
+//documento prueba de animaciones, no funcional ni necesaria 
 import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import Animated, {
