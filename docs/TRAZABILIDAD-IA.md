@@ -10,7 +10,7 @@
 
 El desarrollo de la **Base Inicial** de Astro_Beacon se realizó bajo un enfoque de **desarrollo asistido por IA**, donde la inteligencia artificial actuó como copiloto técnico. La IA **no generó código ciegamente**; cada salida fue investigada, planificada, revisada por un humano, validada con pruebas UAT y finalmente integrada al repositorio.
 
-Este documento traza cómo se utilizó la IA en cada etapa, cómo se aplicó el framework **Get-Shit-Done (GSD)**, el rol de **OpenCode**, el proceso de verificación humana y la estrategia de **UAT por fase**.
+Este documento traza cómo se utilizó la IA en cada etapa, cómo se aplicó el framework **Get-Shit-Done (GSD)**, el rol de **OpenCode**, el proceso de verificación humana y la estrategia de **UAT por fase**. La carpeta .planning guarda el historial de decisiones y modificaciones ejecutadas en cada una de las fases del Milestone implementado, con su plan, contexto y research definidos antes de la ejecucion de la fase.
 
 ---
 
@@ -26,6 +26,10 @@ Este documento traza cómo se utilizó la IA en cada etapa, cómo se aplicó el 
 ---
 
 ## 3. Flujo de Trabajo por Fases (Trace de IA + Humano)
+
+-**Project.md:** Contiene la visión general, objetivos y requerimientos del proyecto. La IA lo usó para entender el contexto global antes de cada fase.
+-**Roadmap.md:** Desglosa el proyecto en hitos y fases. La IA generó planes detallados para cada fase basándose en este roadmap.
+-**State.md:** Registro de decisiones, cambios y aprendizajes. La IA actualizó este documento con cada iteración, mientras que el humano validaba y corregía la información.
 
 ### 🔹 Phase 1: Arquitectura y Diseño
 - **IA:** Investigó patrones de arquitectura RN, redactó `ARCHITECTURE-DESIGN.md`.
