@@ -36,7 +36,7 @@ Root Stack (app/_layout.tsx)
 
 | Ruta | Tipo | Pantalla | Cómo llegar | Descripción |
 |------|------|----------|-------------|-------------|
-| `/(auth)/login` | Stack | Login | Redirect desde index si no autenticado | Autenticación con ID de agente |
+| `/(auth)/login` | Stack | Login | AuthGuard en _layout.tsx redirige si no autenticado | Autenticación con ID de agente + contraseña |
 | `/(tabs)/dashboard` | Tab | Dashboard | Tab 1 (Panel) | Panel principal con recursos, alertas, progreso de misión |
 | `/(tabs)/bestiary` | Tab | Bitácora | Tab 2 (Bitácora) | Catálogo de especies descubiertas con clasificación IA |
 | `/(tabs)/resources` | Tab | Recursos | Tab 3 (Recursos) | Inventario completo e historial de movimientos |
@@ -53,11 +53,17 @@ Root Stack (app/_layout.tsx)
 
 ### 3.1 Login (`/(auth)/login.tsx`)
 **Implementada:** ✅
-- Logo ASTRO_BEACON con icono de satélite
-- Campos: Agent ID + Access Key
-- Botón HUD con borde cyan
-- Subtitle: "Houston, we need you"
-- System ID: AB-2026-EIF411
+- Fondo con estrellas parpadeantes (50 estrellas con animación de opacidad)
+- Estrellas fugaces (5 estrellas que cruzan la pantalla diagonalmente)
+- Overlay de scanlines (efecto HUD)
+- Logo ASTRO_BEACON con fade-in escalonado
+- Campo ID DE AGENTE con cursor parpadeante al enfocar
+- Campo CLAVE DE ACCESO con toggle mostrar/ocultar (👁)
+- Botón [ AUTENTICAR ] con efecto tap (scale 0.98)
+- Estado "AUTENTICANDO..." con texto pulsante
+- Indicador de conexión: punto pulsante + "ENLACE ESTABLECIDO — SEÑAL DÉBIL"
+- Dark/Light mode fully supportado
+- KeyboardAvoidingView con Platform.OS específico (iOS + Android)
 
 ### 3.2 Dashboard (`/(tabs)/dashboard.tsx`)
 **Implementada:** ✅
@@ -105,7 +111,7 @@ Root Stack (app/_layout.tsx)
 - Botón de narración por audio
 - Confianza de la IA
 
-### 7.8 Species Identify (`/species/identify.tsx`)
+### 3.8 Species Identify (`/species/identify.tsx`)
 **Implementada:** ❌ Documentada
 - Vista de cámara a pantalla completa
 - Overlay de escaneo (animación)
@@ -133,7 +139,9 @@ Root Stack (app/_layout.tsx)
 
 ### Flujo 1: Autenticación
 ```
-Index → Redirect → Login → [Ingresar credenciales] → Dashboard
+App → AuthGuard (_layout.tsx) → Si no auth → Login
+→ [Ingresar ID + contraseña] → AuthContext.login()
+→ Si auth → Redirect → Dashboard
 ```
 
 ### Flujo 2: Exploración Completa
@@ -186,18 +194,17 @@ Tab Recursos → [Ver inventario] → Registrar movimiento
 ## 6. Estética HUD
 
 ### Paleta de Colores
-| Color | Hex | Uso |
-|-------|-----|-----|
-| **Deep Navy** | `#0B1120` | Fondo principal |
-| **Dark Surface** | `#111827` | Tarjetas y contenedores |
-| **Border** | `#1F2937` | Bordes de tarjetas |
-| **Cyan Primary** | `#6EE7B7` | Acentos, headers, datos activos |
-| **Orange Warning** | `#FB923C` | Alertas, suministros pendientes |
-| **Green Success** | `#22C55E` | Ingresos, especies amigables |
-| **Red Danger** | `#EF4444` | Egresos, niveles críticos, especies letales |
-| **Purple** | `#A855F7` | Microorganismos, especies letales |
-| **Gray Text** | `#6B7280` | Texto secundario, labels |
-| **Light Text** | `#E5E7EB` | Texto principal |
+| Token | Dark | Light | Uso |
+|-------|------|-------|-----|
+| `background` | `#0B1120` | `#F3F4F6` | Fondo principal |
+| `surface` | `#111827` | `#FFFFFF` | Tarjetas y contenedores |
+| `border` | `#1F2937` | `#E5E7EB` | Bordes de tarjetas |
+| `primary` | `#6EE7B7` | `#059669` | Acentos, headers, datos activos |
+| `warning` | `#FB923C` | `#EA580C` | Alertas, suministros pendientes |
+| `success` | `#22C55E` | `#16A34A` | Ingresos, especies amigables |
+| `danger` | `#EF4444` | `#DC2626` | Egresos, niveles críticos, especies letales |
+| `text` | `#E5E7EB` | `#111827` | Texto principal |
+| `textMuted` | `#6B7280` | `#9CA3AF` | Texto secundario, labels |
 
 ### Tipografía
 - **Familia:** Monospace (system monospace)
@@ -211,7 +218,14 @@ Tab Recursos → [Ver inventario] → Registrar movimiento
 - **Card-based:** Contenido agrupado en tarjetas con bordes sutiles
 - **Segmented bars:** Barras de progreso divididas en segmentos (estética militar/HUD)
 - **Full-bleed:** Contenido ocupa todo el ancho (no max-width como en web)
-- **Safe areas:** Respetar insets del dispositivo
+- **Safe areas:** SafeAreaView en todas las pantallas (notch + home indicator)
+- **Cross-platform:** Platform.OS para diferencias iOS/Android (KeyboardAvoidingView, offsets)
+
+### Dark/Light Mode
+- **Implementado:** ✅ Todos los componentes usan `useTheme()` + `tc.*`
+- **Transición:** StatusBar cambia automáticamente (`light`/`dark`)
+- **Tab bar:** Colores de fondo y tints responden al tema
+- **0 colores hardcodeados** en producción (ver AUDITORIA-INTEGRIDAD.md)
 
 ---
 
