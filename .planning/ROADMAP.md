@@ -107,8 +107,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 07-01: Eliminar colores hex hardcodeados en app/ y src/components/
-- [ ] 07-02: Verificar dark/light mode en todas las pantallas y navegación
+- [x] 07-01: Eliminar colores hex hardcodeados en app/ y src/components/
+- [x] 07-02: Verificar dark/light mode en todas las pantallas y navegación
 
 #### Phase 5: Base de la App y Conexión API
 **Goal**: Establecer la estructura base de la app con rutas, layouts y conexión a la API
@@ -138,4 +138,4 @@ Plans:
 | 4. Design System y Estructura Visual | v1.0 | 3/3 | Complete | 2026-04-03 |
 | 5. Base de la App y Conexión API | v1.0 | 4/4 | Complete | 2026-04-03 |
 | 6. Refactorización de Estilos | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 7. Verificación de Design System | v1.0 | 0/2 | Not started | - |
+| 7. Verificación de Design System | v1.0 | 2/2 | Complete | 2026-04-04 |
