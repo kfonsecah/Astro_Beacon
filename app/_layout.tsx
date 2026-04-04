@@ -1,16 +1,18 @@
 import { Stack, Redirect } from "expo-router";
 import { AuthProvider, useAuth } from "@/context/auth.context";
 import { StatusBar } from "expo-status-bar";
-import { View, ActivityIndicator, StyleSheet } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const theme = useTheme();
+  const { colors: tc } = theme;
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: "#0B1120", justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#6EE7B7" />
+      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={tc.primary} />
       </View>
     );
   }

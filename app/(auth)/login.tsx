@@ -3,21 +3,22 @@ import { useRouter } from "expo-router";
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  ActivityIndicator,
 } from "react-native";
 import { useAuth } from "@/context/auth.context";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { useTheme } from "@/hooks/use-theme";
 
 export default function LoginScreen() {
   const [agentId, setAgentId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { login, isLoading } = useAuth();
+  const theme = useTheme();
+  const { colors: tc } = theme;
 
   const handleLogin = async () => {
     setError("");
@@ -37,19 +38,19 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.inner}
+        style={{ flex: 1, justifyContent: "center", paddingHorizontal: 32 }}
       >
-        <View style={styles.logoSection}>
-          <Text style={styles.logoIcon}>🛰️</Text>
-          <Text style={styles.title}>ASTRO_BEACON</Text>
-          <Text style={styles.subtitle}>Houston, we need you</Text>
-          <Text style={styles.systemId}>SYS.ID: AB-2026-EIF411</Text>
+        <View style={{ alignItems: "center", marginBottom: 48 }}>
+          <Text style={{ fontSize: 64, marginBottom: 16 }}>🛰️</Text>
+          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 28, letterSpacing: 6, fontWeight: "bold" }}>ASTRO_BEACON</Text>
+          <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 12, letterSpacing: 2, marginTop: 8 }}>Houston, we need you</Text>
+          <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 1, marginTop: 12 }}>SYS.ID: AB-2026-EIF411</Text>
         </View>
 
-        <View style={styles.form}>
+        <View style={{ gap: 0 }}>
           <Input
             label="AGENT_ID"
             value={agentId}
@@ -66,7 +67,7 @@ export default function LoginScreen() {
             secureTextEntry
           />
 
-          {error && <Text style={styles.error}>{error}</Text>}
+          {error && <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, letterSpacing: 1, marginBottom: 8, textAlign: "center" }}>{error}</Text>}
 
           <Button
             title={isLoading ? "CONECTANDO..." : "INICIAR SESIÓN"}
@@ -74,7 +75,7 @@ export default function LoginScreen() {
             disabled={isLoading}
           />
 
-          <Text style={styles.footer}>
+          <Text style={{ color: tc.textDisabled, fontFamily: "monospace", fontSize: 9, textAlign: "center", marginTop: 32, letterSpacing: 1 }}>
             Sistema de Asistencia Astronauta v1.0
           </Text>
         </View>
@@ -82,63 +83,3 @@ export default function LoginScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0B1120",
-  },
-  inner: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 32,
-  },
-  logoSection: {
-    alignItems: "center",
-    marginBottom: 48,
-  },
-  logoIcon: {
-    fontSize: 64,
-    marginBottom: 16,
-  },
-  title: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 28,
-    letterSpacing: 6,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    color: "#9CA3AF",
-    fontFamily: "monospace",
-    fontSize: 12,
-    letterSpacing: 2,
-    marginTop: 8,
-  },
-  systemId: {
-    color: "#4B5563",
-    fontFamily: "monospace",
-    fontSize: 10,
-    letterSpacing: 1,
-    marginTop: 12,
-  },
-  form: {
-    gap: 0,
-  },
-  error: {
-    color: "#EF4444",
-    fontFamily: "monospace",
-    fontSize: 10,
-    letterSpacing: 1,
-    marginBottom: 8,
-    textAlign: "center",
-  },
-  footer: {
-    color: "#374151",
-    fontFamily: "monospace",
-    fontSize: 9,
-    textAlign: "center",
-    marginTop: 32,
-    letterSpacing: 1,
-  },
-});

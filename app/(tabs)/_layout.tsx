@@ -1,7 +1,6 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/use-theme";
-import { colors } from "@/constants/colors";
 
 export default function TabLayout() {
   const theme = useTheme();
@@ -14,7 +13,7 @@ export default function TabLayout() {
         tabBarInactiveTintColor: tc.textMuted,
         tabBarStyle: {
           backgroundColor: tc.background,
-          borderTopColor: colors.primaryBorder,
+          borderTopColor: tc.primaryBorder,
           borderTopWidth: 1,
         },
         headerStyle: {
