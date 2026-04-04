@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text, ViewStyle } from 'react-native';
+import { useTheme } from '@/hooks/use-theme';
 
 interface HudHeaderProps {
   title: string;
@@ -8,26 +9,13 @@ interface HudHeaderProps {
 }
 
 export function HudHeader({ title, subtitle, style }: HudHeaderProps) {
+  const theme = useTheme();
+  const { colors: tc } = theme;
+
   return (
     <View style={style}>
-      <Text style={styles.title}>{title}</Text>
-      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+      <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 16, letterSpacing: 3, marginBottom: 4 }}>{title}</Text>
+      {subtitle && <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, letterSpacing: 2 }}>{subtitle}</Text>}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    color: '#6EE7B7',
-    fontFamily: 'monospace',
-    fontSize: 16,
-    letterSpacing: 3,
-    marginBottom: 4,
-  },
-  subtitle: {
-    color: '#4B5563',
-    fontFamily: 'monospace',
-    fontSize: 9,
-    letterSpacing: 2,
-  },
-});

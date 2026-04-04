@@ -27,6 +27,7 @@ export const colors = {
   successMuted: 'rgba(34, 197, 94, 0.1)',
   warning: '#FB923C',
   warningMuted: 'rgba(251, 146, 60, 0.1)',
+  warningBorder: 'rgba(251, 146, 60, 0.3)',
   danger: '#EF4444',
   dangerMuted: 'rgba(239, 68, 68, 0.1)',
   info: '#3B82F6',

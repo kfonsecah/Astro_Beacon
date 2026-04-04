@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle } from 'react-native';
+import { View, Text, ViewStyle } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 
 interface ProgressBarProps {
@@ -23,57 +23,29 @@ export function ProgressBar({ value, max, segments = 10, label, showValue = true
   const activeColor = isCritical ? colors.danger : colors.primary;
 
   return (
-    <View style={[styles.container, style]}>
-      {label && <Text style={styles.label}>{label}</Text>}
-      <View style={styles.barContainer}>
+    <View style={[{ marginBottom: 12 }, style]}>
+      {label && (
+        <Text style={{ color: colors.textSecondary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2, marginBottom: 6 }}>
+          {label}
+        </Text>
+      )}
+      <View style={{ flexDirection: 'row', gap: 2, marginBottom: 4 }}>
         {Array.from({ length: segments }).map((_, i) => (
           <View
             key={i}
-            style={[
-              styles.segment,
-              i < filledSegments
-                ? { backgroundColor: activeColor }
-                : { backgroundColor: colors.border },
-            ]}
+            style={{
+              flex: 1,
+              height: 8,
+              backgroundColor: i < filledSegments ? activeColor : colors.border,
+            }}
           />
         ))}
       </View>
       {showValue && (
-        <Text style={[styles.value, isCritical && styles.valueCritical]}>
+        <Text style={{ color: isCritical ? colors.danger : colors.primary, fontFamily: 'monospace', fontSize: 12, textAlign: 'right' }}>
           {Math.round(percentage)}%
         </Text>
       )}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 12,
-  },
-  label: {
-    color: '#9CA3AF',
-    fontFamily: 'monospace',
-    fontSize: 10,
-    letterSpacing: 2,
-    marginBottom: 6,
-  },
-  barContainer: {
-    flexDirection: 'row',
-    gap: 2,
-    marginBottom: 4,
-  },
-  segment: {
-    flex: 1,
-    height: 8,
-  },
-  value: {
-    color: '#6EE7B7',
-    fontFamily: 'monospace',
-    fontSize: 12,
-    textAlign: 'right',
-  },
-  valueCritical: {
-    color: '#EF4444',
-  },
-});

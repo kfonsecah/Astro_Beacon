@@ -1,4 +1,7 @@
-import { View, Text, ScrollView, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, ScrollView, SafeAreaView } from "react-native";
+import { useTheme } from "@/hooks/use-theme";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { HudHeader } from "@/components/ui/HudHeader";
 
 const mockResources = [
   { id: "o2", name: "OXÍGENO", category: "oxigeno", current: 87, max: 100, unit: "%", threshold: 15 },
@@ -16,80 +19,44 @@ const mockMovements = [
 ];
 
 export default function ResourcesScreen() {
+  const theme = useTheme();
+  const { colors: tc } = theme;
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.header}>GESTIÓN DE RECURSOS</Text>
-        <Text style={styles.subHeader}>INVENTARIO ACTUAL</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <HudHeader title="GESTIÓN DE RECURSOS" subtitle="INVENTARIO ACTUAL" />
 
         {mockResources.map((resource) => {
-          const percentage = (resource.current / resource.max) * 100;
-          const segments = 10;
-          const filledSegments = Math.round((percentage / 100) * segments);
-          const isCritical = percentage < resource.threshold;
-
+          const isCritical = (resource.current / resource.max) * 100 < resource.threshold;
           return (
-            <View key={resource.id} style={styles.resourceCard}>
-              <View style={styles.resourceHeader}>
-                <Text style={styles.resourceName}>{resource.name}</Text>
-                <Text
-                  style={[
-                    styles.resourceValue,
-                    isCritical && styles.resourceValueCritical,
-                  ]}
-                >
+            <View key={resource.id} style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
+                <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>{resource.name}</Text>
+                <Text style={{ color: isCritical ? tc.danger : tc.primary, fontFamily: "monospace", fontSize: 12 }}>
                   {resource.current}/{resource.max} {resource.unit}
                 </Text>
               </View>
-              <View style={styles.resourceBarContainer}>
-                {Array.from({ length: segments }).map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.segment,
-                      i < filledSegments
-                        ? isCritical
-                          ? styles.segmentCritical
-                          : styles.segmentActive
-                        : styles.segmentInactive,
-                    ]}
-                  />
-                ))}
-              </View>
-              {isCritical && (
-                <Text style={styles.criticalAlert}>⚠️ NIVEL CRÍTICO</Text>
-              )}
+              <ProgressBar value={resource.current} max={resource.max} criticalThreshold={resource.threshold} showValue={false} />
+              {isCritical && <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 6 }}>⚠️ NIVEL CRÍTICO</Text>}
             </View>
           );
         })}
 
-        <Text style={[styles.sectionTitle, { marginTop: 24 }]}>
-          HISTORIAL DE MOVIMIENTOS
-        </Text>
+        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12, marginTop: 24 }}>HISTORIAL DE MOVIMIENTOS</Text>
 
         {mockMovements.map((movement) => (
-          <View key={movement.id} style={styles.movementRow}>
-            <View style={styles.movementIcon}>
-              <Text style={styles.movementIconText}>
-                {movement.type === "ingreso" ? "📥" : "📤"}
-              </Text>
+          <View key={movement.id} style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 12, marginBottom: 8 }}>
+            <Text style={{ fontSize: 18, marginRight: 12 }}>{movement.type === "ingreso" ? "📥" : "📤"}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>{movement.resource}</Text>
+              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 2 }}>{movement.reason}</Text>
             </View>
-            <View style={styles.movementInfo}>
-              <Text style={styles.movementResource}>{movement.resource}</Text>
-              <Text style={styles.movementReason}>{movement.reason}</Text>
-            </View>
-            <View style={styles.movementAmount}>
-              <Text
-                style={[
-                  styles.movementValue,
-                  movement.type === "ingreso"
-                    ? styles.movementValueIncome
-                    : styles.movementValueExpense,
-                ]}
-              >
+            <View style={{ alignItems: "flex-end" }}>
+              <Text style={{ fontFamily: "monospace", fontSize: 14, fontWeight: "bold", color: movement.type === "ingreso" ? tc.success : tc.danger }}>
                 {movement.type === "ingreso" ? "+" : "-"}{movement.amount}
               </Text>
-              <Text style={styles.movementDate}>{movement.date}</Text>
+              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 8 }}>{movement.date}</Text>
             </View>
           </View>
         ))}
@@ -97,133 +64,3 @@ export default function ResourcesScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0B1120",
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  header: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 16,
-    letterSpacing: 3,
-    marginBottom: 4,
-  },
-  subHeader: {
-    color: "#4B5563",
-    fontFamily: "monospace",
-    fontSize: 9,
-    letterSpacing: 2,
-    marginBottom: 20,
-  },
-  resourceCard: {
-    backgroundColor: "#111827",
-    borderWidth: 1,
-    borderColor: "#1F2937",
-    padding: 14,
-    marginBottom: 10,
-  },
-  resourceHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  resourceName: {
-    color: "#9CA3AF",
-    fontFamily: "monospace",
-    fontSize: 10,
-    letterSpacing: 2,
-  },
-  resourceValue: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 12,
-  },
-  resourceValueCritical: {
-    color: "#EF4444",
-  },
-  resourceBarContainer: {
-    flexDirection: "row",
-    gap: 2,
-  },
-  segment: {
-    flex: 1,
-    height: 6,
-  },
-  segmentActive: {
-    backgroundColor: "#6EE7B7",
-  },
-  segmentInactive: {
-    backgroundColor: "#1F2937",
-  },
-  segmentCritical: {
-    backgroundColor: "#EF4444",
-  },
-  criticalAlert: {
-    color: "#EF4444",
-    fontFamily: "monospace",
-    fontSize: 9,
-    letterSpacing: 2,
-    marginTop: 6,
-  },
-  sectionTitle: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 12,
-    letterSpacing: 3,
-    marginBottom: 12,
-  },
-  movementRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#111827",
-    borderWidth: 1,
-    borderColor: "#1F2937",
-    padding: 12,
-    marginBottom: 8,
-  },
-  movementIcon: {
-    marginRight: 12,
-  },
-  movementIconText: {
-    fontSize: 18,
-  },
-  movementInfo: {
-    flex: 1,
-  },
-  movementResource: {
-    color: "#E5E7EB",
-    fontFamily: "monospace",
-    fontSize: 11,
-    letterSpacing: 1,
-  },
-  movementReason: {
-    color: "#6B7280",
-    fontFamily: "monospace",
-    fontSize: 9,
-    marginTop: 2,
-  },
-  movementAmount: {
-    alignItems: "flex-end",
-  },
-  movementValue: {
-    fontFamily: "monospace",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  movementValueIncome: {
-    color: "#22C55E",
-  },
-  movementValueExpense: {
-    color: "#EF4444",
-  },
-  movementDate: {
-    color: "#4B5563",
-    fontFamily: "monospace",
-    fontSize: 8,
-  },
-});

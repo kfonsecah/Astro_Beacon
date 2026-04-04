@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextInput, Text, View, StyleSheet, TextInputProps, ViewStyle } from 'react-native';
+import { TextInput, Text, View, TextInputProps, ViewStyle } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 
 interface InputProps extends TextInputProps {
@@ -10,48 +10,20 @@ interface InputProps extends TextInputProps {
 
 export function Input({ label, error, containerStyle, style, ...props }: InputProps) {
   const theme = useTheme();
-  const { colors } = theme;
+  const { colors: tc } = theme;
 
   return (
-    <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+    <View style={[{ marginBottom: 16 }, containerStyle]}>
+      {label && <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 11, letterSpacing: 2, marginBottom: 4 }}>{label}</Text>}
       <TextInput
         style={[
-          styles.input,
-          { backgroundColor: colors.surfaceElevated, borderColor: error ? colors.danger : colors.border, color: colors.text },
+          { borderWidth: 1, borderRadius: 0, paddingHorizontal: 16, paddingVertical: 14, fontFamily: 'monospace', fontSize: 14, backgroundColor: tc.surfaceElevated, borderColor: error ? tc.danger : tc.border, color: tc.text },
           style,
         ]}
-        placeholderTextColor={colors.textDisabled}
+        placeholderTextColor={tc.textDisabled}
         {...props}
       />
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 9, marginTop: 4 }}>{error}</Text>}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: 16,
-  },
-  label: {
-    color: '#6EE7B7',
-    fontFamily: 'monospace',
-    fontSize: 11,
-    letterSpacing: 2,
-    marginBottom: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 0,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontFamily: 'monospace',
-    fontSize: 14,
-  },
-  error: {
-    color: '#EF4444',
-    fontFamily: 'monospace',
-    fontSize: 9,
-    marginTop: 4,
-  },
-});

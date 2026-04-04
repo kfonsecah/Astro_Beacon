@@ -90,9 +90,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 06-01: Fix UI components (Card, Badge, ProgressBar, EmptyState) to use theme colors + fix typography.ts import
-- [ ] 06-02: Refactorizar dashboard, logbook, resources para usar theme y componentes UI
-- [ ] 06-03: Refactorizar bestiary, map para usar theme, constantes de color y componentes UI
+- [x] 06-01: Fix UI components (Card, Badge, ProgressBar, EmptyState) to use theme colors + fix typography.ts import
+- [x] 06-02: Refactorizar dashboard, logbook, resources para usar theme y componentes UI
+- [x] 06-03: Refactorizar bestiary, map para usar theme, constantes de color y componentes UI
 
 #### Phase 5: Base de la App y Conexión API
 **Goal**: Establecer la estructura base de la app con rutas, layouts y conexión a la API
@@ -121,4 +121,4 @@ Plans:
 | 3. Diseño Móvil (Mockups) | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 4. Design System y Estructura Visual | v1.0 | 3/3 | Complete | 2026-04-03 |
 | 5. Base de la App y Conexión API | v1.0 | 4/4 | Complete | 2026-04-03 |
-| 6. Refactorización de Estilos | v1.0 | 0/3 | Not started | - |
+| 6. Refactorización de Estilos | v1.0 | 3/3 | Complete | 2026-04-04 |

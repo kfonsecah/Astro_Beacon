@@ -1,36 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text } from 'react-native';
+import { useTheme } from '@/hooks/use-theme';
+import { colors } from '@/constants/colors';
 
 interface OfflineBannerProps {
   message?: string;
 }
 
 export function OfflineBanner({ message = 'SIN CONEXIÓN — Operaciones en cola local' }: OfflineBannerProps) {
+  const theme = useTheme();
+  const { colors: tc } = theme;
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.icon}>⚠️</Text>
-      <Text style={styles.text}>{message}</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: colors.warningMuted, borderWidth: 1, borderColor: colors.warningBorder, padding: 12 }}>
+      <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
+      <Text style={{ color: tc.warning, fontFamily: 'monospace', fontSize: 11, letterSpacing: 1 }}>{message}</Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-    borderWidth: 1,
-    borderColor: 'rgba(245, 158, 11, 0.3)',
-    padding: 12,
-  },
-  icon: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  text: {
-    color: '#FB923C',
-    fontFamily: 'monospace',
-    fontSize: 11,
-    letterSpacing: 1,
-  },
-});

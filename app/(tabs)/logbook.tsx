@@ -1,5 +1,6 @@
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, RefreshControl } from "react-native";
+import { View, Text, ScrollView, SafeAreaView, RefreshControl } from "react-native";
 import { useState } from "react";
+import { useTheme } from "@/hooks/use-theme";
 
 const mockEntries = [
   { id: "1", date: "Día 47", description: "Nueva forma de vida cristalina descubierta cerca del río", species: "Cristalovoro", synced: true },
@@ -11,6 +12,8 @@ const mockEntries = [
 
 export default function LogbookScreen() {
   const [refreshing, setRefreshing] = useState(false);
+  const theme = useTheme();
+  const { colors: tc } = theme;
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -18,145 +21,42 @@ export default function LogbookScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6EE7B7" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tc.primary} />
         }
       >
-        <Text style={styles.header}>REGISTROS DE MISIÓN</Text>
-        <Text style={styles.subHeader}>{mockEntries.length} ENTRADAS · {mockEntries.filter((e) => !e.synced).length} PENDIENTES</Text>
+        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 16, letterSpacing: 3, marginBottom: 4 }}>REGISTROS DE MISIÓN</Text>
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 20 }}>
+          {mockEntries.length} ENTRADAS · {mockEntries.filter((e) => !e.synced).length} PENDIENTES
+        </Text>
 
         {mockEntries.map((entry) => (
-          <View key={entry.id} style={styles.entryCard}>
-            <View style={styles.entryHeader}>
-              <Text style={styles.entryDate}>{entry.date}</Text>
-              <View style={styles.syncBadge}>
-                <Text style={styles.syncIcon}>{entry.synced ? "✅" : "⏳"}</Text>
-                <Text
-                  style={[
-                    styles.syncText,
-                    entry.synced ? styles.syncedText : styles.pendingText,
-                  ]}
-                >
+          <View key={entry.id} style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: tc.primary }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+              <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>{entry.date}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <Text style={{ fontSize: 10 }}>{entry.synced ? "✅" : "⏳"}</Text>
+                <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: entry.synced ? tc.success : tc.warning }}>
                   {entry.synced ? "Sincronizado" : "Pendiente"}
                 </Text>
               </View>
             </View>
-            <Text style={styles.entryDescription}>{entry.description}</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18, marginBottom: 6 }}>{entry.description}</Text>
             {entry.species && (
-              <Text style={styles.entrySpecies}>
-                🏷️ {entry.species}
-              </Text>
+              <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>🏷️ {entry.species}</Text>
             )}
           </View>
         ))}
 
-        <View style={styles.fabContainer}>
-          <View style={styles.fab}>
-            <Text style={styles.fabText}>+</Text>
+        <View style={{ position: "absolute", bottom: 24, right: 24 }}>
+          <View style={{ width: 56, height: 56, borderRadius: 28, backgroundColor: tc.primary, justifyContent: "center", alignItems: "center", elevation: 4 }}>
+            <Text style={{ color: tc.background, fontSize: 28, fontWeight: "bold", fontFamily: "monospace" }}>+</Text>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0B1120",
-  },
-  scrollContent: {
-    padding: 16,
-    paddingBottom: 100,
-  },
-  header: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 16,
-    letterSpacing: 3,
-    marginBottom: 4,
-  },
-  subHeader: {
-    color: "#4B5563",
-    fontFamily: "monospace",
-    fontSize: 9,
-    letterSpacing: 2,
-    marginBottom: 20,
-  },
-  entryCard: {
-    backgroundColor: "#111827",
-    borderWidth: 1,
-    borderColor: "#1F2937",
-    padding: 14,
-    marginBottom: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: "#6EE7B7",
-  },
-  entryHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  entryDate: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 10,
-    letterSpacing: 2,
-  },
-  syncBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  syncIcon: {
-    fontSize: 10,
-  },
-  syncText: {
-    fontFamily: "monospace",
-    fontSize: 8,
-    letterSpacing: 1,
-  },
-  syncedText: {
-    color: "#22C55E",
-  },
-  pendingText: {
-    color: "#F59E0B",
-  },
-  entryDescription: {
-    color: "#E5E7EB",
-    fontFamily: "monospace",
-    fontSize: 11,
-    lineHeight: 18,
-    marginBottom: 6,
-  },
-  entrySpecies: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 10,
-    letterSpacing: 1,
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: 24,
-    right: 24,
-  },
-  fab: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#6EE7B7",
-    justifyContent: "center",
-    alignItems: "center",
-    elevation: 4,
-  },
-  fabText: {
-    color: "#0B1120",
-    fontSize: 28,
-    fontWeight: "bold",
-    fontFamily: "monospace",
-  },
-});

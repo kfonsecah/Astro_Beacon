@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
+import { View, ViewStyle } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 
 interface CardProps {
@@ -15,9 +15,13 @@ export function Card({ children, style, accent = false }: CardProps) {
   return (
     <View
       style={[
-        styles.container,
-        { borderColor: accent ? colors.primaryBorder : colors.border },
-        accent && styles.accent,
+        {
+          backgroundColor: colors.surface,
+          borderColor: accent ? colors.primaryBorder : colors.border,
+          borderWidth: 1,
+          padding: 14,
+        },
+        accent && { borderLeftWidth: 3 },
         style,
       ]}
     >
@@ -25,14 +29,3 @@ export function Card({ children, style, accent = false }: CardProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#111827',
-    borderWidth: 1,
-    padding: 14,
-  },
-  accent: {
-    borderLeftWidth: 3,
-  },
-});

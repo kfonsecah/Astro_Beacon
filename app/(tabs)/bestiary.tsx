@@ -1,5 +1,7 @@
-import { View, Text, ScrollView, StyleSheet, SafeAreaView, RefreshControl } from "react-native";
+import { View, Text, ScrollView, SafeAreaView, RefreshControl } from "react-native";
 import { useState } from "react";
+import { useTheme } from "@/hooks/use-theme";
+import { colors } from "@/constants/colors";
 
 const mockSpecies = [
   { id: "1", name: "Xenoflora lumínica", classification: "planta", danger: "amigable", confidence: 0.92 },
@@ -10,24 +12,26 @@ const mockSpecies = [
   { id: "6", name: "Desconocido", classification: "desconocido", danger: "neutral", confidence: 0.21 },
 ];
 
-const classificationColors: Record<string, string> = {
-  planta: "#22C55E",
-  animal: "#3B82F6",
-  recurso: "#6EE7B7",
-  microorganismo: "#A855F7",
-  desconocido: "#6B7280",
-  otro: "#F59E0B",
+const classificationColorMap: Record<string, string> = {
+  planta: colors.classificationPlanta,
+  animal: colors.classificationAnimal,
+  recurso: colors.classificationRecurso,
+  microorganismo: colors.classificationMicroorganismo,
+  desconocido: colors.classificationDesconocido,
+  otro: colors.classificationOtro,
 };
 
-const dangerColors: Record<string, string> = {
-  amigable: "#22C55E",
-  cauteloso: "#F59E0B",
-  peligroso: "#EF4444",
-  letal: "#A855F7",
+const dangerColorMap: Record<string, string> = {
+  amigable: colors.dangerAmigable,
+  cauteloso: colors.dangerCauteloso,
+  peligroso: colors.dangerPeligroso,
+  letal: colors.dangerLetal,
 };
 
 export default function BestiaryScreen() {
   const [refreshing, setRefreshing] = useState(false);
+  const theme = useTheme();
+  const { colors: tc } = theme;
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -35,135 +39,39 @@ export default function BestiaryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ padding: 16 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#6EE7B7" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tc.primary} />
         }
       >
-        <Text style={styles.header}>BITÁCORA DE ESPECIES</Text>
-        <Text style={styles.subHeader}>{mockSpecies.length} REGISTROS · 3 SIN CLASIFICAR</Text>
+        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 16, letterSpacing: 3, marginBottom: 4 }}>BITÁCORA DE ESPECIES</Text>
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 20 }}>{mockSpecies.length} REGISTROS · 3 SIN CLASIFICAR</Text>
 
-        {mockSpecies.map((species) => (
-          <View key={species.id} style={styles.speciesCard}>
-            <View style={styles.speciesThumbnail} />
-            <View style={styles.speciesInfo}>
-              <Text style={styles.speciesName}>{species.name.toUpperCase()}</Text>
-              <View style={styles.badgeRow}>
-                <View
-                  style={[
-                    styles.badge,
-                    { backgroundColor: classificationColors[species.classification] + "33" },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.badgeText,
-                      { color: classificationColors[species.classification] },
-                    ]}
-                  >
-                    {species.classification.toUpperCase()}
-                  </Text>
+        {mockSpecies.map((species) => {
+          const classColor = classificationColorMap[species.classification] || tc.textMuted;
+          const dngColor = dangerColorMap[species.danger] || tc.textMuted;
+
+          return (
+            <View key={species.id} style={{ flexDirection: "row", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 12, padding: 12 }}>
+              <View style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12 }} />
+              <View style={{ flex: 1, justifyContent: "center" }}>
+                <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1, marginBottom: 8 }}>{species.name.toUpperCase()}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                  <View style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: classColor + "33" }}>
+                    <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: classColor }}>{species.classification.toUpperCase()}</Text>
+                  </View>
+                  <View style={{ width: 12, height: 12, borderRadius: 6, borderWidth: 1, borderColor: tc.textDisabled, alignItems: "center", justifyContent: "center" }}>
+                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: dngColor }} />
+                  </View>
+                  <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>IA: {Math.round(species.confidence * 100)}%</Text>
                 </View>
-                <View style={styles.dangerDot}>
-                  <View
-                    style={[
-                      styles.dangerDotInner,
-                      { backgroundColor: dangerColors[species.danger] },
-                    ]}
-                  />
-                </View>
-                <Text style={styles.confidenceText}>
-                  IA: {Math.round(species.confidence * 100)}%
-                </Text>
               </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0B1120",
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  header: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 16,
-    letterSpacing: 3,
-    marginBottom: 4,
-  },
-  subHeader: {
-    color: "#4B5563",
-    fontFamily: "monospace",
-    fontSize: 9,
-    letterSpacing: 2,
-    marginBottom: 20,
-  },
-  speciesCard: {
-    flexDirection: "row",
-    backgroundColor: "#111827",
-    borderWidth: 1,
-    borderColor: "#1F2937",
-    marginBottom: 12,
-    padding: 12,
-  },
-  speciesThumbnail: {
-    width: 60,
-    height: 60,
-    backgroundColor: "#1F2937",
-    marginRight: 12,
-  },
-  speciesInfo: {
-    flex: 1,
-    justifyContent: "center",
-  },
-  speciesName: {
-    color: "#E5E7EB",
-    fontFamily: "monospace",
-    fontSize: 12,
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  badgeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  badgeText: {
-    fontFamily: "monospace",
-    fontSize: 8,
-    letterSpacing: 1,
-  },
-  dangerDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: "#374151",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dangerDotInner: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  confidenceText: {
-    color: "#6B7280",
-    fontFamily: "monospace",
-    fontSize: 9,
-  },
-});

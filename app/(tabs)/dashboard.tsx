@@ -1,4 +1,9 @@
-import { View, Text, ScrollView, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, ScrollView, SafeAreaView } from "react-native";
+import { useTheme } from "@/hooks/use-theme";
+import { colors } from "@/constants/colors";
+import { ProgressBar } from "@/components/ui/ProgressBar";
+import { Card } from "@/components/ui/Card";
+import { HudHeader } from "@/components/ui/HudHeader";
 
 const mockResources = [
   { id: "o2", name: "OXÍGENO", current: 87, max: 100, unit: "%", critical: false },
@@ -12,212 +17,56 @@ const mockAlerts = [
 ];
 
 export default function DashboardScreen() {
+  const theme = useTheme();
+  const { colors: tc } = theme;
+
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.header}>PANEL DE CONTROL</Text>
-        <Text style={styles.subHeader}>DÍA 47 · PLANETA DESCONOCIDO</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+      <ScrollView contentContainerStyle={{ padding: 16 }}>
+        <HudHeader title="PANEL DE CONTROL" subtitle="DÍA 47 · PLANETA DESCONOCIDO" />
 
         {mockAlerts.map((alert) => (
-          <View key={alert.id} style={styles.alertBanner}>
-            <Text style={styles.alertIcon}>⚠️</Text>
-            <Text style={styles.alertText}>{alert.message}</Text>
+          <View key={alert.id} style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.warningMuted, borderWidth: 1, borderColor: colors.warningBorder, padding: 12, marginBottom: 16 }}>
+            <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
+            <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>{alert.message}</Text>
           </View>
         ))}
 
-        <Text style={styles.sectionTitle}>RECURSOS ACTIVOS</Text>
+        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>RECURSOS ACTIVOS</Text>
 
-        {mockResources.map((resource) => {
-          const percentage = (resource.current / resource.max) * 100;
-          const segments = 10;
-          const filledSegments = Math.round((percentage / 100) * segments);
+        {mockResources.map((resource) => (
+          <ProgressBar
+            key={resource.id}
+            label={resource.name}
+            value={resource.current}
+            max={resource.max}
+            criticalThreshold={resource.critical ? 15 : 100}
+          />
+        ))}
 
-          return (
-            <View key={resource.id} style={styles.resourceRow}>
-              <Text style={styles.resourceLabel}>{resource.name}</Text>
-              <View style={styles.resourceBarContainer}>
-                {Array.from({ length: segments }).map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.segment,
-                      i < filledSegments
-                        ? resource.critical
-                          ? styles.segmentCritical
-                          : styles.segmentActive
-                        : styles.segmentInactive,
-                    ]}
-                  />
-                ))}
-              </View>
-              <Text
-                style={[
-                  styles.resourceValue,
-                  resource.critical && styles.resourceValueCritical,
-                ]}
-              >
-                {Math.round(percentage)}{resource.unit}
-              </Text>
-            </View>
-          );
-        })}
-
-        <View style={styles.missionSection}>
-          <Text style={styles.sectionTitle}>PROGRESO DE MISIÓN</Text>
-          <View style={styles.missionCard}>
-            <Text style={styles.missionLabel}>ESTADO</Text>
-            <Text style={styles.missionValue}>ACTIVA</Text>
-            <Text style={styles.missionLabel}>SEÑAL</Text>
-            <Text style={styles.missionValue}>ESTABLE · 847ms</Text>
-            <Text style={styles.missionLabel}>PRÓXIMO SUMINISTRO</Text>
-            <Text style={styles.missionValue}>ETA: 2d 14h</Text>
-          </View>
+        <View style={{ marginTop: 8 }}>
+          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>PROGRESO DE MISIÓN</Text>
+          <Card>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>ESTADO</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>ACTIVA</Text>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>SEÑAL</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>ESTABLE · 847ms</Text>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>PRÓXIMO SUMINISTRO</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>ETA: 2d 14h</Text>
+          </Card>
         </View>
 
-        <View style={styles.quickActions}>
-          <View style={styles.actionButton}>
-            <Text style={styles.actionIcon}>🚀</Text>
-            <Text style={styles.actionText}>EXPEDICIÓN</Text>
+        <View style={{ flexDirection: "row", gap: 12, marginTop: 24, marginBottom: 32 }}>
+          <View style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}>
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
           </View>
-          <View style={styles.actionButton}>
-            <Text style={styles.actionIcon}>📷</Text>
-            <Text style={styles.actionText}>TOMAR FOTO</Text>
+          <View style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}>
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
           </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#0B1120",
-  },
-  scrollContent: {
-    padding: 16,
-  },
-  header: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 18,
-    letterSpacing: 4,
-    marginBottom: 4,
-  },
-  subHeader: {
-    color: "#4B5563",
-    fontFamily: "monospace",
-    fontSize: 10,
-    letterSpacing: 2,
-    marginBottom: 20,
-  },
-  alertBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(251, 146, 60, 0.1)",
-    borderWidth: 1,
-    borderColor: "rgba(251, 146, 60, 0.3)",
-    padding: 12,
-    marginBottom: 16,
-  },
-  alertIcon: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  alertText: {
-    color: "#FB923C",
-    fontFamily: "monospace",
-    fontSize: 11,
-    letterSpacing: 1,
-  },
-  sectionTitle: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 12,
-    letterSpacing: 3,
-    marginBottom: 12,
-  },
-  resourceRow: {
-    marginBottom: 12,
-  },
-  resourceLabel: {
-    color: "#9CA3AF",
-    fontFamily: "monospace",
-    fontSize: 10,
-    letterSpacing: 2,
-    marginBottom: 6,
-  },
-  resourceBarContainer: {
-    flexDirection: "row",
-    gap: 2,
-    marginBottom: 4,
-  },
-  segment: {
-    flex: 1,
-    height: 8,
-  },
-  segmentActive: {
-    backgroundColor: "#6EE7B7",
-  },
-  segmentInactive: {
-    backgroundColor: "#1F2937",
-  },
-  segmentCritical: {
-    backgroundColor: "#EF4444",
-  },
-  resourceValue: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 12,
-    textAlign: "right",
-  },
-  resourceValueCritical: {
-    color: "#EF4444",
-  },
-  missionSection: {
-    marginTop: 8,
-  },
-  missionCard: {
-    backgroundColor: "#111827",
-    borderWidth: 1,
-    borderColor: "#1F2937",
-    padding: 16,
-  },
-  missionLabel: {
-    color: "#4B5563",
-    fontFamily: "monospace",
-    fontSize: 9,
-    letterSpacing: 2,
-    marginTop: 8,
-  },
-  missionValue: {
-    color: "#E5E7EB",
-    fontFamily: "monospace",
-    fontSize: 12,
-    letterSpacing: 1,
-  },
-  quickActions: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 24,
-    marginBottom: 32,
-  },
-  actionButton: {
-    flex: 1,
-    backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#1F2937",
-    paddingVertical: 20,
-    alignItems: "center",
-  },
-  actionIcon: {
-    fontSize: 24,
-    marginBottom: 8,
-  },
-  actionText: {
-    color: "#6EE7B7",
-    fontFamily: "monospace",
-    fontSize: 10,
-    letterSpacing: 2,
-  },
-});
