@@ -94,6 +94,22 @@ Plans:
 - [x] 06-02: Refactorizar dashboard, logbook, resources para usar theme y componentes UI
 - [x] 06-03: Refactorizar bestiary, map para usar theme, constantes de color y componentes UI
 
+#### Phase 7: Verificación de Design System
+**Goal**: Verificar que hay 0 valores hardcodeados y todo sigue el design system
+**Depends on**: Phase 6
+**Requirements**: [Diseño, animaciones y estilos temáticos - Requerimientos Generales]
+**Success Criteria** (what must be TRUE):
+  1. Cero colores hex hardcodeados en `app/` y `src/` (scan con grep)
+  2. Cero valores de spacing numéricos hardcodeados (excepto en `constants/` y `theme/`)
+  3. Todos los componentes UI usan `useTheme()` o `colors` constants
+  4. Todas las pantallas responden a cambio de tema (dark/light)
+  5. Tab bar, status bar y login cambian con el tema
+**Plans**: 2 plans
+
+Plans:
+- [ ] 07-01: Eliminar colores hex hardcodeados en app/ y src/components/
+- [ ] 07-02: Verificar dark/light mode en todas las pantallas y navegación
+
 #### Phase 5: Base de la App y Conexión API
 **Goal**: Establecer la estructura base de la app con rutas, layouts y conexión a la API
 **Depends on**: Phase 2, Phase 4
@@ -122,3 +138,4 @@ Plans:
 | 4. Design System y Estructura Visual | v1.0 | 3/3 | Complete | 2026-04-03 |
 | 5. Base de la App y Conexión API | v1.0 | 4/4 | Complete | 2026-04-03 |
 | 6. Refactorización de Estilos | v1.0 | 3/3 | Complete | 2026-04-04 |
+| 7. Verificación de Design System | v1.0 | 0/2 | Not started | - |
