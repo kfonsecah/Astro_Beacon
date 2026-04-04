@@ -370,7 +370,7 @@ Se utiliza **Swagger/OpenAPI** con `swagger-jsdoc` y `swagger-ui-express`. La do
 
 | Servicio | Propósito | Integración |
 |----------|-----------|-------------|
-| **OpenAI GPT-4o Vision** | Clasificación automática de especies | API REST desde backend (SpeciesService) |
+| **OpenAI GPT-4o Vision o modelo programado por nosotros** | Clasificación automática de especies | API REST desde backend (SpeciesService) |
 | **expo-maps / react-native-maps** | Visualización GPS de suministros | SDK nativo en frontend |
 | **expo-camera / expo-image-picker** | Captura de fotos para bitácora | SDK nativo en frontend |
 | **expo-speech** | Narración de especies por audio | SDK nativo en frontend |
