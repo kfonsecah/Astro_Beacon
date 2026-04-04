@@ -77,6 +77,23 @@ Plans:
 - [x] 04-02: Implementar temas dark/light con ThemeProvider, hooks y carga de fuentes
 - [x] 04-03: Crear componentes UI reutilizables (Button, Card, Input, Badge, ProgressBar, EmptyState, HudHeader)
 
+#### Phase 6: Refactorización de Estilos
+**Goal**: Eliminar todos los estilos hardcodeados de las pantallas y migrar al design system
+**Depends on**: Phase 4, Phase 5
+**Requirements**: [Diseño, animaciones y estilos temáticos - Requerimientos Generales]
+**Success Criteria** (what must be TRUE):
+  1. Cero colores hardcodeados en pantallas de `app/` (todos via `theme.colors`)
+  2. Cero valores de spacing hardcodeados (todos via `theme.spacing` o `spacing`)
+  3. Cero tipografía hardcodeada (todos via `typography`)
+  4. Pantallas responden correctamente a cambio de tema (dark/light)
+  5. Componentes UI reutilizables usados en lugar de estilos inline repetidos
+**Plans**: 3 plans
+
+Plans:
+- [ ] 06-01: Fix UI components (Card, Badge, ProgressBar, EmptyState) to use theme colors + fix typography.ts import
+- [ ] 06-02: Refactorizar dashboard, logbook, resources para usar theme y componentes UI
+- [ ] 06-03: Refactorizar bestiary, map para usar theme, constantes de color y componentes UI
+
 #### Phase 5: Base de la App y Conexión API
 **Goal**: Establecer la estructura base de la app con rutas, layouts y conexión a la API
 **Depends on**: Phase 2, Phase 4
@@ -104,3 +121,4 @@ Plans:
 | 3. Diseño Móvil (Mockups) | v1.0 | 2/2 | Complete | 2026-04-03 |
 | 4. Design System y Estructura Visual | v1.0 | 3/3 | Complete | 2026-04-03 |
 | 5. Base de la App y Conexión API | v1.0 | 4/4 | Complete | 2026-04-03 |
+| 6. Refactorización de Estilos | v1.0 | 0/3 | Not started | - |
