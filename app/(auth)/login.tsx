@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/auth.context";
+import { useAuth } from "@/stores/auth.store";
 import { useTheme } from "@/hooks/use-theme";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -235,6 +235,7 @@ export default function LoginScreen() {
     setIsAuthenticating(true);
     try {
       await login(agentId, password);
+      router.replace('/(tabs)/dashboard');
     } catch {
       setIsAuthenticating(false);
     }

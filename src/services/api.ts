@@ -1,6 +1,5 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
-
-//in development we will use the local API, in production we will use the deployed API
+import { useAuthStore } from '@/stores/auth.store';
 
 const API_BASE_URL = __DEV__
   ? 'http://localhost:3000/api/v1'
@@ -19,11 +18,10 @@ const api: AxiosInstance = axios.create({
 // Request interceptor: attach JWT token
 api.interceptors.request.use(
   (config) => {
-    // Token will be attached once auth store is implemented
-    // const token = useAuthStore.getState().token;
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = useAuthStore.getState().token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -36,8 +34,9 @@ api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     if (error.response?.status === 401) {
-      // Token expired — logout will be handled by auth store
-      console.warn('[API] Token expired, redirecting to login');
+      // Token expirado — limpiar sesión desde el store
+      if (__DEV__) console.warn('[API] Token expired, clearing session');
+      await useAuthStore.getState().logout();
     }
 
     const message =
