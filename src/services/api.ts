@@ -1,4 +1,6 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
+
+//in development we will use the local API, in production we will use the deployed API
 
 const API_BASE_URL = __DEV__
   ? 'http://localhost:3000/api/v1'
