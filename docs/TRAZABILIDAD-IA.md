@@ -10,7 +10,7 @@
 
 El desarrollo de la **Base Inicial** de Astro_Beacon se realizó bajo un enfoque de **desarrollo asistido por IA**, donde la inteligencia artificial actuó como copiloto técnico. La IA **no generó código ciegamente**; cada salida fue investigada, planificada, revisada por un humano, validada con pruebas UAT y finalmente integrada al repositorio.
 
-Este documento traza cómo se utilizó la IA en cada etapa, cómo se aplicó el framework **Get-Shit-Done (GSD)**, el rol de **OpenCode**, el proceso de verificación humana y la estrategia de **UAT por fase**. La carpeta .planning guarda el historial de decisiones y modificaciones ejecutadas en cada una de las fases del Milestone implementado, con su plan, contexto y research definidos antes de la ejecucion de la fase.
+Este documento traza cómo se utilizó la IA en cada etapa, cómo se aplicó el framework **Get-Shit-Done (GSD)**, el rol de **OpenCode**, el proceso de verificación humana y la estrategia de **UAT por fase**. La carpeta .planning guarda el historial de decisiones y modificaciones ejecutadas en cada una de las fases del Milestone (etapa con fases) implementado, con su plan, contexto y research definidos antes de la ejecucion de cada fase. Dentro de ese historial, la subcarpeta .planning/debugs concentra los análisis, correcciones y seguimientos de incidencias detectadas durante la integración y la validación.
 
 ---
 
@@ -20,8 +20,9 @@ Este documento traza cómo se utilizó la IA en cada etapa, cómo se aplicó el 
 |-------------|----------------------|
 | **OpenCode CLI** | Entorno de ejecución principal. Orquesta agentes de IA, gestiona contextos, ejecuta comandos y mantiene trazabilidad de decisiones. |
 | **Framework GSD** | Metodología de desarrollo iterativo: `Research → Plan → Discuss → Execute → Verify`. Garantiza que cada fase tenga objetivos claros, planes ejecutables y criterios de éxito medibles. |
+| **Subagentes GSD** | Agentes especializados como `gsd-phase-researcher`, `gsd-planner`, `gsd-executor`, `gsd-verifier`, `gsd-debugger`, `gsd-ui-researcher` y `gsd-ui-checker`, usados para dividir investigación, planificación, ejecución, verificación y auditoría. |
 | **Modelos de IA** | Investigación técnica, generación de scaffolding, detección de deuda técnica, simulación de flujos de usuario, generación de documentación y escaneo de código. |
-| **Reference Project** | `astro-beacon-reference/` (generado por Lovable). Usado como guía visual/UX, adaptado manualmente a React Native. |
+| **Reference Project** | `astro-beacon-reference/` (generado por Lovable). Usado como guía visual/UX, adaptado manualmente a React Native. SOLO INSPIRACION DE DISEÑO |
 
 ---
 
@@ -30,6 +31,11 @@ Este documento traza cómo se utilizó la IA en cada etapa, cómo se aplicó el 
 -**Project.md:** Contiene la visión general, objetivos y requerimientos del proyecto. La IA lo usó para entender el contexto global antes de cada fase.
 -**Roadmap.md:** Desglosa el proyecto en hitos y fases. La IA generó planes detallados para cada fase basándose en este roadmap.
 -**State.md:** Registro de decisiones, cambios y aprendizajes. La IA actualizó este documento con cada iteración, mientras que el humano validaba y corregía la información.
+-**Debugs/**: Carpeta destinada a documentar incidencias, hipótesis de causa raíz, fixes aplicados y resultados de verificación para asegurar trazabilidad técnica de los problemas resueltos.
+
+El framework GSD se apoyó en subagentes especializados para mantener cada fase separada por responsabilidad: investigación, mapeo del código base, planificación, ejecución, verificación y revisión de UI. Esto permitió que la IA trabajara con contextos acotados y que cada salida tuviera una validación técnica más precisa.
+
+El desarrollo se dividió en 7 fases, cada una con su propio reserach, plan generado por IA, validacion, revisión humana y UAT específico, esta explicacion de cada a una a continuacion esta resumida de la manera mas clara posible, sin embargo fue mas detallada:
 
 ### 🔹 Phase 1: Arquitectura y Diseño
 - **IA:** Investigó patrones de arquitectura RN, redactó `ARCHITECTURE-DESIGN.md`.
@@ -78,7 +84,7 @@ La IA **asistió**, pero NOSOTROS **decidimos, validamos y corregimos**.
 | **Correcciones Manuales** | Resolución de conflictos de casing, ajuste de `KeyboardAvoidingView`, fix de scanlines, validación de `Platform.OS`. |
 | **Decisiones Arquitectónicas** | Elección de Expo Router vs React Navigation, Zustand vs Redux, MongoDB vs PostgreSQL. |
 | **Code Ownership** | Todo código generado fue leído, comprendido y adaptado. Cero `copy-paste` ciego. |
-| **Justificacion** | El humano entiende cada línea, patrón y decisión. La IA es herramienta, no autor. |
+| **Justificacion** | El humano entiende cada patrón y decisión. La IA es herramienta, no autor. |
 
 ---
 
