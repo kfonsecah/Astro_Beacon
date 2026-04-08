@@ -42,6 +42,7 @@ erDiagram
         string password_hash
         string rol
         string estado
+        GeoPoint base_camp_location
         Date creado_en
         Date ultima_actividad
     }
@@ -116,8 +117,8 @@ erDiagram
     }
 
     SUMINISTRO_CONTENIDO {
-        string suministro_id FK
-        string recurso_id FK
+        string suministro_id PK "FK → SUMINISTRO"
+        string recurso_id PK "FK → RECURSO"
         float cantidad
     }
 
@@ -147,7 +148,7 @@ erDiagram
 | `passwordHash` | `string` | Hash de contraseña (bcrypt) |
 | `rol` | `enum` | `astronaut`, `control_mision` |
 | `estado` | `enum` | `activo`, `inactivo`, `emergencia` |
-| `baseCampLocation` | `GeoPoint` | Ubicación del campamento base |
+| `baseCampLocation` | `GeoPoint` | Coordenadas GPS del campamento base |
 | `creadoEn` | `Date` | Fecha de registro |
 | `ultimaActividad` | `Date` | Último acceso |
 
