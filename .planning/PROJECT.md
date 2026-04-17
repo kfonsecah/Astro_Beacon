@@ -8,15 +8,38 @@ Aplicación móvil de exploración planetaria para la materia EIF411 (UNACR). Si
 
 Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
 
+## Current Milestone: v1.1 Aplicación Base — API Development
+
+**Goal:** Implement a functional REST API with Node.js + Express v4 to support all app features.
+
+**Target features:**
+- API structure with Express v4 (routes, controllers, services, models)
+- Authentication endpoints (register, login, session management)
+- Core domain endpoints (astronauts, resources, logbook, species, trips, supplies)
+- Database connection and models
+- Security middleware (JWT, validation)
+- Error handling and API documentation
+
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| Bitácora de lo desconocido | v1.0 | Complete |
+| Gestión de recursos | v1.0 | Complete |
+| Recursos y viajes | v1.0 | Complete |
+| Pantalla principal | v1.0 | Complete |
+| Diseño y estilos | v1.0 | Complete |
 
 ### Active
 
-- [ ] Bitácora de lo desconocido (fotos, clasificación IA, audio, offline)
+- [ ] API REST con Node.js + Express v4
+- [ ] Autenticación (register, login, JWT, sesión)
+- [ ] Endpoints de dominio (astronautas, recursos, bitácora, especies, viajes, suministros)
+- [ ] Conexión a base de datos y modelos
+- [ ] Middleware de seguridad (JWT, validación)
+- [ ] Manejo de errores y documentación de API
 - [ ] Gestión de recursos (oxígeno, comida, agua, alertas)
 - [ ] Recursos y viajes (mapa GPS, consumo de oxígeno, conteo)
 - [ ] Pantalla principal con métricas del campamento
@@ -29,8 +52,25 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 
 ### Out of Scope
 
-- Backend/API completa (se requiere pero el foco es el frontend móvil)
+- Frontend móvil (ya implementado en v1.0)
 - Funcionalidades web-only (siempre React Native compatible)
+
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd-transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd-complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
 
 ## Context
 
@@ -187,7 +227,8 @@ color: tc.primary
 | Referencia visual de Lovable | Acelera diseño, mantiene coherencia visual | ✓ In progress |
 | IA asistida en desarrollo | Requisito explícito del curso | ✓ In progress |
 | New Architecture enabled | Reanimated 4 no necesita babel plugin | ✓ Good |
-| Cross-platform iOS + Android | Requisito del curso | ✓ In progress |
+| Cross-platform iOS + Android | Requisito del curso | ✓ Good |
+| API REST con Node + Express v4 | Requisito del curso para Entrega 2 | ✓ Planned |
 
 ---
-*Last updated: 2026-04-04 — Design system + cross-platform constraints added*
+*Last updated: 2026-04-16 — Milestone v1.1 API Development started*

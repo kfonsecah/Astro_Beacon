@@ -1,44 +1,73 @@
 # State: Astro_Beacon
 
-## Current Status
+## Current Position
 
-**Milestone:** v1.0 Base Inicial
-**Phase:** 4 Complete — Moving to Phase 5
-**Last Updated:** 2026-04-03
+**Milestone:** v1.1 Aplicación Base — API Development
+**Phase:** Not started (roadmap defined)
+**Plan:** —
+**Status:** Roadmap defined, ready for Phase 8 planning
+**Last activity:** 2026-04-16 — Roadmap v1.1 created
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-04-01)
+See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
-**Current focus:** v1.0 Base Inicial - Mockups, design system y base de la app
+
+**Current focus:** v1.1 Aplicación Base - API REST con Node.js + Express v4
 
 ## Active Context
 
-### Codebase Map
-- Main project: `.planning/codebase/` (7 documents)
-- Reference project: `astro-beacon-reference/.planning/codebase/` (7 documents)
+### Previous Milestone (v1.0 Base Inicial) - COMPLETE ✓
+- Phase 1-7: Arquitectura, Diseño de Datos, Mockups, Design System, Base App, Refactorización, Verificación - COMPLETE
 
-### Key Constraints
-- Expo + React Native siempre
-- Versiones compatibles con scaffold inicial
-- Estructura de carpetas del profesor
-- Design system obligatorio
-- Estilo visual basado en `astro-beacon-reference/`
+### This Milestone Focus (v1.1)
+- API REST con Node.js + Express v4
+- Authentication endpoints (register, login, JWT)
+- Domain endpoints (astronauts, resources, logbook, species, trips, supplies)
+- Database connection with MongoDB
+- Security middleware (helmet, cors, rate limiting, validation)
+- Offline sync support
 
-### Phase Status
+## Phase Status
 
-| Phase | Status | Plans |
-|-------|--------|-------|
-| 1. Arquitectura y Diseño | Complete | 2/2 |
-| 2. Diseño de Datos | Complete | 2/2 |
-| 3. Diseño Móvil (Mockups) | Complete | 2/2 |
-| 4. Design System y Estructura Visual | Complete | 3/3 |
-| 5. Base de la App y Conexión API | Not started | 0/4 |
+| Phase | Status | Plans | Requirements |
+|-------|--------|-------|--------------|
+| 8. API Setup y Estructura | Not started | 0/4 | API-01, API-02, API-03, API-04, API-05, API-08 |
+| 9. Autenticación | Not started | 0/3 | AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, API-06, API-07 |
+| 10. Endpoints de Dominio | Not started | 0/5 | RES-01-05, SPEC-01-03, LBK-01-03, ASTR-01-03, TRIP-01-05, SUPP-01-04, SYNC-01 |
+| 11. Offline Sync y Middleware | Not started | 0/3 | SYNC-02, SYNC-03 |
+| 12. Documentación y Testing | Not started | 0/3 | Unit tests, API documentation |
+
+## Milestone Progress
+
+**v1.1 Progress:** 0/12 phases complete
+
+**Requirements Coverage:**
+- Total v1.1 requirements: 35
+- Phase 8: 6 requirements
+- Phase 9: 7 requirements
+- Phase 10: 22 requirements
+- Phase 11: 2 requirements
+- Phase 12: 0 specific requirements (testing + docs)
+
+## Key Decisions
+
+| Decision | Rationale | Status |
+|----------|-----------|--------|
+| Express v4 + TypeScript + MongoDB | Course requirement, proven stack | Planned |
+| Layered architecture (routes → controllers → services → models) | Testability, maintainability | Planned |
+| JWT for authentication | Mobile apps standard, stateless | Planned |
+| Zod for validation | TypeScript-first, better inference | Planned |
+| Delta + Bulk sync for offline | Mobile app needs offline support | Planned |
+
+## Blockers
+
+None at this time.
 
 ## Next Action
 
-Start Phase 3: Diseño Móvil (Mockups)
+Start Phase 8: `/gsd-plan-phase 8`
 
 ---
-*State updated after Phase 2 completion*
+*State updated: 2026-04-16 — Roadmap v1.1 created*
