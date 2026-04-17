@@ -5,9 +5,8 @@ export const astronautStatusEnum = z.enum(['activo', 'inactivo', 'emergencia']);
 
 export type AstronautStatus = z.infer<typeof astronautStatusEnum>;
 
-// Create astronaut schema
+// Create astronaut schema (userId is auto-filled from auth token)
 export const createAstronautSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
   name: z.string().min(1, 'Name is required').trim(),
   status: astronautStatusEnum.optional().default('activo'),
   birthDate: z.string().optional(), // ISO date string
