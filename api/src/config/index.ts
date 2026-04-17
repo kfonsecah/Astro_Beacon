@@ -12,7 +12,7 @@ export const config = {
   
   JWT: {
     SECRET: process.env.JWT_SECRET || 'dev-secret-change-in-production',
-    EXPIRES_IN: process.env.JWT_EXPIRES_IN || '15m',
+    EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1h',
     REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN || '7d'
   },
   
