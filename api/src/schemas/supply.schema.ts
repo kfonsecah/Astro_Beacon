@@ -37,9 +37,9 @@ export const collectSupplySchema = z.object({
 
 // Nearby query schema for geospatial queries (SUPP-03)
 export const nearbyQuerySchema = z.object({
-  lat: z.number().min(-90).max(90),
-  lng: z.number().min(-180).max(180),
-  radius: z.number().int().positive().optional().default(1000), // meters
+  lat: z.coerce.number().min(-90).max(90),
+  lng: z.coerce.number().min(-180).max(180),
+  radius: z.coerce.number().int().positive().optional().default(1000), // meters
   status: supplyStatusEnum.optional(),
   page: z.coerce.number().int().positive().optional().default(1),
   limit: z.coerce.number().int().positive().max(100).optional().default(20),

@@ -11,6 +11,21 @@ import type {
 
 export class SupplyService {
   /**
+   * Create a new supply
+   */
+  async create(userId: string, input: CreateSupplyInput) {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const supply = await Supply.create({
+      ...input,
+      userId: userObjectId,
+      status: SupplyDropStatus.PENDIENTE
+    });
+
+    return supply;
+  }
+
+  /**
    * Find all supplies for a user with pagination and optional status filter
    */
   async findAll(

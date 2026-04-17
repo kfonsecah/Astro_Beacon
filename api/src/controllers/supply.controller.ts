@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { supplyService } from '../services/supply.service.js';
 import {
+  createSupplySchema,
   collectSupplySchema,
   nearbyQuerySchema
 } from '../schemas/supply.schema.js';
@@ -73,6 +74,31 @@ export async function getSupply(
       success: true,
       data: supply
     });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * POST /api/v1/supplies
+ * Create a new supply
+ */
+export async function createSupply(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const input = createSupplySchema.parse(req.body);
+    const userId = (req as any).user?.sub;
+
+    if (!userId) {
+      res.status(401).json({ success: false, error: 'Unauthorized' });
+      return;
+    }
+
+    const supply = await supplyService.create(userId, input);
+    res.status(201).json({ success: true, data: supply });
   } catch (error) {
     next(error);
   }

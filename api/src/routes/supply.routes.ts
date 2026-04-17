@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   getSupplies,
   getSupply,
+  createSupply,
   collectSupply,
   expireSupply,
   getNearbySupplies
@@ -15,6 +16,9 @@ router.use(authenticate);
 
 // GET /api/v1/supplies - List all supplies (paginated, with status filter)
 router.get('/', getSupplies);
+
+// POST /api/v1/supplies - Create supply
+router.post('/', createSupply);
 
 // GET /api/v1/supplies/nearby - Find nearby supplies
 router.get('/nearby', getNearbySupplies);
