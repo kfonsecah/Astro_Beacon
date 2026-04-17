@@ -95,11 +95,11 @@
 
 | Requirement | Description | Status |
 |-------------|-------------|--------|
-| API-01 | Project scaffold with Express v4 + TypeScript | Pending |
+| API-01 | Project scaffold with Express v4 + TypeScript | ✓ Complete (Plan 08-01) |
 | API-02 | Layered architecture (routes, controllers, services, models) | Pending |
 | API-03 | MongoDB connection with Mongoose ODM | Pending |
 | API-04 | Global error handler with consistent response envelope | Pending |
-| API-05 | Environment configuration (.env for secrets) | Pending |
+| API-05 | Environment configuration (.env for secrets) | ✓ Complete (Plan 08-01) |
 | API-08 | Pagination helper for list endpoints | Pending |
 
 ### Phase 9: Autenticación
