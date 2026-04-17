@@ -17,7 +17,7 @@ Desarrollo de una aplicación móvil de exploración planetaria para la materia 
 **Milestone Goal:** Implementar una API REST funcional con Node.js + Express v4 para soportar todas las funcionalidades de la app móvil.
 
 - [ ] **Phase 8: API Setup y Estructura** - Project scaffold, layered architecture, MongoDB connection
-- [ ] **Phase 9: Autenticación** - Register, login, JWT, bcrypt, rate limiting
+- [x] **Phase 9: Autenticación** - Register, login, JWT, bcrypt, rate limiting (completed 2026-04-17)
 - [ ] **Phase 10: Endpoints de Dominio** - All CRUD operations for resources, species, logbook, astronaut, trips, supplies
 - [ ] **Phase 11: Offline Sync y Middleware** - Delta sync, bulk sync, security hardening
 - [ ] **Phase 12: Documentación y Testing** - API documentation, unit tests, final verification
@@ -151,7 +151,7 @@ Desarrollo de una aplicación móvil de exploración planetaria para la materia 
 | 6. Refactorización de Estilos | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 7. Verificación de Design System | v1.0 | 2/2 | Complete | 2026-04-04 |
 | 8. API Setup y Estructura | v1.1 | 0/4 | Not started | - |
-| 9. Autenticación | v1.1 | 0/3 | Not started | - |
+| 9. Autenticación | v1.1 | 0/3 | Complete    | 2026-04-17 |
 | 10. Endpoints de Dominio | v1.1 | 0/5 | Not started | - |
 | 11. Offline Sync y Middleware | v1.1 | 0/3 | Not started | - |
 | 12. Documentación y Testing | v1.1 | 0/3 | Not started | - |
