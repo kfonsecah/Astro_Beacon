@@ -68,7 +68,11 @@ Desarrollo de una aplicación móvil de exploración planetaria para la materia 
 6. Input validation rejects malformed requests with clear error messages
 7. Security headers (helmet) and CORS configured for mobile app access
 
-**Plans**: TBD
+**Plans**: 3 plans
+
+- [ ] 09-01-PLAN.md — User model and Zod validation schemas
+- [ ] 09-02-PLAN.md — Auth service with JWT utilities
+- [ ] 09-03-PLAN.md — Auth controller, routes, and middleware
 
 ---
 
