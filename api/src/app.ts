@@ -6,6 +6,8 @@ import 'express-async-errors';
 
 import { config } from './config/index.js';
 import { errorHandler } from './middlewares/error.middleware.js';
+import authRoutes from './routes/auth.routes.js';
+import { authenticate } from './middlewares/auth.middleware.js';
 
 const app = express();
 
@@ -55,8 +57,11 @@ app.get('/api/v1/health', (req, res) => {
   });
 });
 
-// API routes placeholder (will be added in next plan)
-// app.use('/api/v1', routes);
+// Auth routes (public)
+app.use('/api/v1/auth', authRoutes);
+
+// Auth middleware for protected routes
+// The logout route will use this middleware
 
 // 404 handler
 app.use((req, res) => {
