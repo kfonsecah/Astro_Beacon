@@ -18,8 +18,8 @@ progress:
 
 **Milestone:** v1.1 Aplicación Base — API Development
 **Phase:** 9
-**Plan:** Not started
-**Status:** Ready to plan
+**Plan:** 01 complete
+**Status:** Executing
 **Last activity:** 2026-04-17
 
 ## Project Reference
@@ -50,7 +50,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-16)
 | Phase | Status | Plans | Requirements |
 |-------|--------|-------|--------------|
 | 8. API Setup y Estructura | In progress | 3/4 | API-01 ✓, API-02 ✓, API-03 ✓, API-04 ✓, API-05 ✓, API-08 |
-| 9. Autenticación | Not started | 0/3 | AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, API-06, API-07 |
+| 9. Autenticación | In progress | 1/3 | AUTH-01 ✓, AUTH-04 ✓, API-07 ✓, AUTH-02, AUTH-03, AUTH-05, API-06 |
 | 10. Endpoints de Dominio | Not started | 0/5 | RES-01-05, SPEC-01-03, LBK-01-03, ASTR-01-03, TRIP-01-05, SUPP-01-04, SYNC-01 |
 | 11. Offline Sync y Middleware | Not started | 0/3 | SYNC-02, SYNC-03 |
 | 12. Documentación y Testing | Not started | 0/3 | Unit tests, API documentation |
