@@ -41,7 +41,12 @@ Desarrollo de una aplicación móvil de exploración planetaria para la materia 
 5. Environment variables loaded from `.env` file (no hardcoded secrets)
 6. List endpoints support pagination with `page` and `limit` query params
 
-**Plans**: TBD
+**Plans**: 4 plans
+
+- [ ] 08-01-PLAN.md — Project scaffold with Express v4 + TypeScript
+- [ ] 08-02-PLAN.md — Express app with security middleware and error handler
+- [ ] 08-03-PLAN.md — MongoDB connection with Mongoose
+- [ ] 08-04-PLAN.md — Pagination helper for list endpoints
 
 ---
 
