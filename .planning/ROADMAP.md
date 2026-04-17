@@ -96,7 +96,13 @@ Desarrollo de una aplicación móvil de exploración planetaria para la materia 
 8. All endpoints include `lastModified` timestamps for offline sync support
 9. All endpoints are protected by JWT authentication middleware
 
-**Plans**: TBD
+**Plans**: 5 plans
+
+- [ ] 10-01-PLAN.md — Models + Schemas for all 6 entities
+- [ ] 10-02-PLAN.md — Resources, Species, Logbook services + controllers
+- [ ] 10-03-PLAN.md — Astronaut, Trips, Supplies services + controllers
+- [ ] 10-04-PLAN.md — Routes wiring + app.ts integration
+- [ ] 10-05-PLAN.md — Final verification + testing
 
 ---
 
