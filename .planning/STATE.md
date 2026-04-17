@@ -18,7 +18,7 @@ progress:
 
 **Milestone:** v1.1 Aplicación Base — API Development
 **Phase:** 10
-**Plan:** 01 complete - ready for next plan
+**Plan:** 02 complete - ready for next plan
 **Status:** Ready to plan
 **Last activity:** 2026-04-17
 
@@ -50,8 +50,8 @@ See: `.planning/PROJECT.md` (updated 2026-04-16)
 | Phase | Status | Plans | Requirements |
 |-------|--------|-------|--------------|
 | 8. API Setup y Estructura | Complete | 4/4 | API-01 ✓, API-02 ✓, API-03 ✓, API-04 ✓, API-05 ✓, API-08 ✓ |
-| 9. Autenticación | In progress | 3/3 | AUTH-01 ✓, AUTH-02 ✓, AUTH-04 ✓, AUTH-03 ✓, AUTH-05 ✓, API-06 ✓, API-07 ✓ |
-| 10. Endpoints de Dominio | In progress | 1/5 | RES-01-05, SPEC-01-03, LBK-01-03, ASTR-01-03, TRIP-01-05, SUPP-01-04, SYNC-01 |
+| 9. Autenticación | Complete | 3/3 | AUTH-01 ✓, AUTH-02 ✓, AUTH-04 ✓, AUTH-03 ✓, AUTH-05 ✓, API-06 ✓, API-07 ✓ |
+| 10. Endpoints de Dominio | In progress | 2/5 | RES-01-05 ✓, SPEC-01-03 ✓, LBK-01-02 ✓, ASTR-01-03, TRIP-01-05, SUPP-01-04, SYNC-01 |
 | 11. Offline Sync y Middleware | Not started | 0/3 | SYNC-02, SYNC-03 |
 | 12. Documentación y Testing | Not started | 0/3 | Unit tests, API documentation |
 
@@ -92,6 +92,7 @@ None at this time.
 | Access token 1hr, refresh token 7d | Standard mobile app JWT pattern | Implemented |
 | Refresh tokens as SHA-256 hashes in MongoDB | Revocable tokens for security | Implemented |
 | bcrypt 12 rounds for password hashing | Strong password security (AUTH-04) | Implemented |
+| Response envelope: { success, data, pagination? } | Consistent API format for all endpoints | Implemented |
 
 **Note:** gsd-tools not configured - state updates performed manually.
 
@@ -100,4 +101,4 @@ None at this time.
 Continue with Phase 10: Domain endpoints (resources, species, logbook, etc.)
 
 ---
-*State updated: 2026-04-17 — Phase 9 Plan 02 complete*
+*State updated: 2026-04-17 — Phase 10 Plan 02 complete*
