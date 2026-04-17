@@ -209,6 +209,20 @@ export class TripService {
   }
 
   /**
+   * Delete a trip
+   */
+  async delete(userId: string, tripId: string): Promise<void> {
+    // Verify ownership
+    await this.findOne(userId, tripId);
+
+    const result = await Trip.findByIdAndDelete(new mongoose.Types.ObjectId(tripId));
+
+    if (!result) {
+      throw new AppError('Trip not found', 404);
+    }
+  }
+
+  /**
    * Calculate O2 consumed for a trip
    * Base rate 1 unit/hour + manual adjustments
    */
