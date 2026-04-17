@@ -9,7 +9,7 @@ progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 4
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # State: Astro_Beacon
@@ -18,7 +18,7 @@ progress:
 
 **Milestone:** v1.1 Aplicación Base — API Development
 **Phase:** 9
-**Plan:** 01 complete
+**Plan:** 02 complete
 **Status:** Executing
 **Last activity:** 2026-04-17
 
@@ -50,7 +50,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-16)
 | Phase | Status | Plans | Requirements |
 |-------|--------|-------|--------------|
 | 8. API Setup y Estructura | In progress | 3/4 | API-01 ✓, API-02 ✓, API-03 ✓, API-04 ✓, API-05 ✓, API-08 |
-| 9. Autenticación | In progress | 1/3 | AUTH-01 ✓, AUTH-04 ✓, API-07 ✓, AUTH-02, AUTH-03, AUTH-05, API-06 |
+| 9. Autenticación | In progress | 2/3 | AUTH-01 ✓, AUTH-02 ✓, AUTH-04 ✓, API-06 ✓, API-07 ✓, AUTH-03, AUTH-05 |
 | 10. Endpoints de Dominio | Not started | 0/5 | RES-01-05, SPEC-01-03, LBK-01-03, ASTR-01-03, TRIP-01-05, SUPP-01-04, SYNC-01 |
 | 11. Offline Sync y Middleware | Not started | 0/3 | SYNC-02, SYNC-03 |
 | 12. Documentación y Testing | Not started | 0/3 | Unit tests, API documentation |
@@ -89,12 +89,15 @@ None at this time.
 | Response envelope: { success, data, pagination?, error? } | Consistent API format for mobile clients | Implemented |
 | Error handler last in middleware chain | Ensures all errors are caught | Implemented |
 | Error details hidden in production | Security - prevent information leakage | Implemented |
+| Access token 1hr, refresh token 7d | Standard mobile app JWT pattern | Implemented |
+| Refresh tokens as SHA-256 hashes in MongoDB | Revocable tokens for security | Implemented |
+| bcrypt 12 rounds for password hashing | Strong password security (AUTH-04) | Implemented |
 
 **Note:** gsd-tools not configured - state updates performed manually.
 
 ## Next Action
 
-Continue with Phase 8 Plan 04: Routes and controllers structure
+Continue with Phase 9 Plan 03: Auth controllers and routes
 
 ---
-*State updated: 2026-04-16 — Phase 8 Plan 02 complete*
+*State updated: 2026-04-17 — Phase 9 Plan 02 complete*
