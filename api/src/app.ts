@@ -7,6 +7,12 @@ import 'express-async-errors';
 import { config } from './config/index.js';
 import { errorHandler } from './middlewares/error.middleware.js';
 import authRoutes from './routes/auth.routes.js';
+import resourceRoutes from './routes/resource.routes.js';
+import speciesRoutes from './routes/species.routes.js';
+import logbookRoutes from './routes/logbook.routes.js';
+import astronautRoutes from './routes/astronaut.routes.js';
+import tripRoutes from './routes/trip.routes.js';
+import supplyRoutes from './routes/supply.routes.js';
 import { authenticate } from './middlewares/auth.middleware.js';
 
 const app = express();
@@ -60,8 +66,13 @@ app.get('/api/v1/health', (req, res) => {
 // Auth routes (public)
 app.use('/api/v1/auth', authRoutes);
 
-// Auth middleware for protected routes
-// The logout route will use this middleware
+// Domain routes (protected by JWT)
+app.use('/api/v1/resources', authenticate, resourceRoutes);
+app.use('/api/v1/species', authenticate, speciesRoutes);
+app.use('/api/v1/logbook', authenticate, logbookRoutes);
+app.use('/api/v1/astronaut', authenticate, astronautRoutes);
+app.use('/api/v1/trips', authenticate, tripRoutes);
+app.use('/api/v1/supplies', authenticate, supplyRoutes);
 
 // 404 handler
 app.use((req, res) => {
