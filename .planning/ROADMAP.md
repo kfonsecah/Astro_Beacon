@@ -1,163 +1,94 @@
-# Roadmap: Astro_Beacon
+# Roadmap: Astro_Beacon v1.2 (Integración API-Frontend)
 
-## Overview
+**Milestone Goal**: Conectar el frontend React Native/Expo con el backend Node.js/Express existente, integrando todas las pantallas actuales con sus respectivos endpoints (sin crear nuevos endpoints ni pantallas).
 
-Desarrollo de una aplicación móvil de exploración planetaria para la materia EIF411 (UNACR). El proyecto simula la asistencia a una astronauta varada en un planeta desconocido, con funcionalidades de bitácora, gestión de recursos, navegación GPS y soporte offline. La referencia visual proviene del proyecto `astro-beacon-reference/` generado por Lovable.
+**Phase Numbering**: Continúa desde v1.1 (fases 8-12), inicia en Fase 13.
 
-## Milestones
-
-- ✅ **v1.0 Base Inicial** - Fases 1-7 (complete) - Entrega 1: 08 de abril
-- 🚧 **v1.1 Aplicación Base** - Fases 8-12 (in progress) - Entrega 2: 06 de mayo
-- 📋 **v1.2 Defensa Final** - Fases 13+ (planned) - Entrega: 03 de junio
+---
 
 ## Phases
 
-### 🚧 v1.1 Aplicación Base (In Progress)
-
-**Milestone Goal:** Implementar una API REST funcional con Node.js + Express v4 para soportar todas las funcionalidades de la app móvil.
-
-- [ ] **Phase 8: API Setup y Estructura** - Project scaffold, layered architecture, MongoDB connection
-- [x] **Phase 9: Autenticación** - Register, login, JWT, bcrypt, rate limiting (completed 2026-04-17)
-- [x] **Phase 10: Endpoints de Dominio** - All CRUD operations for resources, species, logbook, astronaut, trips, supplies (completed 2026-04-17)
-- [ ] **Phase 11: Offline Sync y Middleware** - Delta sync, bulk sync, security hardening
-- [ ] **Phase 12: Documentación y Testing** - API documentation, unit tests, final verification
+- [ ] **Phase 13: Auth Integration** - Conectar login/registro con API, almacenamiento seguro de tokens, manejo de JWT
+- [ ] **Phase 14: API Client Setup** - Configurar TanStack Query y detección de red
+- [ ] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios
+- [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API
+- [ ] **Phase 17: Error Handling & Offline** - Error boundaries y soporte offline
 
 ---
 
-### Phase 8: API Setup y Estructura
+## Phase Details
 
-**Goal**: Establish the backend project foundation with Express v4, TypeScript, MongoDB connection, and layered architecture
-
-**Depends on**: Nothing (first phase of v1.1)
-
-**Requirements**: API-01, API-02, API-03, API-04, API-05, API-08
-
+### Phase 13: Auth Integration
+**Goal**: Users can authenticate with the backend, maintain secure sessions, and access protected screens.
+**Depends on**: Nothing (first phase of this milestone)
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-02, API-03, API-05, API-06
 **Success Criteria** (what must be TRUE):
+  1. User can log in with email/password and is redirected to home screen with no back button to login
+  2. User can register a new account with email/password and receive confirmation
+  3. JWT and refresh tokens are stored securely in expo-secure-store (not accessible via unencrypted storage)
+  4. Unauthenticated users are redirected to login screen when accessing protected routes
+  5. Expired JWTs are automatically refreshed via axios interceptor without user intervention
+**Plans**: TBD
+**UI hint**: yes
 
-1. Server starts and responds to health check at `GET /api/v1/health`
-2. All routes follow layered architecture: routes → controllers → services → models
-3. MongoDB connection established via Mongoose with proper error handling
-4. All API responses follow consistent envelope format: `{ success, data, pagination?, error? }`
-5. Environment variables loaded from `.env` file (no hardcoded secrets)
-6. List endpoints support pagination with `page` and `limit` query params
-
-**Plans**: 4 plans
-
-- [ ] 08-01-PLAN.md — Project scaffold with Express v4 + TypeScript
-- [ ] 08-02-PLAN.md — Express app with security middleware and error handler
-- [ ] 08-03-PLAN.md — MongoDB connection with Mongoose
-- [ ] 08-04-PLAN.md — Pagination helper for list endpoints
-
----
-
-### Phase 9: Autenticación
-
-**Goal**: Users can securely register, login, and access protected endpoints with JWT authentication
-
-**Depends on**: Phase 8
-
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, API-06, API-07
-
+### Phase 14: API Client Setup
+**Goal**: Configure TanStack Query for server state management and network detection for offline awareness.
+**Depends on**: Phase 13 (auth tokens available for API client)
+**Requirements**: API-01, API-04
 **Success Criteria** (what must be TRUE):
-
-1. User can register with email and password, receiving a success response
-2. User can login with valid credentials and receive a JWT access token
-3. Protected routes reject requests without valid JWT token
-4. Passwords are stored hashed (bcrypt with minimum 12 rounds), never in plaintext
-5. Auth endpoints (register/login) block after 5 failed attempts within 15 minutes
-6. Input validation rejects malformed requests with clear error messages
-7. Security headers (helmet) and CORS configured for mobile app access
-
-**Plans**: 3 plans
-
-- [ ] 09-01-PLAN.md — User model and Zod validation schemas
-- [ ] 09-02-PLAN.md — Auth service with JWT utilities
-- [ ] 09-03-PLAN.md — Auth controller, routes, and middleware
-
----
-
-### Phase 10: Endpoints de Dominio
-
-**Goal**: Complete CRUD operations for all domain entities: resources, species, logbook, astronaut, trips, and supplies
-
-**Depends on**: Phase 9
-
-**Requirements**: RES-01, RES-02, RES-03, RES-04, RES-05, SPEC-01, SPEC-02, SPEC-03, LBK-01, LBK-02, LBK-03, ASTR-01, ASTR-02, ASTR-03, TRIP-01, TRIP-02, TRIP-03, TRIP-04, TRIP-05, SUPP-01, SUPP-02, SUPP-03, SUPP-04, SYNC-01
-
-**Success Criteria** (what must be TRUE):
-
-1. User can create, read, update, and delete resources with movements tracking
-2. User can view resource alerts when oxygen, food, or water drops below threshold
-3. User can create species entries with classification and mark as dangerous/friendly
-4. User can create logbook entries with optional species linking
-5. User can view and update their astronaut profile with dashboard stats
-6. User can create trips (planned), start trips (active), and complete/abort trips
-7. User can view nearby supplies and collect supply drops
-8. All endpoints include `lastModified` timestamps for offline sync support
-9. All endpoints are protected by JWT authentication middleware
-
-**Plans**: 5 plans
-
-- [ ] 10-01-PLAN.md — Models + Schemas for all 6 entities
-- [ ] 10-02-PLAN.md — Resources, Species, Logbook services + controllers
-- [ ] 10-03-PLAN.md — Astronaut, Trips, Supplies services + controllers
-- [ ] 10-04-PLAN.md — Routes wiring + app.ts integration
-- [ ] 10-05-PLAN.md — Final verification + testing
-
----
-
-### Phase 11: Offline Sync y Middleware
-
-**Goal**: Implement delta sync and bulk sync endpoints for offline mobile app support
-
-**Depends on**: Phase 10
-
-**Requirements**: SYNC-02, SYNC-03
-
-**Success Criteria** (what must be TRUE):
-
-1. Delta sync endpoint returns all entities modified since a given timestamp
-2. Bulk sync endpoint processes batch operations and returns server IDs for local IDs
-3. Bulk sync handles conflicts gracefully with clear conflict resolution
-4. All sync responses follow standardized format with success/conflict/failed arrays
-
+  1. App initializes with TanStack Query provider in root layout, enabling useQuery/useMutation in all screens
+  2. Network connectivity status is detectable via NetInfo for offline-aware logic
 **Plans**: TBD
 
----
-
-### Phase 12: Documentación y Testing
-
-**Goal**: Complete API documentation and unit tests for core functionality
-
-**Depends on**: Phase 11
-
-**Requirements**: Documentation (OpenAPI/Swagger), Unit Tests for auth and core services
-
+### Phase 15: Domain Services + Hooks
+**Goal**: Create service layer and custom hooks for all domain entities to fetch and mutate data.
+**Depends on**: Phase 13 (JWT auth), Phase 14 (TanStack Query + network detection)
+**Requirements**: DOM-01, DOM-02, DOM-03, DOM-04, DOM-05, DOM-06, DOM-07, DOM-08, DOM-09
 **Success Criteria** (what must be TRUE):
-
-1. API endpoints documented with OpenAPI/Swagger at `/api-docs`
-2. Auth endpoints have unit tests covering register, login, and middleware
-3. Core domain services have unit tests for business logic
-4. All tests pass with `npm test`
-5. README includes setup instructions and API usage examples
-
+  1. All domain services (auth, astronauts, resources, logbook, species, trips, supplies) have typed API functions matching backend DTOs
+  2. All domain hooks wrap TanStack Query with proper query keys and mutation support
+  3. TypeScript types are correctly defined for all API request/response shapes
 **Plans**: TBD
+
+### Phase 16: Screen Integration
+**Goal**: Connect all existing screens to real API data via domain hooks, with proper loading/error states and design system compliance.
+**Depends on**: Phase 15 (domain hooks available)
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, UI-08, UI-09, UI-10, UI-11, UI-12, UI-13, UI-14, UI-15, UI-16
+**Success Criteria** (what must be TRUE):
+  1. Login/register screens consume useLogin/useRegister mutations with loading/error states
+  2. All list screens (resources, logbook, species, trips, supplies) display real paginated data with pull-to-refresh
+  3. All detail screens fetch and display real data via useQuery
+  4. All screens use design system tokens (useTheme, constants) with zero hardcoded values
+  5. All screens handle loading states with ActivityIndicator and user-friendly error messages
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 17: Error Handling & Offline
+**Goal**: Add error boundaries for graceful failure and offline detection with user feedback.
+**Depends on**: Phase 16 (screens integrated, errors can occur)
+**Requirements**: ERR-01, ERR-02, ERR-03, ERR-04, ERR-05, ERR-06
+**Success Criteria** (what must be TRUE):
+  1. All route files export ErrorBoundary for graceful error recovery
+  2. Root layout (app/_layout.tsx) has a catch-all ErrorBoundary for unhandled errors
+  3. OfflineBanner component appears when network is unavailable
+  4. Network errors display user-friendly "Check connection" messages
+  5. TanStack Query onlineManager pauses queries when offline and retries when reconnected
+**Plans**: TBD
+**UI hint**: yes
 
 ---
 
 ## Progress
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 1. Arquitectura y Diseño | v1.0 | 2/2 | Complete | 2026-04-02 |
-| 2. Diseño de Datos | v1.0 | 2/2 | Complete | 2026-04-03 |
-| 3. Diseño Móvil (Mockups) | v1.0 | 2/2 | Complete | 2026-04-03 |
-| 4. Design System y Estructura Visual | v1.0 | 3/3 | Complete | 2026-04-03 |
-| 5. Base de la App y Conexión API | v1.0 | 4/4 | Complete | 2026-04-03 |
-| 6. Refactorización de Estilos | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 7. Verificación de Design System | v1.0 | 2/2 | Complete | 2026-04-04 |
-| 8. API Setup y Estructura | v1.1 | 0/4 | Not started | - |
-| 9. Autenticación | v1.1 | 0/3 | Complete    | 2026-04-17 |
-| 10. Endpoints de Dominio | v1.1 | 0/5 | Complete    | 2026-04-17 |
-| 11. Offline Sync y Middleware | v1.1 | 0/3 | Not started | - |
-| 12. Documentación y Testing | v1.1 | 0/3 | Not started | - |
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 13. Auth Integration | 0/X | Not started | - |
+| 14. API Client Setup | 0/X | Not started | - |
+| 15. Domain Services + Hooks | 0/X | Not started | - |
+| 16. Screen Integration | 0/X | Not started | - |
+| 17. Error Handling & Offline | 0/X | Not started | - |
+
+---
+
+**Coverage**: 45/45 v1.2 requirements mapped ✓
+**Last updated**: 2026-04-27

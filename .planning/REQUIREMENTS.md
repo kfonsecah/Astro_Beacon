@@ -109,56 +109,56 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| AUTH-06 | — | Pending |
-| AUTH-07 | — | Pending |
-| AUTH-08 | — | Pending |
-| API-01 | — | Pending |
-| API-02 | — | Pending |
-| API-03 | — | Pending |
-| API-04 | — | Pending |
-| API-05 | — | Pending |
-| API-06 | — | Pending |
-| DOM-01 | — | Pending |
-| DOM-02 | — | Pending |
-| DOM-03 | — | Pending |
-| DOM-04 | — | Pending |
-| DOM-05 | — | Pending |
-| DOM-06 | — | Pending |
-| DOM-07 | — | Pending |
-| DOM-08 | — | Pending |
-| DOM-09 | — | Pending |
-| UI-01 | — | Pending |
-| UI-02 | — | Pending |
-| UI-03 | — | Pending |
-| UI-04 | — | Pending |
-| UI-05 | — | Pending |
-| UI-06 | — | Pending |
-| UI-07 | — | Pending |
-| UI-08 | — | Pending |
-| UI-09 | — | Pending |
-| UI-10 | — | Pending |
-| UI-11 | — | Pending |
-| UI-12 | — | Pending |
-| UI-13 | — | Pending |
-| UI-14 | — | Pending |
-| UI-15 | — | Pending |
-| UI-16 | — | Pending |
-| ERR-01 | — | Pending |
-| ERR-02 | — | Pending |
-| ERR-03 | — | Pending |
-| ERR-04 | — | Pending |
-| ERR-05 | — | Pending |
-| ERR-06 | — | Pending |
+| AUTH-01 | Phase 13 | Pending |
+| AUTH-02 | Phase 13 | Pending |
+| AUTH-03 | Phase 13 | Pending |
+| AUTH-04 | Phase 13 | Pending |
+| AUTH-05 | Phase 13 | Pending |
+| AUTH-06 | Phase 13 | Pending |
+| AUTH-07 | Phase 13 | Pending |
+| AUTH-08 | Phase 13 | Pending |
+| API-01 | Phase 14 | Pending |
+| API-02 | Phase 13 | Pending |
+| API-03 | Phase 13 | Pending |
+| API-04 | Phase 14 | Pending |
+| API-05 | Phase 13 | Pending |
+| API-06 | Phase 13 | Pending |
+| DOM-01 | Phase 15 | Pending |
+| DOM-02 | Phase 15 | Pending |
+| DOM-03 | Phase 15 | Pending |
+| DOM-04 | Phase 15 | Pending |
+| DOM-05 | Phase 15 | Pending |
+| DOM-06 | Phase 15 | Pending |
+| DOM-07 | Phase 15 | Pending |
+| DOM-08 | Phase 15 | Pending |
+| DOM-09 | Phase 15 | Pending |
+| UI-01 | Phase 16 | Pending |
+| UI-02 | Phase 16 | Pending |
+| UI-03 | Phase 16 | Pending |
+| UI-04 | Phase 16 | Pending |
+| UI-05 | Phase 16 | Pending |
+| UI-06 | Phase 16 | Pending |
+| UI-07 | Phase 16 | Pending |
+| UI-08 | Phase 16 | Pending |
+| UI-09 | Phase 16 | Pending |
+| UI-10 | Phase 16 | Pending |
+| UI-11 | Phase 16 | Pending |
+| UI-12 | Phase 16 | Pending |
+| UI-13 | Phase 16 | Pending |
+| UI-14 | Phase 16 | Pending |
+| UI-15 | Phase 16 | Pending |
+| UI-16 | Phase 16 | Pending |
+| ERR-01 | Phase 17 | Pending |
+| ERR-02 | Phase 17 | Pending |
+| ERR-03 | Phase 17 | Pending |
+| ERR-04 | Phase 17 | Pending |
+| ERR-05 | Phase 17 | Pending |
+| ERR-06 | Phase 17 | Pending |
 
 **Coverage:**
-- v1.2 requirements: 46 total
-- Mapped to phases: 0
-- Unmapped: 46 ⚠️
+- v1.2 requirements: 45 total
+- Mapped to phases: 45
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-27*
