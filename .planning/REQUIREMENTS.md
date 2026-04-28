@@ -1,168 +1,165 @@
-# Requirements: Astro_Beacon REST API
+# Requirements: Astro_Beacon
 
-**Defined:** 2026-04-16
+**Defined:** 2026-04-27
 **Core Value:** Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
 
-## v1.1 Requirements (This Milestone)
+## v1.2 Requirements (Integración API-Frontend)
 
-### API Foundation
+Requirements for API-Frontend integration milestone. Scope estricto: integrar pantallas existentes con endpoints existentes. NO crear endpoints nuevos, NO crear pantallas nuevas.
 
-- [ ] **API-01**: Project scaffold with Express v4 + TypeScript + Node.js 20
-- [ ] **API-02**: Layered architecture (routes, controllers, services, models)
-- [ ] **API-03**: MongoDB connection with Mongoose ODM
-- [ ] **API-04**: Global error handler with consistent response envelope
-- [ ] **API-05**: Environment configuration (.env for secrets)
-- [ ] **API-06**: Security middleware (helmet, cors, rate limiting)
-- [ ] **API-07**: Input validation middleware with Zod
-- [ ] **API-08**: Pagination helper for list endpoints
+### Authentication (AUTH)
 
-### Authentication
+- [ ] **AUTH-01**: User can login with email and password (integrate with POST /api/v1/auth/login)
+- [ ] **AUTH-02**: User can register with email and password (integrate with POST /api/v1/auth/register)
+- [ ] **AUTH-03**: JWT access token stored securely in expo-secure-store (not AsyncStorage)
+- [ ] **AUTH-04**: Refresh token stored securely for session persistence
+- [ ] **AUTH-05**: JWT token automatically attached to API requests via axios request interceptor
+- [ ] **AUTH-06**: Protected routes redirect unauthenticated users to login screen
+- [ ] **AUTH-07**: Token refresh flow handles 401 responses automatically via axios response interceptor
+- [ ] **AUTH-08**: After login, navigation stack replaced (router.replace) to prevent back to login
 
-- [ ] **AUTH-01**: User can register with email and password
-- [ ] **AUTH-02**: User can login and receive JWT access token
-- [ ] **AUTH-03**: Auth middleware validates JWT on protected routes
-- [ ] **AUTH-04**: Password hashing with bcrypt (minimum 12 rounds)
-- [ ] **AUTH-05**: Rate limiting on auth endpoints (5 attempts/15min)
+### API Client Setup (API)
 
-### Resources (Gestión de recursos)
+- [ ] **API-01**: TanStack Query provider (QueryClientProvider) setup in root layout (app/_layout.tsx)
+- [ ] **API-02**: Axios instance with request interceptor for JWT injection from Zustand store
+- [ ] **API-03**: Axios response interceptor for global error handling (401, 403, 400, 500)
+- [ ] **API-04**: Network detection with @react-native-community/netinfo for offline awareness
+- [ ] **API-05**: Environment-based API URL via EXPO_PUBLIC_API_URL
+- [ ] **API-06**: Zustand persist middleware to sync auth state with expo-secure-store
 
-- [ ] **RES-01**: User can create, read, update, delete resources
-- [ ] **RES-02**: User can record resource movements (income/expense)
-- [ ] **RES-03**: User can get resource alerts when below threshold
-- [ ] **RES-04**: Resource types: oxígeno, comida, agua, y otros definidos por usuario
-- [ ] **RES-05**: Resource movement history tracking
+### Domain Services & Hooks (DOM)
 
-### Species / Logbook (Bitácora de lo desconocido)
+- [ ] **DOM-01**: Auth service + hook (useLogin, useRegister, useRefreshToken)
+- [ ] **DOM-02**: Astronauts service + hook (useAstronautProfile, useAstronautStats)
+- [ ] **DOM-03**: Resources service + hook (useResources with pagination, useResourceById, useCreateResource, useConsumeResource, useResourceStats)
+- [ ] **DOM-04**: Logbook service + hook (useLogbookEntries with pagination, useLogbookEntryById, useCreateLogbookEntry)
+- [ ] **DOM-05**: Species service + hook (useSpecies with pagination, useSpeciesById, useCreateSpecies)
+- [ ] **DOM-06**: Trips service + hook (useTrips with pagination, useTripById, usePlanTrip, useStartTrip, useCompleteTrip)
+- [ ] **DOM-07**: Supplies service + hook (useSupplies, useNearbySupplies, useCollectSupply)
+- [ ] **DOM-08**: All services return TypeScript-typed data matching backend DTOs
+- [ ] **DOM-09**: All hooks use TanStack Query useQuery/useMutation with proper query keys
 
-- [ ] **SPEC-01**: User can create species entries with classification
-- [ ] **SPEC-02**: User can list and filter species by type
-- [ ] **SPEC-03**: User can mark species as dangerous/friendly
-- [ ] **LBK-01**: User can create logbook entries with photo
-- [ ] **LBK-02**: User can link logbook entry to species
-- [ ] **LBK-03**: User can narrate species (TTS endpoint for future)
+### Screen Integration (UI)
 
-### Astronaut (Profile)
+- [ ] **UI-01**: Login screen consumes useLogin mutation with loading/error states
+- [ ] **UI-02**: Register screen consumes useRegister mutation with loading/error states
+- [ ] **UI-03**: Home/Dashboard screen consumes useAstronautProfile + useResourceStats via useQuery
+- [ ] **UI-04**: Resources list screen consumes useResources with FlatList + pagination + pull-to-refresh
+- [ ] **UI-05**: Resource detail screen consumes useResourceById via useQuery
+- [ ] **UI-06**: Logbook list screen consumes useLogbookEntries with FlatList + pagination
+- [ ] **UI-07**: Logbook detail screen consumes useLogbookEntryById via useQuery
+- [ ] **UI-08**: Species list screen consumes useSpecies with FlatList + pagination
+- [ ] **UI-09**: Species detail screen consumes useSpeciesById via useQuery
+- [ ] **UI-10**: Trips list screen consumes useTrips with FlatList + pagination
+- [ ] **UI-11**: Trip detail screen consumes useTripById via useQuery
+- [ ] **UI-12**: Supplies list screen consumes useSupplies via useQuery
+- [ ] **UI-13**: Profile screen consumes useAstronautProfile via useQuery
+- [ ] **UI-14**: All screens handle loading states with ActivityIndicator using theme colors
+- [ ] **UI-15**: All screens handle error states with user-friendly messages (no raw API errors)
+- [ ] **UI-16**: All screens use design system (useTheme, constants, no hardcoded values)
 
-- [ ] **ASTR-01**: User can view own astronaut profile
-- [ ] **ASTR-02**: User can update astronaut information
-- [ ] **ASTR-03**: User can get dashboard stats (aggregated resource counts)
+### Error Handling & Offline (ERR)
 
-### Trips (Recursos y viajes)
+- [ ] **ERR-01**: ErrorBoundary export in all route files for graceful error recovery
+- [ ] **ERR-02**: Root layout (app/_layout.tsx) has catch-all ErrorBoundary
+- [ ] **ERR-03**: Offline detection shows OfflineBanner component when network unavailable
+- [ ] **ERR-04**: Network errors (no response) display user-friendly "Check connection" message
+- [ ] **ERR-05**: Form validation errors display per-field with clear messaging
+- [ ] **ERR-06**: TanStack Query onlineManager pauses queries when offline, retries when online
 
-- [ ] **TRIP-01**: User can create trip plan with destination
-- [ ] **TRIP-02**: User can start a trip (status: planned → active)
-- [ ] **TRIP-03**: User can end a trip (status: active → completed/aborted)
-- [ ] **TRIP-04**: User can view active and past trips
-- [ ] **TRIP-05**: Trip tracks oxygen consumption (to be integrated with frontend)
+## v2 Requirements (Deferred)
 
-### Supplies (NASA Suministros)
+Features acknowledged but deferred to future milestones.
 
-- [ ] **SUPP-01**: User can view available supply drops with GPS location
-- [ ] **SUPP-02**: User can collect supply drop
-- [ ] **SUPP-03**: User can view nearby supplies
-- [ ] **SUPP-04**: Supplies have status: available, collected, expired
+### Advanced Integration
 
-### Offline Sync Support
+- **INT-01**: Optimistic updates for mutations (toggle status, increment/decrement)
+- **INT-02**: Refresh on screen focus (data stays fresh when navigating back)
+- **INT-03**: Haptic feedback on successful mutations (expo-haptics)
+- **INT-04**: Cancel in-flight requests on component unmount
 
-- [ ] **SYNC-01**: Endpoints include lastModified timestamps
-- [ ] **SYNC-02**: Delta sync endpoint for getting changes since timestamp
-- [ ] **SYNC-03**: Bulk sync endpoint for batch operations
+### Offline Support
 
-## v1.2 Requirements (Future)
+- **OFF-01**: Queue failed mutations when offline, flush when reconnected
+- **OFF-02**: Cache API responses for offline viewing (TanStack Query cache)
 
-### AI Classification
-- **AI-01**: Species photo classification using external AI API
-- **AI-02**: User can verify/correct AI classification
+### Enhancements
 
-### Enhanced Features
-- **PUSH-01**: Push notifications for low resource alerts
-- **GPS-01**: Real-time GPS tracking during trips
-- **EXP-01**: Data export for offline viewing
+- **ENH-01**: Image upload for species/avatar with FormData
+- **ENH-02**: Expo Router data loaders for web version (SDK 55+)
 
 ## Out of Scope
 
+Explicitly excluded. Documented to prevent scope creep.
+
 | Feature | Reason |
 |---------|--------|
-| Real-time WebSocket updates | Not required by spec, polling is sufficient |
-| GraphQL API | REST is simpler for mobile, adds complexity without benefit |
-| Multi-user/tenant | Single astronaut per deployment |
-| Role-based access control | Single user = single role |
-| Admin panel | Not in course requirements |
+| Creating new backend endpoints | Use existing Phase 9-10 endpoints only (scope estricto) |
+| Creating new screens | Integrate existing screens only (scope estricto) |
+| Redux for server state | TanStack Query handles caching/updates better |
+| Polling/long-polling for real-time | Not needed for this app; WebSocket/SSE if needed later |
+| Manual useEffect+fetch in screens | Use TanStack Query useQuery instead |
+| Storing JWT in AsyncStorage | Security risk; use expo-secure-store (encrypted) |
+| Showing raw API error messages | Bad UX; map to user-friendly messages |
+| Adding new features | Milestone focus is integration only |
 
 ## Traceability
 
-### Phase 8: API Setup y Estructura
+Which phases cover which requirements. Updated during roadmap creation.
 
-| Requirement | Description | Status |
-|-------------|-------------|--------|
-| API-01 | Project scaffold with Express v4 + TypeScript | ✓ Complete (Plan 08-01) |
-| API-02 | Layered architecture (routes, controllers, services, models) | Pending |
-| API-03 | MongoDB connection with Mongoose ODM | Pending |
-| API-04 | Global error handler with consistent response envelope | Pending |
-| API-05 | Environment configuration (.env for secrets) | ✓ Complete (Plan 08-01) |
-| API-08 | Pagination helper for list endpoints | Pending |
-
-### Phase 9: Autenticación
-
-| Requirement | Description | Status |
-|-------------|-------------|--------|
-| AUTH-01 | User can register with email and password | Pending |
-| AUTH-02 | User can login and receive JWT access token | Pending |
-| AUTH-03 | Auth middleware validates JWT on protected routes | Pending |
-| AUTH-04 | Password hashing with bcrypt (minimum 12 rounds) | Pending |
-| AUTH-05 | Rate limiting on auth endpoints (5 attempts/15min) | Pending |
-| API-06 | Security middleware (helmet, cors, rate limiting) | Pending |
-| API-07 | Input validation middleware with Zod | Pending |
-
-### Phase 10: Endpoints de Dominio
-
-| Requirement | Description | Status |
-|-------------|-------------|--------|
-| RES-01 | CRUD operations for resources | Pending |
-| RES-02 | Record resource movements (income/expense) | Pending |
-| RES-03 | Resource alerts when below threshold | Pending |
-| RES-04 | Resource types: oxígeno, comida, agua, otros | Pending |
-| RES-05 | Resource movement history tracking | Pending |
-| SPEC-01 | Create species entries with classification | Pending |
-| SPEC-02 | List and filter species by type | Pending |
-| SPEC-03 | Mark species as dangerous/friendly | Pending |
-| LBK-01 | Create logbook entries with photo | Pending |
-| LBK-02 | Link logbook entry to species | Pending |
-| LBK-03 | Narrate species (TTS endpoint for future) | Pending |
-| ASTR-01 | View own astronaut profile | Pending |
-| ASTR-02 | Update astronaut information | Pending |
-| ASTR-03 | Get dashboard stats (aggregated resource counts) | Pending |
-| TRIP-01 | Create trip plan with destination | Pending |
-| TRIP-02 | Start a trip (status: planned → active) | Pending |
-| TRIP-03 | End a trip (status: active → completed/aborted) | Pending |
-| TRIP-04 | View active and past trips | Pending |
-| TRIP-05 | Trip tracks oxygen consumption | Pending |
-| SUPP-01 | View available supply drops with GPS location | Pending |
-| SUPP-02 | Collect supply drop | Pending |
-| SUPP-03 | View nearby supplies | Pending |
-| SUPP-04 | Supplies have status: available, collected, expired | Pending |
-| SYNC-01 | Endpoints include lastModified timestamps | Pending |
-
-### Phase 11: Offline Sync y Middleware
-
-| Requirement | Description | Status |
-|-------------|-------------|--------|
-| SYNC-02 | Delta sync endpoint for getting changes since timestamp | Pending |
-| SYNC-03 | Bulk sync endpoint for batch operations | Pending |
-
-### Phase 12: Documentación y Testing
-
-| Requirement | Description | Status |
-|-------------|-------------|--------|
-| DOC-01 | API documentation (OpenAPI/Swagger) | Pending |
-| TEST-01 | Unit tests for auth endpoints | Pending |
-| TEST-02 | Unit tests for core domain services | Pending |
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| AUTH-01 | — | Pending |
+| AUTH-02 | — | Pending |
+| AUTH-03 | — | Pending |
+| AUTH-04 | — | Pending |
+| AUTH-05 | — | Pending |
+| AUTH-06 | — | Pending |
+| AUTH-07 | — | Pending |
+| AUTH-08 | — | Pending |
+| API-01 | — | Pending |
+| API-02 | — | Pending |
+| API-03 | — | Pending |
+| API-04 | — | Pending |
+| API-05 | — | Pending |
+| API-06 | — | Pending |
+| DOM-01 | — | Pending |
+| DOM-02 | — | Pending |
+| DOM-03 | — | Pending |
+| DOM-04 | — | Pending |
+| DOM-05 | — | Pending |
+| DOM-06 | — | Pending |
+| DOM-07 | — | Pending |
+| DOM-08 | — | Pending |
+| DOM-09 | — | Pending |
+| UI-01 | — | Pending |
+| UI-02 | — | Pending |
+| UI-03 | — | Pending |
+| UI-04 | — | Pending |
+| UI-05 | — | Pending |
+| UI-06 | — | Pending |
+| UI-07 | — | Pending |
+| UI-08 | — | Pending |
+| UI-09 | — | Pending |
+| UI-10 | — | Pending |
+| UI-11 | — | Pending |
+| UI-12 | — | Pending |
+| UI-13 | — | Pending |
+| UI-14 | — | Pending |
+| UI-15 | — | Pending |
+| UI-16 | — | Pending |
+| ERR-01 | — | Pending |
+| ERR-02 | — | Pending |
+| ERR-03 | — | Pending |
+| ERR-04 | — | Pending |
+| ERR-05 | — | Pending |
+| ERR-06 | — | Pending |
 
 **Coverage:**
-- v1.1 requirements: 35 total (API: 8, Auth: 5, Domain: 22)
-- Mapped to phases: 35
-- Unmapped: 0 ✓
+- v1.2 requirements: 46 total
+- Mapped to phases: 0
+- Unmapped: 46 ⚠️
 
 ---
-*Requirements defined: 2026-04-16*
-*Last updated: 2026-04-16 — Roadmap v1.1 created with phase traceability*
+*Requirements defined: 2026-04-27*
+*Last updated: 2026-04-27 after initial definition*
