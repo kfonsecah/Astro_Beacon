@@ -28,8 +28,12 @@
   3. JWT and refresh tokens are stored securely in expo-secure-store (not accessible via unencrypted storage)
   4. Unauthenticated users are redirected to login screen when accessing protected routes
   5. Expired JWTs are automatically refreshed via axios interceptor without user intervention
-**Plans**: TBD
+**Plans**: 2 plans
 **UI hint**: yes
+
+Plans:
+- [ ] 13-01-PLAN.md — Update auth store with persist middleware + register screen (AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-08, API-06)
+- [ ] 13-02-PLAN.md — Update API client with refresh interceptor + protected routes (AUTH-05, AUTH-06, AUTH-07, API-02, API-03, API-05)
 
 ### Phase 14: API Client Setup
 **Goal**: Configure TanStack Query for server state management and network detection for offline awareness.
@@ -80,9 +84,9 @@
 
 ## Progress
 
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 13. Auth Integration | 0/X | Not started | - |
+| Phase | Plans | Status | Completed |
+|-------|-------|--------|-----------|
+| 13. Auth Integration | 2/2 | Planned | - |
 | 14. API Client Setup | 0/X | Not started | - |
 | 15. Domain Services + Hooks | 0/X | Not started | - |
 | 16. Screen Integration | 0/X | Not started | - |
