@@ -1,748 +1,545 @@
-# Feature Landscape: Astro Beacon REST API
+# Feature Landscape: API-Frontend Integration
 
-**Domain:** Planetary exploration survival app — REST API backend
-**Researched:** 2026-04-16
-**Confidence:** HIGH
-
-## Executive Summary
-
-This API serves a single-astronaut survival mobile app on an unknown planet. The astronaut must track resources (O2, water, food), log discoveries in a bitácora, identify species with AI, manage exploration trips with oxygen budgets, and collect NASA supply drops via GPS. The API must support **offline-first** mobile behavior where the app works disconnected and syncs when reconnected.
-
-**Critical insight:** This is a **single-user system** — one astronaut per installation. User isolation is needed for session management, but most queries are `WHERE astronautId = currentUser`. This simplifies authorization but means every entity has a hard dependency on the authenticated session.
+**Domain:** React Native / Expo app integrating with Node.js/Express REST API  
+**Researched:** 2026-04-27  
+**Confidence:** HIGH — Based on TanStack Query v5 docs, Expo docs (2026), and multiple 2025-2026 community articles
 
 ---
 
-## 1. Authentication Features
+## Table Stakes
 
-### Table Stakes (Must Have)
+Features users expect when a mobile app connects to a backend API. Missing = app feels broken.
 
-| Feature | Why Expected | Complexity | Implementation Notes |
-|---------|--------------|------------|---------------------|
-| **User Registration** | Course requirement: "El sistema debe implementar seguridad" | Low | Email/password, returns JWT immediately (auto-login pattern) |
-| **Login (JWT Token)** | Course requirement: session-based auth | Low | Returns access token + optional refresh token |
-| **Token Refresh** | Prevent frequent re-logins during active sessions | Medium | Silent refresh before expiry, sliding expiration |
-| **Session Expiration** | Course requirement: "sesión debe expirar tras período de inactividad" | Medium | 15-30 min inactivity timeout, server-side session tracking |
-| **Password Reset Flow** | Industry standard, defensive | Medium | Email-based reset link with expiry token |
-| **Logout (Token Invalidation)** | Security best practice | Low | Blacklist refresh token or mark session inactive |
-
-### Differentiators (Nice to Have)
-
-| Feature | Value Proposition | Complexity | When to Build |
-|---------|-------------------|------------|---------------|
-| **OAuth2 Social Login** | Faster onboarding (Google, Apple) | Medium | If supporting multiple users later |
-| **2FA/MFA** | Enhanced security | High | Out of scope for single-user app |
-| **Login Activity Log** | Audit trail for security | Low | Nice for defense demonstration |
-
-### Anti-Features (Avoid)
-
-| Anti-Feature | Why Avoid | Instead |
-|--------------|-----------|---------|
-| **Session cookies (HTTP-only)** | Mobile apps don't handle cookies well, JWT in headers is standard | JWT Bearer tokens in Authorization header |
-| **Role-based access control (RBAC)** | Single user = single role ("astronaut") | User ID filtering on all queries |
-| **API key authentication** | Designed for server-to-server, not mobile-to-server | JWT only |
-
-### Authentication Endpoint Specifications
-
-```
-POST /api/v1/auth/register
-  Body: { email, password, name }
-  Response: { success, data: { user, token, refreshToken } }
-  Notes: Auto-login after registration, no email verification (MVP)
-
-POST /api/v1/auth/login
-  Body: { email, password }
-  Response: { success, data: { user, token, refreshToken, expiresIn } }
-  Notes: Token typically 1h, refresh token 7d
-
-POST /api/v1/auth/refresh
-  Body: { refreshToken }
-  Response: { success, data: { token, refreshToken, expiresIn } }
-  Notes: Issues new token pair, invalidates old refresh token
-
-POST /api/v1/auth/logout
-  Headers: Authorization: Bearer <token>
-  Response: { success, message: "Logged out" }
-  Notes: Invalidates refresh token in database
-
-POST /api/v1/auth/forgot-password
-  Body: { email }
-  Response: { success, message: "Reset email sent" }
-  Notes: Generates reset token, sends email (or logs to console in dev)
-
-POST /api/v1/auth/reset-password
-  Body: { resetToken, newPassword }
-  Response: { success, data: { user, token } }
-  Notes: Reset token expires in 1h
-
-GET /api/v1/auth/me
-  Headers: Authorization: Bearer <token>
-  Response: { success, data: { user } }
-  Notes: Returns current astronaut profile
-```
-
-### Feature Dependencies
-
-```
-User Registration → Login → Token Storage (mobile)
-Login → Token Refresh → Session Expiration Check
-Forgot Password → Reset Password → Login
-```
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| **TanStack Query for server state** | Industry standard 2025-2026; eliminates manual loading/error/cache logic | Low (once set up) | Replaces useEffect+fetch boilerplate. Provides `useQuery`, `useMutation`, automatic caching, background refetch, retry logic. |
+| **Axios with interceptors** | Global auth token injection, centralized error handling | Low | Interceptors add JWT to all requests. Response interceptor handles 401 → redirect to login. |
+| **Loading states in screens** | Users need feedback during API calls | Low | Use `isLoading`, `isFetching` from TanStack Query. Show `ActivityIndicator` or skeleton screens. |
+| **Error display in UI** | Users need to know what went wrong | Medium | Per-field errors for forms. Toast/Alert for global errors (401, 500). Network error detection via `!error.response`. |
+| **Login/Register form submission** | Core auth flow required for all features | Medium | `useMutation` for POST `/api/v1/auth/register` and `/api/v1/auth/login`. Navigate to `(app)` on success. Store JWT in `expo-secure-store`. |
+| **Protected route navigation** | Unauthenticated users shouldn't access app screens | Medium | Use Expo Router `Stack.Protected` or custom auth context with `useAuth()` hook. Redirect to `(auth)/login` if no valid token. |
+| **List views with FlatList** | Standard pattern for displaying collections (resources, species, trips, etc.) | Low | Use `useQuery` with query key like `['resources', page]`. FlatList with `renderItem`, `keyExtractor`, `onEndReached` for pagination. |
+| **Detail views with data fetching** | Tapping an item shows its details | Low | `useQuery` with ID in query key: `['resource', id]`. Fetch from `/api/v1/resources/:id`. Handle loading/error states. |
+| **Pull-to-refresh** | Users expect to swipe down to reload data | Low | Use React Native `RefreshControl` with TanStack Query's `refetch()`. Set `refreshing={isRefetching}`. |
+| **Pagination for list endpoints** | Backend returns paginated results (`page`, `limit`, `totalPages`) | Medium | Backend Roadmap confirms pagination support. Use `onEndReached` + page state. TanStack Query `useInfiniteQuery` is an alternative. |
+| **Form validation before submit** | Prevent invalid data from reaching API | Low | Use Zod (already in backend) or Formik + Yup. Validate email format, required fields, password strength. |
+| **Navigation after mutation** | After creating/updating, navigate to appropriate screen | Low | `router.replace()` for login (prevents back to login). `router.back()` for create forms. `router.push('/detail/:id')` after creating resource. |
+| **Token refresh flow** | JWT expires; app should refresh silently | Medium | Axios response interceptor catches 401, calls `/api/v1/auth/refresh`, retries original request with new token. If refresh fails → logout. |
+| **Environment-based API URL** | Different URLs for dev/staging/prod | Low | Use `EXPO_PUBLIC_API_URL` in `.env`. For physical devices, use local network IP (e.g., `http://192.168.x.x:3000`). |
 
 ---
 
-## 2. Domain Endpoints
+## Differentiators
 
-### 2.1 Astronaut (User Profile)
+Features that set this integration apart. Not expected, but valued.
 
-**Purpose:** Own astronaut profile, track base location and status.
-
-#### Table Stakes
-
-| Endpoint | Method | Purpose | Complexity |
-|----------|--------|---------|------------|
-| Get own profile | GET | Fetch astronaut data | Low |
-| Update profile | PATCH | Update name, base location | Low |
-| Get activity summary | GET /stats | Dashboard metrics | Medium |
-
-```
-GET /api/v1/astronauts/me
-  Response: { id, name, email, status, currentPlanet, baseCampLocation, lastActiveAt }
-  Notes: All other astronaut endpoints are /me, no /astronauts/:id
-
-PATCH /api/v1/astronauts/me
-  Body: { name?, currentPlanet?, baseCampLocation? }
-  Response: { success, data: { astronaut } }
-
-GET /api/v1/astronauts/me/stats
-  Response: {
-    totalDiscoveries: number,
-    totalTrips: number,
-    resourcesCollected: number,
-    oxygenConsumed: number,
-    survivalDays: number
-  }
-  Notes: Aggregated for dashboard display
-```
-
-#### Differentiators
-
-| Endpoint | Value Proposition | Complexity |
-|----------|-------------------|------------|
-| Update avatar | Personalization | Low |
-| Update status (emergency mode) | Course requirement: status field | Low |
-| Export all data (GDPR-style) | Data ownership | Medium |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| **Optimistic updates for mutations** | UI updates instantly; feels faster than waiting for server | Medium | TanStack Query `useMutation` with `onMutate` (snapshot), `onError` (rollback), `onSettled` (invalidate). Good for toggling resource status, updating astronaut profile. |
+| **Refresh on screen focus** | Data stays fresh when user navigates back to a screen | Low | Use `useFocusEffect` from `@react-navigation/native` + `queryClient.refetchQueries()`. Skip first mount. TanStack Query docs provide hook: `useRefreshOnFocus()`. |
+| **Offline-aware error handling** | Detect network status and queue mutations | High | Use `@react-native-community/netinfo` to detect connectivity. Queue failed mutations when offline, flush when reconnected. Phase 11 (Offline Sync) will handle this more comprehensively. |
+| **Expo Router data loaders (web)** | Server-side data fetching for web version | Low (web only) | Export `loader` function in route file. Use `useLoaderData()` in component. Only works for web SDK 55+. Native uses TanStack Query. |
+| **Cancel in-flight requests** | Prevent race conditions when user navigates quickly | Low | TanStack Query cancels queries automatically on unmount. For manual fetch, use `AbortController`. Axios supports cancel tokens. |
+| **Haptic feedback on actions** | Tactile confirmation for creating/updating resources | Low | Use `expo-haptics` on successful mutations. Already in project constraints. |
 
 ---
 
-### 2.2 Resources (Inventory Management)
+## Anti-Features
 
-**Purpose:** Track survival resources (O2, water, food, medical, equipment). Must generate alerts when below threshold.
+Features to explicitly NOT build in this milestone.
 
-#### Table Stakes
-
-| Endpoint | Method | Purpose | Complexity |
-|----------|--------|---------|------------|
-| List all resources | GET | Dashboard view | Low |
-| Get single resource | GET /:id | Detail view | Low |
-| Update resource amount | PATCH /:id | Add/subtract quantities | Medium |
-| Get resource history | GET /:id/movements | Income/expense log | Low |
-| Add resource movement | POST /:id/movements | Record income or expense | Low |
-
-```
-GET /api/v1/resources
-  Query: ?includeCritical=true
-  Response: { success, data: { resources: Resource[], criticalAlerts: Resource[] } }
-  Notes: Returns all resources, flagged if below threshold
-
-GET /api/v1/resources/:id
-  Response: { success, data: { resource } }
-
-PATCH /api/v1/resources/:id
-  Body: { currentAmount }
-  Response: { success, data: { resource, previousAmount } }
-  Notes: Direct set, prefer movements for income/expense
-
-POST /api/v1/resources/:id/movements
-  Body: { type: "income" | "expense", amount: number, reason: string }
-  Response: { success, data: { movement, resource: updatedResource } }
-  Notes: Automatically updates resource.currentAmount
-
-GET /api/v1/resources/:id/movements
-  Query: ?page=1&limit=20&type=expense
-  Response: { success, data: { movements }, pagination }
-  Notes: Paginated history for detail screen
-
-GET /api/v1/resources/alerts
-  Response: { success, data: { alerts: Resource[] } }
-  Notes: Resources where currentAmount < minAlertThreshold
-```
-
-#### Resource Movement Types
-
-| Type | Trigger | Example |
-|------|---------|---------|
-| income | Resource gained | NASA drop collected, food found |
-| expense | Resource consumed | Oxygen used during trip, water drunk |
-| adjustment | Manual correction | Inventory recount, supply error fixed |
-| transfer | Resource moved | Water transferred between containers |
-
-#### Differentiators
-
-| Endpoint | Value Proposition | Complexity |
-|----------|-------------------|------------|
-| Bulk update resources | NASA drop collection in one call | Medium |
-| Low stock notifications (push) | Alert astronaut proactively | Medium |
-| Consumption rate calculation | Predict when O2 runs out | Medium |
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| **Redux for server state** | Overkill for API data; TanStack Query handles caching/updates better | Use TanStack Query for server state, Zustand (if needed) for client state |
+| **Manual useEffect+fetch in every screen** | Boilerplate hell; no caching; hard to handle errors consistently | Centralize with TanStack Query `useQuery` |
+| **Storing JWT in AsyncStorage** | Not encrypted; vulnerable to theft | Use `expo-secure-store` (encrypted) |
+| **Showing raw error messages from API** | Bad UX; might expose internals | Map error codes to user-friendly messages. Use interceptor to sanitize. |
+| **Polling/long-polling for real-time** | Inefficient; drains battery | Not needed for this app. If real-time needed later, use WebSockets/SSE. |
+| **Creating new backend endpoints** | Out of scope for this milestone | Use existing endpoints from Phases 9-10 |
+| **Adding new screens** | Out of scope for this milestone | Integrate existing screens only |
 
 ---
 
-### 2.3 Species / Bitácora (Discovery Logbook)
-
-**Purpose:** Catalog species discovered on the planet. AI classification of photos, danger level tracking, audio narration.
-
-#### Table Stakes
-
-| Endpoint | Method | Purpose | Complexity |
-|----------|--------|---------|------------|
-| List all species | GET | Bestiary screen | Low |
-| Get single species | GET /:id | Detail view | Low |
-| Create entry (with photo) | POST | Add discovery | High |
-| Update species | PATCH /:id | Edit classification, notes | Low |
-| Identify from photo | POST /identify | AI classification | High |
-| Get nearby species | GET /nearby | Map integration | Medium |
+## Feature Dependencies
 
 ```
-GET /api/v1/species
-  Query: ?classification=animal&dangerLevel=dangerous&page=1&limit=20
-  Response: { success, data: { species }, pagination }
-  Notes: Filter by classification (animal, plant, resource, microorganism, other)
-
-GET /api/v1/species/:id
-  Response: { success, data: { species: { id, name, classification, dangerLevel, description, imageUrl, discoveredAt, aiConfidence, location } } }
-
-POST /api/v1/species
-  Headers: Content-Type: multipart/form-data
-  Body: { name?, description, classification?, dangerLevel?, image: file, location? }
-  Response: { success, data: { species } }
-  Notes: File upload for photo, optional AI classification on server side
-
-PATCH /api/v1/species/:id
-  Body: { name?, description?, classification?, dangerLevel?, notes? }
-  Response: { success, data: { species } }
-  Notes: Manual override of AI classification (course requirement: user can correct AI)
-
-POST /api/v1/species/identify
-  Headers: Content-Type: multipart/form-data
-  Body: { image: file }
-  Response: { success, data: { classification, dangerLevel, confidence, suggestions } }
-  Notes: AI classification endpoint, returns results without saving
-
-GET /api/v1/species/nearby
-  Query: ?lat=-33.8688&lng=151.2093&radius=500
-  Response: { success, data: { species: Species[] } }
-  Notes: For map overlay, return species near current location
-
-GET /api/v1/species/export
-  Response: { success, data: { downloadUrl } }
-  Notes: Export bitácora as JSON or PDF for offline viewing
-```
-
-#### Classification Enum
-
-| Value | Description | Example |
-|-------|-------------|---------|
-| animal | Living creatures that move | Alien insects, predators |
-| plant | Stationary life forms | Crystalline flora, moss |
-| resource | Natural resources | Minerals, water deposits |
-| microorganism | Microscopic life | Bacteria, spores |
-| other | Unclassified | Anomalies, unknown phenomena |
-| unknown | Pending classification | Awaiting AI or manual classification |
-
-#### Danger Level Enum
-
-| Value | Description | UI Color |
-|-------|-------------|----------|
-| friendly | Safe to approach | Green |
-| cautious | Approach with care | Yellow |
-| dangerous | Hazardous, avoid | Orange |
-| lethal | Deadly on contact | Red |
-
-#### Differentiators
-
-| Endpoint | Value Proposition | Complexity |
-|----------|-------------------|------------|
-| Batch create entries | Upload multiple photos at once | Medium |
-| Species comparison | Compare two species side-by-side | Medium |
-| Species timeline | View discoveries chronologically | Low |
-| Audio narration (TTS) | Generate audio description | Low (offload to client with expo-speech) |
-
----
-
-### 2.4 Logbook Entries (Discovery Journal)
-
-**Purpose:** Detailed journal entries linking to species, with photos, descriptions, and GPS locations.
-
-#### Table Stakes
-
-| Endpoint | Method | Purpose | Complexity |
-|----------|--------|---------|------------|
-| List entries | GET | Journal feed | Low |
-| Get entry | GET /:id | Entry detail | Low |
-| Create entry | POST | New journal entry | Medium |
-| Update entry | PATCH /:id | Edit entry | Low |
-| Delete entry | DELETE /:id | Remove entry | Low |
-
-```
-GET /api/v1/logbook
-  Query: ?page=1&limit=20&speciesId=xxx&from=2026-01-01&to=2026-04-16
-  Response: { success, data: { entries }, pagination }
-  Notes: Chronological feed, filterable by species or date range
-
-GET /api/v1/logbook/:id
-  Response: { success, data: { entry: { id, description, imageUrl, location, species, createdAt, syncedAt } } }
-
-POST /api/v1/logbook
-  Headers: Content-Type: multipart/form-data
-  Body: { description, image: file?, speciesId?, location: { lat, lng } }
-  Response: { success, data: { entry } }
-  Notes: Creates entry, optionally links to existing species
-
-PATCH /api/v1/logbook/:id
-  Body: { description?, image?: file, speciesId?, location? }
-  Response: { success, data: { entry } }
-  Notes: Full or partial update
-
-DELETE /api/v1/logbook/:id
-  Response: { success, message: "Entry deleted" }
-  Notes: Soft delete or hard delete based on sync requirements
-```
-
-#### Offline Sync Support (Critical)
-
-```
-POST /api/v1/logbook/sync
-  Body: { entries: [{ localId, description, imageUri, location, speciesId?, createdAt }] }
-  Response: { success, data: { synced: [{ localId, serverId }], failed: [...] } }
-  Notes: Bulk sync endpoint for offline-created entries
+Auth Context (useAuth hook)
+├── Login Screen (useMutation for /auth/login)
+├── Register Screen (useMutation for /auth/register)
+└── Token Refresh (interceptor for /auth/refresh)
+    │
+    └── All Domain Screens (require JWT in Authorization header)
+        │
+        ├── Home/Dashboard (useQuery for astronaut profile + stats)
+        ├── Resources List (useQuery with pagination)
+        │   └── Resource Detail (useQuery by ID)
+        │       └── Create/Edit Resource (useMutation POST/PUT)
+        ├── Species List (useQuery with pagination)
+        │   └── Species Detail (useQuery by ID)
+        │       └── Create Species (useMutation POST)
+        ├── Logbook List (useQuery with pagination)
+        │   └── Logbook Detail (useQuery by ID)
+        │       └── Create Logbook Entry (useMutation POST)
+        ├── Trips List (useQuery with pagination)
+        │   └── Trip Detail (useQuery by ID)
+        │       └── Create/Start/Complete Trip (useMutation POST/PATCH)
+        ├── Supplies List (useQuery)
+        │   └── Collect Supply (useMutation POST)
+        └── Profile Screen (useQuery for astronaut data)
+            └── Update Profile (useMutation PATCH)
 ```
 
 ---
 
-### 2.5 Trips (Exploration Management)
+## MVP Recommendation
 
-**Purpose:** Track exploration trips, oxygen consumption during EVA, resource collection.
+Prioritize integration of these screens/features first:
 
-#### Table Stakes
+1. **Auth integration (login + register)** — Foundation for everything else. Without auth, no domain data can be fetched.
+2. **Home/Dashboard screen** — Shows astronaut stats. Uses `useQuery` for `/api/v1/astronauts/me`.
+3. **Resources list + detail + create** — Core survival feature. Demonstrates list/detail/create pattern for all domain entities.
+4. **One additional domain screen (e.g., Species)** — Proves pattern works across entities.
 
-| Endpoint | Method | Purpose | Complexity |
-|----------|--------|---------|------------|
-| List trips | GET | Trip history | Low |
-| Get trip | GET /:id | Trip detail | Low |
-| Start trip | POST | Begin exploration | Medium |
-| End trip | PATCH /:id/end | Complete or abort trip | Medium |
-| Update location | PATCH /:id/location | GPS ping during trip | Medium |
-| Log oxygen consumed | POST /:id/oxygen | Record O2 usage | Low |
-
-```
-GET /api/v1/trips
-  Query: ?status=active&page=1&limit=10
-  Response: { success, data: { trips }, pagination }
-  Notes: Include trip stats (oxygen consumed, distance, duration)
-
-GET /api/v1/trips/:id
-  Response: { success, data: { trip: { id, status, destination, startedAt, oxygenBudget, oxygenConsumed, resourcesCollected, waypoints } } }
-
-POST /api/v1/trips
-  Body: { destination: { lat, lng }, oxygenBudget: number, notes? }
-  Response: { success, data: { trip } }
-  Notes: Creates trip with status="planned", astronaut must manually start
-
-POST /api/v1/trips/:id/start
-  Body: { currentLocation: { lat, lng } }
-  Response: { success, data: { trip } }
-  Notes: Changes status to "active", starts tracking
-
-POST /api/v1/trips/:id/oxygen
-  Body: { amount: number, reason: string }
-  Response: { success, data: { trip, remainingBudget } }
-  Notes: Log O2 consumption, auto-calculates remaining
-
-PATCH /api/v1/trips/:id/waypoint
-  Body: { location: { lat, lng } }
-  Response: { success, data: { trip } }
-  Notes: GPS ping to track route
-
-PATCH /api/v1/trips/:id/end
-  Body: { status: "completed" | "aborted", finalLocation: { lat, lng }, collectedResources?: [...] }
-  Response: { success, data: { trip, summary: { totalO2Consumed, totalDistance, resourcesGathered } } }
-  Notes: Finalizes trip, calculates stats, triggers resource income
-
-GET /api/v1/trips/active
-  Response: { success, data: { trip: Trip | null } }
-  Notes: Get currently active trip (for resume functionality)
-```
-
-#### Trip Status Enum
-
-| Status | Description | Transitions To |
-|--------|-------------|----------------|
-| planned | Trip created, not started | active, aborted |
-| active | Astronaut is exploring | completed, aborted |
-| completed | Trip finished successfully | (terminal) |
-| aborted | Trip ended early (emergency) | (terminal) |
-
-#### Differentiators
-
-| Endpoint | Value Proposition | Complexity |
-|----------|-------------------|------------|
-| Trip route replay | View completed trip on map | Medium |
-| Oxygen forecast | Predict O2 at current consumption rate | Medium |
-| Auto-abort on critical O2 | Safety feature, aborts if O2 < 10% | Medium |
+Defer to later phases:
+- **Optimistic updates** — Nice-to-have; implement after basic mutations work
+- **Offline queue** — Phase 11 (Offline Sync) will handle this comprehensively
+- **Complex error boundaries** — Add after identifying common error patterns
 
 ---
 
-### 2.6 Supply Drops (NASA Resource Packages)
+## Integration Patterns (Answer to Research Question)
 
-**Purpose:** GPS-tracked NASA supply drops that astronaut must collect.
+### 1. Data Fetching in Screens
 
-#### Table Stakes
-
-| Endpoint | Method | Purpose | Complexity |
-|----------|--------|---------|------------|
-| List supply drops | GET | Map view | Low |
-| Get supply drop | GET /:id | Drop detail | Low |
-| Update drop status | PATCH /:id/collect | Mark as collected | Low |
-| Get nearby drops | GET /nearby | Drops within radius | Medium |
-
-```
-GET /api/v1/supplies
-  Query: ?status=delivered&page=1&limit=20
-  Response: { success, data: { supplies }, pagination }
-  Notes: Filter by status (pending, delivered, collected, expired)
-
-GET /api/v1/supplies/nearby
-  Query: ?lat=-33.8688&lng=151.2093&radius=5000
-  Response: { success, data: { supplies: SupplyDrop[] } }
-  Notes: For map overlay, sorted by distance
-
-GET /api/v1/supplies/:id
-  Response: { success, data: { supply: { id, location, status, contents: ResourceItem[], droppedAt, expiresAt } } }
-
-PATCH /api/v1/supplies/:id/collect
-  Body: { collectedResources: [{ resourceId, amount }] }
-  Response: { success, data: { supply, movements: ResourceMovement[] } }
-  Notes: Marks drop as collected, creates resource income movements
-```
-
-#### Supply Drop Status Enum
-
-| Status | Description |
-|--------|-------------|
-| pending | Drop incoming, not yet landed |
-| delivered | Drop has landed, awaiting collection |
-| collected | Astronaut has collected |
-| expired | Drop has expired (uncollected) |
-
-#### Supply Contents Structure
+**Recommended approach: TanStack Query `useQuery`**
 
 ```typescript
-interface SupplyContents {
-  resourceId: string;
-  resourceName: string;
-  amount: number;
-  unit: string;
+// services/astronautService.ts
+import api from './api'; // Axios instance with interceptors
+
+export const fetchAstronautProfile = async () => {
+  const response = await api.get('/api/v1/astronauts/me');
+  return response.data; // Axios interceptor returns response.data automatically
+};
+
+// screens/UserProfile.tsx
+import { useQuery } from '@tanstack/react-query';
+import { fetchAstronautProfile } from '../../services/astronautService';
+
+export default function UserProfileScreen() {
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
+    queryKey: ['astronaut', 'me'],
+    queryFn: fetchAstronautProfile,
+  });
+
+  if (isLoading) return <ActivityIndicator size="large" color={colors.primary} />;
+  if (error) return <Text>Error: {error.message}</Text>;
+
+  return (
+    <View>
+      <Text>{data.name}</Text>
+      {/* Render profile details */}
+    </View>
+  );
+}
+```
+
+**Why TanStack Query:**
+- Caches responses automatically (no duplicate requests)
+- Provides `isLoading`, `isError`, `isRefetching` booleans
+- Handles background refetch when screen refocuses
+- Integrates with TypeScript (generic `useQuery<DataType>()`)
+
+---
+
+### 2. Form Submissions (Login, Register, Create Resource)
+
+**Recommended approach: TanStack Query `useMutation`**
+
+```typescript
+// services/authService.ts
+import api from './api';
+
+export const login = async (credentials: { email: string; password: string }) => {
+  const response = await api.post('/api/v1/auth/login', credentials);
+  return response.data; // { accessToken, refreshToken, user }
+};
+
+// screens/Login.tsx
+import { useMutation } from '@tanstack/react-query';
+import { login } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
+
+export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login: setAuth } = useAuth();
+  const router = useRouter();
+
+  const mutation = useMutation({
+    mutationFn: login,
+    onSuccess: (data) => {
+      // Store tokens in expo-secure-store
+      setAuth(data.accessToken, data.refreshToken);
+      // Navigate to main app (replace prevents going back to login)
+      router.replace('/(app)/(tabs)/home');
+    },
+    onError: (error: any) => {
+      Alert.alert('Login Failed', error.response?.data?.message || 'Please try again');
+    },
+  });
+
+  const handleLogin = () => {
+    mutation.mutate({ email, password });
+  };
+
+  return (
+    <View>
+      <TextInput value={email} onChangeText={setEmail} placeholder="Email" />
+      <TextInput value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry />
+      <Button
+        title={mutation.isPending ? 'Logging in...' : 'Login'}
+        onPress={handleLogin}
+        disabled={mutation.isPending}
+      />
+      {mutation.isPending && <ActivityIndicator />}
+    </View>
+  );
+}
+```
+
+**Key points:**
+- `mutation.isPending` replaces manual loading state
+- `mutation.error` provides error object
+- Navigate after success using `router.replace()` (login) or `router.back()` (create forms)
+- Show `ActivityIndicator` during pending state
+
+---
+
+### 3. List/Detail Views
+
+**List with FlatList + Pagination:**
+
+```typescript
+// screens/ResourcesList.tsx
+import { useQuery } from '@tanstack/react-query';
+import { FlatList, RefreshControl } from 'react-native';
+
+export default function ResourcesListScreen() {
+  const [page, setPage] = useState(1);
+  const { data, isLoading, error, refetch, isRefetching } = useQuery({
+    queryKey: ['resources', page],
+    queryFn: () => fetchResources(page, 10),
+    keepPreviousData: true, // Smooth pagination
+  });
+
+  const loadMore = () => {
+    if (data && page < data.totalPages) {
+      setPage(page + 1);
+    }
+  };
+
+  if (isLoading) return <ActivityIndicator />;
+  if (error) return <Text>Error loading resources</Text>;
+
+  return (
+    <FlatList
+      data={data?.resources || []}
+      keyExtractor={(item) => item._id}
+      renderItem={({ item }) => (
+        <TouchableOpacity onPress={() => router.push(`/resources/${item._id}`)}>
+          <Text>{item.name}</Text>
+          <Text>Quantity: {item.quantity}</Text>
+        </TouchableOpacity>
+      )}
+      refreshControl={
+        <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+      }
+      onEndReached={loadMore}
+      onEndReachedThreshold={0.5}
+      ListFooterComponent={
+        data && page < data.totalPages ? <ActivityIndicator /> : null
+      }
+    />
+  );
+}
+```
+
+**Detail view:**
+
+```typescript
+// screens/ResourceDetail.tsx
+export default function ResourceDetailScreen() {
+  const { id } = useLocalSearchParams();
+  
+  const { data: resource, isLoading, error } = useQuery({
+    queryKey: ['resource', id],
+    queryFn: () => fetchResourceById(id as string),
+    enabled: !!id, // Only run if id exists
+  });
+
+  // ... loading/error handling
 }
 ```
 
 ---
 
-## 3. Common API Patterns
+### 4. Optimistic Updates
 
-### 3.1 Pagination
-
-**Standard cursor-based pagination for lists:**
-
-```
-GET /api/v1/{resource}
-  Query: ?page=1&limit=20&sort=createdAt&order=desc
-  Response:
-  {
-    success: true,
-    data: { items: [...] },
-    pagination: {
-      page: 1,
-      limit: 20,
-      total: 150,
-      totalPages: 8,
-      hasNext: true,
-      hasPrev: false
-    }
-  }
-```
-
-**For large datasets or real-time data, consider cursor-based:**
-
-```
-GET /api/v1/{resource}
-  Query: ?cursor=abc123&limit=20
-  Response:
-  {
-    success: true,
-    data: { items: [...] },
-    pagination: {
-      nextCursor: "def456",
-      hasMore: true
-    }
-  }
-```
-
-### 3.2 Filtering and Sorting
-
-**Common filter patterns:**
-
-```
-GET /api/v1/species
-  ?classification=animal,plant          # Multi-value filter (OR)
-  ?dangerLevel=lethal&classification=animal  # Combined filters (AND)
-  ?search=alien                          # Full-text search on name
-  ?discoveredAfter=2026-01-01            # Date range
-  ?minConfidence=0.8                    # Numeric threshold
-
-GET /api/v1/resources
-  ?category=oxygen,water                # Filter by category
-  ?belowThreshold=true                   # Resources in alert state
-  ?sort=currentAmount&order=asc         # Sort by current level
-```
-
-### 3.3 Offline Sync Support
-
-**Strategy: `lastModified` timestamps + bulk sync endpoint**
-
-```
-GET /api/v1/sync/state
-  Headers: Authorization: Bearer <token>
-  Query: ?since=2026-04-10T00:00:00Z
-  Response:
-  {
-    success: true,
-    data: {
-      resources: { items: [...], lastModified: "2026-04-16T10:00:00Z" },
-      species: { items: [...], lastModified: "2026-04-15T14:30:00Z" },
-      logbook: { items: [...], lastModified: "2026-04-16T09:00:00Z" },
-      supplies: { items: [...], lastModified: "2026-04-14T08:00:00Z" }
-    }
-  }
-```
-
-**Mobile sync flow:**
-
-1. **On reconnect:** GET /sync/state?since={lastSyncTimestamp}
-2. **Merge server data:** Update local store with server changes
-3. **Push pending changes:** POST /{entity}/sync with queued operations
-4. **Conflict resolution:** Last-write-wins (compare timestamps)
-5. **Update sync timestamp:** Store current time for next sync
-
-**Bulk sync endpoint:**
-
-```
-POST /api/v1/{entity}/sync
-  Body:
-  {
-    operations: [
-      { type: "create", localId: "local-123", data: {...}, timestamp: "..." },
-      { type: "update", localId: "local-456", serverId: "abc", data: {...}, timestamp: "..." }
-    ]
-  }
-  Response:
-  {
-    success: true,
-    data: {
-      synced: [{ localId, serverId }],
-      conflicts: [{ localId, reason, resolution: "server_wins" }],
-      failed: [{ localId, error }]
-    }
-  }
-```
-
-### 3.4 File Upload for Photos
-
-**Multi-part form upload with compression:**
-
-```
-POST /api/v1/species
-  Headers: Content-Type: multipart/form-data
-  Body:
-  {
-    description: "Found near water source",
-    image: [binary data],
-    location: { lat: -33.8688, lng: 151.2093 }
-  }
-  Response:
-  {
-    success: true,
-    data: {
-      species: { ..., imageUrl: "/uploads/species/abc123.jpg" }
-    }
-  }
-
-Configuration:
-- Max file size: 5MB
-- Allowed formats: JPEG, PNG, WebP
-- Server-side compression: sharp library (optional)
-- Image URL returned for subsequent requests
-```
-
-**For large files or slow connections, consider chunked upload:**
-
-```
-POST /api/v1/upload/init
-  Body: { filename, mimeType, size }
-  Response: { uploadId, chunkSize }
-
-POST /api/v1/upload/:uploadId/chunk
-  Body: { chunkIndex, data: [binary] }
-  Response: { received: true, chunksRemaining }
-
-POST /api/v1/upload/:uploadId/complete
-  Response: { fileUrl }
-```
-
-### 3.5 Error Response Format
-
-**Standardized error structure:**
+**Pattern for toggling a resource status or updating a field:**
 
 ```typescript
-{
-  success: false,
-  error: {
-    code: "RESOURCE_NOT_FOUND",
-    message: "Species with ID xyz not found",
-    details?: { field: "id", value: "xyz" }
+const toggleResourceMutation = useMutation({
+  mutationFn: (id: string) => toggleResourceStatus(id),
+  
+  // 1. Before mutation: snapshot + optimistic update
+  onMutate: async (id) => {
+    await queryClient.cancelQueries({ queryKey: ['resource', id] });
+    const previous = queryClient.getQueryData(['resource', id]);
+    
+    queryClient.setQueryData(['resource', id], (old: any) => ({
+      ...old,
+      status: old.status === 'active' ? 'inactive' : 'active',
+    }));
+    
+    return { previous };
+  },
+  
+  // 2. On error: rollback
+  onError: (err, id, context) => {
+    queryClient.setQueryData(['resource', id], context?.previous);
+    Alert.alert('Error', 'Failed to update resource');
+  },
+  
+  // 3. On settle: always refetch to sync with server
+  onSettled: (data, error, id) => {
+    queryClient.invalidateQueries({ queryKey: ['resource', id] });
+  },
+});
+```
+
+**When to use optimistic updates:**
+- Toggling boolean fields (status, favorite)
+- Incrementing/decrementing quantities
+- Adding items to a list (optimistically add, rollback on error)
+
+**When NOT to use:**
+- Financial transactions
+- Deleting critical data (unless undo is possible)
+- Creating resources that need server-generated IDs (use standard mutation instead)
+
+---
+
+### 5. Error Handling in UI
+
+**Global error handling via Axios interceptor:**
+
+```typescript
+// services/api.ts
+import axios from 'axios';
+import { Alert } from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { router } from 'expo-router';
+
+const api = axios.create({
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
+});
+
+// Request interceptor: add JWT to all requests
+api.interceptors.request.use(async (config) => {
+  const token = await SecureStore.getItemAsync('accessToken');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
+  return config;
+});
+
+// Response interceptor: handle errors globally
+api.interceptors.response.use(
+  (response) => response.data, // Unwrap data automatically
+  async (error) => {
+    if (!error.response) {
+      // Network error
+      Alert.alert('Network Error', 'Please check your connection');
+      return Promise.reject({ message: 'Network Error' });
+    }
+
+    const { status, data } = error.response;
+
+    switch (status) {
+      case 401:
+        // Token expired or invalid
+        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync('refreshToken');
+        router.replace('/(auth)/login');
+        return Promise.reject({ message: 'Session expired' });
+      
+      case 403:
+        Alert.alert('Forbidden', 'You don\'t have permission');
+        break;
+      
+      case 400:
+        // Validation error - return for component to handle
+        return Promise.reject({ 
+          message: data?.message || 'Invalid request',
+          errors: data?.errors, // Field-specific errors
+        });
+      
+      case 500:
+        Alert.alert('Server Error', 'Please try again later');
+        break;
+    }
+
+    return Promise.reject(error.response.data);
+  }
+);
+
+export default api;
+```
+
+**Per-component error display (forms):**
+
+```typescript
+const [errors, setErrors] = useState<Record<string, string>>({});
+
+const mutation = useMutation({
+  mutationFn: createResource,
+  onError: (error: any) => {
+    if (error.errors) {
+      // Backend returned field-specific errors
+      setErrors(error.errors); // { name: 'Name is required', quantity: 'Must be > 0' }
+    }
+  },
+});
+
+// In JSX:
+{errors.name && <Text style={{ color: colors.danger }}>{errors.name}</Text>}
+```
+
+---
+
+### 6. Loading States
+
+**Patterns for different loading scenarios:**
+
+```typescript
+// Full-screen loading (initial load)
+const { data, isLoading } = useQuery({ queryKey: ['resources'], queryFn: fetchResources });
+if (isLoading) {
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color={colors.primary} />
+    </View>
+  );
 }
+
+// Inline loading (refetch)
+const { isRefetching } = useQuery({ ... });
+// Show RefreshControl in FlatList
+
+// Mutation loading
+const mutation = useMutation({ ... });
+// mutation.isPending === true during request
+
+// Skeleton loading (advanced)
+// Use react-native-skeleton-placeholder or similar library
 ```
 
-**HTTP Status Codes:**
-
-| Code | Use Case |
-|------|----------|
-| 200 | Success |
-| 201 | Created |
-| 400 | Bad Request (validation error) |
-| 401 | Unauthorized (no/invalid token) |
-| 403 | Forbidden (token valid but no access) |
-| 404 | Not Found |
-| 409 | Conflict (duplicate, version mismatch) |
-| 422 | Unprocessable Entity (business rule violation) |
-| 429 | Too Many Requests (rate limiting) |
-| 500 | Internal Server Error |
+**Design system integration:**
+- Use `colors.primary` for ActivityIndicator
+- Wrap loading states in `View` with `flex: 1, justifyContent: 'center', alignItems: 'center'`
+- Don't use hardcoded colors (enforce project constraint)
 
 ---
 
-## 4. Feature Dependencies
+### 7. Navigation After API Calls
 
-```
-Authentication
-├── User Registration → Create Astronaut profile
-├── Login → JWT issued → All subsequent requests authenticated
-├── Token Refresh → Session continues
-└── Logout → Token invalidated → Requires re-auth
+**Login/Register (replace to prevent back navigation):**
 
-Astronaut (Profile)
-└── View Dashboard Stats → Aggregates from all other entities
-
-Resources
-├── List Resources → Dashboard display
-├── Update Amount → Via Resource Movements
-├── Movement History → Audit trail
-└── Alerts → Triggered when below threshold
-
-Species
-├── List Species → Bestiary screen
-├── Identify → AI classification (external API call)
-├── Create Entry → File upload + location
-└── Nearby → Map overlay
-
-Logbook
-├── List Entries → Journal feed
-├── Create Entry → Optional species link
-└── Sync → Offline support
-
-Trips
-├── Start Trip → Creates planned trip → Activates
-├── Log Oxygen → Decreases oxygen budget
-├── Update Location → GPS tracking
-└── End Trip → Marks complete → Resource income
-
-Supplies
-├── List Nearby → Map display
-├── Collect → Resource income → Updates resources
-└── Expiration check → Background job (optional)
+```typescript
+const loginMutation = useMutation({
+  mutationFn: login,
+  onSuccess: (data) => {
+    await setAuth(data.accessToken, data.refreshToken);
+    router.replace('/(app)/(tabs)/home'); // Can't go back to login
+  },
+});
 ```
 
----
+**Create form (go back to list):**
 
-## 5. MVP Recommendation
+```typescript
+const createMutation = useMutation({
+  mutationFn: createResource,
+  onSuccess: () => {
+    router.back(); // Go back to list
+    // OR navigate to detail if ID is returned:
+    // router.push(`/resources/${data._id}`);
+  },
+});
+```
 
-### Prioritize (Phase 1 of API)
+**Update form (go back to detail):**
 
-1. **Authentication** — Login, register, token refresh, logout
-2. **Resources** — CRUD, movements, alerts
-3. **Species** — CRUD with basic classification (no AI in MVP)
-4. **Logbook** — CRUD with photo upload
+```typescript
+const updateMutation = useMutation({
+  mutationFn: (data) => updateResource(id, data),
+  onSuccess: () => {
+    router.back(); // Back to detail view
+  },
+});
+```
 
-### Defer (Phase 2+)
+**Delete (go back to list):**
 
-| Feature | Why Defer | Implementation Effort |
-|---------|-----------|----------------------|
-| AI Species Classification | Requires external API integration, prompt engineering | High |
-| Trip GPS Tracking | Needs background location on mobile | Medium |
-| Offline Sync | Complex conflict resolution, queue management | High |
-| Push Notifications | Requires push service setup | Medium |
-| Supply Drop Expiration | Needs background job/cron | Low |
-
-### Anti-Features to Avoid
-
-| Don't Build | Why | Instead |
-|------------|-----|---------|
-| User roles/permissions | Single user, astronaut = admin | User ID filtering |
-| Multi-tenant architecture | One astronaut per deployment | Single astronaut context |
-| Complex RBAC | Overkill for survival app | Hardcoded permissions |
-| Real-time WebSocket | Not required by spec | Polling if needed |
-| GraphQL | Adds complexity without benefit | REST is simpler for mobile |
+```typescript
+const deleteMutation = useMutation({
+  mutationFn: () => deleteResource(id),
+  onSuccess: () => {
+    router.dismiss(); // Dismiss modal OR router.back()
+  },
+});
+```
 
 ---
 
 ## Sources
 
-- Project requirements (`project-requirements.md`) — Domain requirements, course rubric
-- Phase 1 research (`01-RESEARCH.md`) — Technology stack, architecture patterns
-- Phase 2 data design plan (`02-01-PLAN.md`) — Entity definitions, offline strategy
-- Express.js best practices — REST API conventions
-- JWT authentication patterns — Industry standard implementation
+| Source | Type | Confidence | Notes |
+|--------|------|------------|-------|
+| [TanStack Query React Native Docs](https://tanstack.com/query/latest/docs/framework/react/react-native) | Official Docs | HIGH | Refresh on focus, disable on blur patterns |
+| [TanStack Query Optimistic Updates Guide](https://tanstack.com/query/latest/docs/framework/react/guides/optimistic-updates) | Official Docs | HIGH | onMutate, onError, onSettled pattern |
+| [Expo Router Authentication Guide](https://docs.expo.dev/router/advanced/authentication/) | Official Docs | HIGH | Stack.Protected, AuthContext pattern |
+| [Expo Docs: Authentication](https://docs.expo.dev/develop/authentication/) | Official Docs | HIGH | Navigation auth flow, token storage |
+| [OneUptime: React Native TanStack Query](https://oneuptime.com/blog/post/2026-01-15-react-native-tanstack-query/view) | Article (2026) | HIGH | Comprehensive guide with code examples |
+| [Mastering React Query in 2025](https://dev.to/jdavissoftware/mastering-react-query-in-2025-a-deep-dive-into-data-fetching-for-modern-apps-22jf) | Article (2025) | HIGH | Pagination, offline support, devtools |
+| [React Native FlatList Docs](https://reactnative.dev/docs/flatlist) | Official Docs | HIGH | onEndReached, RefreshControl, pagination |
+| [Mastering API Error Handling in React Native](https://codercrafter.in/blogs/react-native/mastering-api-error-handling-in-react-native-a-2025-developers-survival-guide) | Article (2025) | MEDIUM | Axios interceptors, error handling patterns |
+| [Optimistic Updates & Offline Thinking](https://medium.com/@didemsahin1789/optimistic-updates-offline-thinking-in-react-native-274b702f0652) | Article (2026) | MEDIUM | Queue pattern for offline mutations |
+| [Authentication Flow with Expo Router](https://blog.devgenius.io/complete-authentication-flow-with-expo-router-and-react-native-step-by-step-guide-c9a4d67b5f6c) | Article (2025) | MEDIUM | useAuth hook, protected routes |
+| Project ROADMAP.md (Phase 9-10) | Internal Docs | HIGH | Existing API endpoints and pagination support |
+| Project PROJECT.md | Internal Docs | HIGH | Expo Router structure, design system constraints |
 
 ---
 
-## Open Questions
+## Confidence Assessment
 
-1. **Image storage:** Where to store uploaded photos?
-   - Options: Local filesystem (Nginx serve), AWS S3, Cloudinary, Base64 in MongoDB
-   - Recommendation: Cloudinary for easiest integration, S3 for production
-   - Status: Needs decision before species/logbook photo upload
+| Area | Confidence | Reason |
+|------|------------|--------|
+| Data fetching (TanStack Query) | HIGH | Official docs + multiple 2025-2026 articles confirm pattern |
+| Form submissions (useMutation) | HIGH | TanStack Query docs + examples |
+| List/Detail (FlatList + useQuery) | HIGH | React Native docs + community examples |
+| Optimistic updates | HIGH | TanStack Query official guide |
+| Error handling (Axios interceptors) | HIGH | Multiple sources + standard pattern |
+| Loading states | HIGH | Well-documented in TanStack Query |
+| Navigation after mutations | HIGH | Expo Router docs + React Navigation patterns |
+| Token refresh flow | MEDIUM | Pattern documented, but needs testing with backend |
 
-2. **AI Classification provider:** Which service for species identification?
-   - Options: OpenAI Vision, Google Cloud Vision, custom model
-   - Recommendation: OpenAI Vision for prototype simplicity
-   - Status: Needs API key + integration in Phase 2
+---
 
-3. **Push notifications:** How to alert astronaut of low resources?
-   - Options: Expo Notifications, OneSignal, Firebase Cloud Messaging
-   - Status: Defer to Phase 2 unless early prototype needed
+## Gaps to Address
 
-4. **Supply drop simulation:** Who creates supply drops?
-   - Options: Admin API, scheduled background job, external NASA system
-   - Status: Assume admin-only creation for MVP
-
-5. **Session expiration duration:** How long before session times out?
-   - Recommendation: 15 minutes inactivity (matches course requirement)
-   - Implementation: Redis for session tracking, or token expiry check
+- **Token refresh implementation details** — Need to verify exact backend response format for `/auth/refresh` endpoint (Phase 9)
+- **Pagination query key structure** — Need to decide between `useQuery` with page state vs `useInfiniteQuery` (recommend `useQuery` with `keepPreviousData` for simplicity)
+- **Offline queue implementation** — Phase 11 will handle comprehensively; for now, just detect offline and show message
+- **Image upload for species/avatar** — May need `FormData` + special handling for React Native (Axios patchForm issue on Android, per GitHub #6968)
