@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { User, IUser } from '../models/user.model.js';
 import { signToken, verifyToken, hashToken, generateRefreshToken } from '../utils/jwt.util.js';
-import { AppError } from '../utils/AppError.js';
+import { AppError } from '../middlewares/error.middleware.js';
 import type { RegisterInput, LoginInput } from '../schemas/auth.schema.js';
 
 const BCRYPT_ROUNDS = 12;

@@ -3,7 +3,7 @@ import { Astronaut, IAstronaut, AstronautStatus } from '../models/astronaut.mode
 import { Trip, TripStatus } from '../models/trip.model.js';
 import { Species } from '../models/species.model.js';
 import { Resource } from '../models/resource.model.js';
-import { AppError } from '../utils/AppError.js';
+import { AppError } from '../middlewares/error.middleware.js';
 import type {
   CreateAstronautInput,
   UpdateAstronautInput

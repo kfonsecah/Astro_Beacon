@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Resource, IResource, ResourceCategory, MovementType } from '../models/resource.model.js';
-import { AppError } from '../utils/AppError.js';
+import { AppError } from '../middlewares/error.middleware.js';
 import { calculatePagination } from '../utils/pagination.js';
 import type {
   CreateResourceInput,

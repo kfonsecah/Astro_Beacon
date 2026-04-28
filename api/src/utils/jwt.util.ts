@@ -1,7 +1,7 @@
 import jwt, { SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
 import { config } from '../config/index.js';
-import { AppError } from './AppError.js';
+import { AppError } from '../middlewares/error.middleware.js';
 
 /**
  * Generate JWT access token (1 hour expiry)

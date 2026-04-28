@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { LogbookEntry, ILogbookEntry } from '../models/logbook.model.js';
-import { AppError } from '../utils/AppError.js';
+import { AppError } from '../middlewares/error.middleware.js';
 import { calculatePagination } from '../utils/pagination.js';
 import type {
   CreateLogbookInput,

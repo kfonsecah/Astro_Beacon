@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { verifyToken } from '../utils/jwt.util.js';
-import { AppError } from '../utils/AppError.js';
+import { AppError } from './error.middleware.js';
 
 /**
  * Authenticate: Verify JWT from Authorization: Bearer <token>
