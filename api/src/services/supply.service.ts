@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { Supply, ISupply, SupplyDropStatus, GeoPoint } from '../models/supply.model.js';
-import { AppError } from '../utils/AppError.js';
+import { AppError } from '../middlewares/error.middleware.js';
 import { calculatePagination } from '../utils/pagination.js';
 import type {
   CreateSupplyInput,

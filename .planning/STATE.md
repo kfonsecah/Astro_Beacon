@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Aplicación Base
-status: planning
-last_updated: "2026-04-17T03:19:53.849Z"
-last_activity: 2026-04-17
+status: executing
+last_updated: "2026-04-28T19:09:49.094Z"
+last_activity: 2026-04-28
 progress:
   total_phases: 5
   completed_phases: 1
@@ -16,11 +16,13 @@ progress:
 
 ## Current Position
 
+Phase: 10 (Endpoints de Dominio) — EXECUTING
+Plan: 1 of 5
 **Milestone:** v1.1 Aplicación Base — API Development
 **Phase:** 11
 **Plan:** Not started
-**Status:** Ready to plan
-**Last activity:** 2026-04-17
+**Status:** Executing Phase 10
+**Last activity:** 2026-04-28
 
 ## Project Reference
 
@@ -28,7 +30,7 @@ See: `.planning/PROJECT.md` (updated 2026-04-16)
 
 **Core value:** Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
 
-**Current focus:** v1.1 Aplicación Base - API REST con Node.js + Express v4
+**Current focus:** Phase 10 — Endpoints de Dominio
 
 ## Active Context
 
