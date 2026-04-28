@@ -8,17 +8,17 @@ Aplicación móvil de exploración planetaria para la materia EIF411 (UNACR). Si
 
 Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
 
-## Current Milestone: v1.1 Aplicación Base — API Development
+## Current Milestone: v1.2 Integración API-Frontend
 
-**Goal:** Implement a functional REST API with Node.js + Express v4 to support all app features.
+**Goal:** Conectar el frontend React Native/Expo con el backend Node.js/Express existente, integrando todas las pantallas actuales con sus respectivos endpoints (sin crear nuevos endpoints ni pantallas).
 
 **Target features:**
-- API structure with Express v4 (routes, controllers, services, models)
-- Authentication endpoints (register, login, session management)
-- Core domain endpoints (astronauts, resources, logbook, species, trips, supplies)
-- Database connection and models
-- Security middleware (JWT, validation)
-- Error handling and API documentation
+- Auditar y listar todos los endpoints existentes en el backend
+- Identificar pantallas frontend mockeadas que necesitan datos reales
+- Integrar endpoints de autenticación (register, login, refresh token)
+- Integrar endpoints de dominio (astronauts, resources, logbook, species, trips, supplies)
+- Aplicar patrones de programación: servicios, capas de abstracción, manejo de errores
+- Asegurar que todas las pantallas existentes consuman datos reales del API
 
 ## Requirements
 
@@ -231,4 +231,4 @@ color: tc.primary
 | API REST con Node + Express v4 | Requisito del curso para Entrega 2 | ✓ Planned |
 
 ---
-*Last updated: 2026-04-16 — Milestone v1.1 API Development started*
+*Last updated: 2026-04-27 — Milestone v1.2 Integración API-Frontend started*
