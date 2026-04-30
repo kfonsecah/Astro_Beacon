@@ -34,6 +34,7 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 | Autenticación (login, JWT, sesión) | 13 | Complete |
 | Seguridad y autenticación | 13 | Complete |
 | TanStack Query + Network Detection | 14 | Complete |
+| Domain Services + Hooks | 15 | Complete |
 
 ### Active
 
