@@ -1,30 +1,34 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { astronautService, type DashboardStats } from '../services/astronaut.service';
-import type { Astronauta, CreateAstronautaDTO, UpdateAstronautaDTO } from '@/types-dtos';
+import { astronautService } from '../services/astronaut.service';
+import type { Astronauta, CreateAstronautaDTO } from '@/types-dtos';
 
-export function useAstronautProfile(userId: string) {
+const QUERY_KEYS = {
+  profile: ['astronaut', 'profile'],
+  dashboard: ['astronaut', 'dashboard'],
+} as const;
+
+export function useAstronautProfile() {
   return useQuery({
-    queryKey: ['astronaut', 'profile', userId],
-    queryFn: () => astronautService.getProfile(userId),
-    enabled: !!userId,
+    queryKey: QUERY_KEYS.profile,
+    queryFn: () => astronautService.getProfile(),
+    staleTime: 5 * 60 * 1000,
   });
 }
 
-export function useAstronautDashboard(userId: string) {
+export function useAstronautDashboard() {
   return useQuery({
-    queryKey: ['astronaut', 'dashboard', userId],
-    queryFn: () => astronautService.getDashboard(userId),
-    enabled: !!userId,
+    queryKey: QUERY_KEYS.dashboard,
+    queryFn: () => astronautService.getDashboard(),
   });
 }
 
 export function useUpdateAstronautProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: UpdateAstronautaDTO }) => 
-      astronautService.createOrUpdate(userId, data as CreateAstronautaDTO),
-    onSuccess: (_data, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['astronaut', 'profile', userId] });
+    mutationFn: (data: CreateAstronautaDTO) => 
+      astronautService.createOrUpdate(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile });
     },
   });
 }

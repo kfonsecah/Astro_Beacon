@@ -2,29 +2,34 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { logbookService } from '../services/logbook.service';
 import type { BitacoraEntrada, CreateBitacoraEntradaDTO } from '@/types-dtos';
 
-export function useLogbookEntries(userId: string, page = 1, limit = 20, speciesId?: string) {
+const QUERY_KEYS = {
+  list: (page = 1, limit = 20, speciesId?: string) => 
+    ['logbook', 'list', page, limit, speciesId] as const,
+  detail: (id: string) => ['logbook', 'detail', id] as const,
+} as const;
+
+export function useLogbookEntries(page = 1, limit = 20, speciesId?: string) {
   return useQuery({
-    queryKey: ['logbook', 'list', userId, page, limit, speciesId],
-    queryFn: () => logbookService.getAll(userId, page, limit, speciesId),
-    enabled: !!userId,
+    queryKey: QUERY_KEYS.list(page, limit, speciesId),
+    queryFn: () => logbookService.getAll(page, limit, speciesId),
   });
 }
 
-export function useLogbookEntryById(userId: string, entryId: string) {
+export function useLogbookEntryById(id: string) {
   return useQuery({
-    queryKey: ['logbook', 'detail', userId, entryId],
-    queryFn: () => logbookService.getById(userId, entryId),
-    enabled: !!userId && !!entryId,
+    queryKey: QUERY_KEYS.detail(id),
+    queryFn: () => logbookService.getById(id),
+    enabled: !!id,
   });
 }
 
 export function useCreateLogbookEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, data, speciesId }: { userId: string; data: CreateBitacoraEntradaDTO; speciesId?: string }) => 
-      logbookService.create(userId, data, speciesId),
-    onSuccess: (_data, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['logbook', 'list', userId] });
+    mutationFn: ({ data, speciesId }: { data: CreateBitacoraEntradaDTO; speciesId?: string }) => 
+      logbookService.create(data, speciesId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['logbook'] });
     },
   });
 }
@@ -32,11 +37,11 @@ export function useCreateLogbookEntry() {
 export function useUpdateLogbookEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, entryId, data }: { userId: string; entryId: string; data: CreateBitacoraEntradaDTO }) => 
-      logbookService.update(userId, entryId, data),
-    onSuccess: (_data, { userId, entryId }) => {
-      queryClient.invalidateQueries({ queryKey: ['logbook', 'detail', userId, entryId] });
-      queryClient.invalidateQueries({ queryKey: ['logbook', 'list', userId] });
+    mutationFn: ({ id, data }: { id: string; data: CreateBitacoraEntradaDTO }) => 
+      logbookService.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['logbook', 'list'] });
     },
   });
 }
@@ -44,10 +49,10 @@ export function useUpdateLogbookEntry() {
 export function useDeleteLogbookEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, entryId }: { userId: string; entryId: string }) => 
-      logbookService.delete(userId, entryId),
-    onSuccess: (_data, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['logbook', 'list', userId] });
+    mutationFn: (id: string) => 
+      logbookService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['logbook'] });
     },
   });
 }
