@@ -71,7 +71,7 @@ Plans:
 **Plans**: 6 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Connect Dashboard to API (UI-03, UI-13, UI-14, UI-15, UI-16)
+- [x] 16-01-PLAN.md — Connect Dashboard to API (UI-03, UI-13, UI-14, UI-15, UI-16)
 - [ ] 16-02-PLAN.md — Connect Resources to API with pagination (UI-04, UI-05, UI-14, UI-15, UI-16)
 - [ ] 16-03-PLAN.md — Connect Logbook to API with pagination (UI-06, UI-07, UI-14, UI-15, UI-16)
 - [ ] 16-04-PLAN.md — Connect Bestiary (Species) to API with pagination (UI-08, UI-09, UI-14, UI-15, UI-16)
@@ -101,7 +101,7 @@ Plans:
 | 13. Auth Integration | 1/2 | Complete    | 2026-04-30 |
 | 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
 | 15. Domain Services + Hooks | 2/2 | Complete    | 2026-04-30 |
-| 16. Screen Integration | 0/X | Not started | - |
+| 16. Screen Integration | 1/6 | In Progress|  |
 | 17. Error Handling & Offline | 0/X | Not started | - |
 
 ---

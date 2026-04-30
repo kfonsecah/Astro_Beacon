@@ -43,7 +43,7 @@ Requirements for API-Frontend integration milestone. Scope estricto: integrar pa
 
 - [ ] **UI-01**: Login screen consumes useLogin mutation with loading/error states
 - [ ] **UI-02**: Register screen consumes useRegister mutation with loading/error states
-- [ ] **UI-03**: Home/Dashboard screen consumes useAstronautProfile + useResourceStats via useQuery
+- [x] **UI-03**: Home/Dashboard screen consumes useAstronautProfile + useResourceStats via useQuery
 - [ ] **UI-04**: Resources list screen consumes useResources with FlatList + pagination + pull-to-refresh
 - [ ] **UI-05**: Resource detail screen consumes useResourceById via useQuery
 - [ ] **UI-06**: Logbook list screen consumes useLogbookEntries with FlatList + pagination
@@ -53,10 +53,10 @@ Requirements for API-Frontend integration milestone. Scope estricto: integrar pa
 - [ ] **UI-10**: Trips list screen consumes useTrips with FlatList + pagination
 - [ ] **UI-11**: Trip detail screen consumes useTripById via useQuery
 - [ ] **UI-12**: Supplies list screen consumes useSupplies via useQuery
-- [ ] **UI-13**: Profile screen consumes useAstronautProfile via useQuery
-- [ ] **UI-14**: All screens handle loading states with ActivityIndicator using theme colors
-- [ ] **UI-15**: All screens handle error states with user-friendly messages (no raw API errors)
-- [ ] **UI-16**: All screens use design system (useTheme, constants, no hardcoded values)
+- [x] **UI-13**: Profile screen consumes useAstronautProfile via useQuery
+- [x] **UI-14**: All screens handle loading states with ActivityIndicator using theme colors
+- [x] **UI-15**: All screens handle error states with user-friendly messages (no raw API errors)
+- [x] **UI-16**: All screens use design system (useTheme, constants, no hardcoded values)
 
 ### Error Handling & Offline (ERR)
 
@@ -134,7 +134,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOM-09 | Phase 15 | Complete |
 | UI-01 | Phase 16 | Pending |
 | UI-02 | Phase 16 | Pending |
-| UI-03 | Phase 16 | Pending |
+| UI-03 | Phase 16 | Complete |
 | UI-04 | Phase 16 | Pending |
 | UI-05 | Phase 16 | Pending |
 | UI-06 | Phase 16 | Pending |
@@ -144,10 +144,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-10 | Phase 16 | Pending |
 | UI-11 | Phase 16 | Pending |
 | UI-12 | Phase 16 | Pending |
-| UI-13 | Phase 16 | Pending |
-| UI-14 | Phase 16 | Pending |
-| UI-15 | Phase 16 | Pending |
-| UI-16 | Phase 16 | Pending |
+| UI-13 | Phase 16 | Complete |
+| UI-14 | Phase 16 | Complete |
+| UI-15 | Phase 16 | Complete |
+| UI-16 | Phase 16 | Complete |
 | ERR-01 | Phase 17 | Pending |
 | ERR-02 | Phase 17 | Pending |
 | ERR-03 | Phase 17 | Pending |

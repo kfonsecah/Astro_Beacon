@@ -3,23 +3,23 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
 status: executing
-last_updated: "2026-04-30T20:56:19.158Z"
+last_updated: "2026-04-30T21:40:38.124Z"
 last_activity: 2026-04-30
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 11
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 15 (domain-services-hooks) — EXECUTING
-Plan: 2 of 2
+Phase: 16 (screen-integration) — EXECUTING
+Plan: 2 of 6
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Executing Phase 15
+**Status:** Executing Phase 16
 **Last activity:** 2026-04-30
 
 ## Project Reference
@@ -57,7 +57,7 @@ Plan: 2 of 2
 - Login screen uses useLogin() mutation from TanStack Query
 - Navigation after login uses router.replace('/(app)/(tabs)/home') to prevent back navigation
 
-**Current focus:** Phase 15 — domain-services-hooks (COMPLETED 15-01, 15-02)
+**Current focus:** Phase 16 — screen-integration
  
 ### Key Decisions (Phase 14)
  
@@ -81,6 +81,14 @@ Plan: 2 of 2
 - All mutations use queryClient.invalidateQueries() for cache invalidation
 - Auth hooks call useAuthStore.getState() for immediate state updates (not hook inside mutation)
 
+### Key Decisions (Phase 16-01)
+
+- Connected Dashboard to real API data using useAstronautProfile and useAstronautDashboard hooks
+- Replaced mockResources and mockAlerts with real astronaut profile and dashboard stats
+- Fixed astronaut.service.ts to import DashboardStats from types-dtos (fixed duplicate interface and missing api import)
+- Dashboard UI displays: astronaut nombre/estado, recursosCount, activeTrips, speciesDiscovered
+- All loading/error states use design system tokens via useTheme
+
 ### Todos
 
 - None yet
@@ -90,8 +98,8 @@ Plan: 2 of 2
 - None
 
 ## Session Continuity
-  
-- Last action: Completed 15-01-PLAN.md (Domain service layer with typed functions)
-- Stopped At: Completed 15-01-PLAN.md
-- Phase 15 context: Complete - 7 domain services with typed functions matching backend API endpoints
-- Next step: Execute next plan in phase (`/gsd-execute-phase 15` to run 15-02 if not done)
+   
+- Last action: Completed 16-01-PLAN.md (Dashboard connected to API)
+- Stopped At: Completed 16-01-PLAN.md
+- Phase 16 context: Dashboard now uses real API data via TanStack Query hooks
+- Next step: Execute next plan in phase (`/gsd-execute-phase 16` to run 16-02)
