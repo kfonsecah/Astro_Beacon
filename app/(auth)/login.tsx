@@ -2,6 +2,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useAuthStore } from "@/stores/auth.store";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
+import { useLogin } from "@/hooks/useAuth";
 import {
   Dimensions,
   KeyboardAvoidingView,
@@ -225,7 +226,7 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const login = useAuthStore((state) => state.login);
+  const loginMutation = useLogin();
   const theme = useTheme();
   const { colors: tc } = theme;
   const router = useRouter();
@@ -234,13 +235,15 @@ export default function LoginScreen() {
     if (!email.trim() || isAuthenticating) return;
     setIsAuthenticating(true);
     try {
-      await login(email, password);
-      router.replace('/(tabs)/dashboard');
+      const response = await loginMutation.mutateAsync({ email, password });
+      // Update auth store with tokens and user data
+      useAuthStore.getState().setAuth(response.accessToken, response.refreshToken, response.user);
+      router.replace('/(app)/(tabs)/home');
     } catch (error) {
       console.error('Login failed:', error);
       setIsAuthenticating(false);
     }
-  }, [email, password, isAuthenticating, login]);
+  }, [email, password, isAuthenticating, loginMutation]);
 
   const btnScale = useSharedValue(1);
   const animatedBtnStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
