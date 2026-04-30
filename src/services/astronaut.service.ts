@@ -12,21 +12,19 @@ export interface DashboardStats {
 }
 
 export interface AstronautService {
-  getProfile(userId: string): Promise<Astronauta | null>;
+  getProfile(): Promise<Astronauta | null>;
   createOrUpdate(
-    userId: string,
     data: CreateAstronautaDTO,
   ): Promise<Astronauta>;
   update(
-    userId: string,
     astronautId: string,
     data: UpdateAstronautaDTO,
   ): Promise<Astronauta>;
-  getDashboard(userId: string): Promise<DashboardStats>;
+  getDashboard(): Promise<DashboardStats>;
 }
 
 export const astronautService: AstronautService = {
-  async getProfile(userId: string): Promise<Astronauta | null> {
+  async getProfile(): Promise<Astronauta | null> {
     const response = await api.get<{ success: boolean; data: Astronauta }>(
       `/astronaut`,
     );
@@ -34,7 +32,6 @@ export const astronautService: AstronautService = {
   },
 
   async createOrUpdate(
-    userId: string,
     data: CreateAstronautaDTO,
   ): Promise<Astronauta> {
     const response = await api.put<{ success: boolean; data: Astronauta }>(
@@ -45,7 +42,6 @@ export const astronautService: AstronautService = {
   },
 
   async update(
-    userId: string,
     astronautId: string,
     data: UpdateAstronautaDTO,
   ): Promise<Astronauta> {
@@ -56,7 +52,7 @@ export const astronautService: AstronautService = {
     return response.data.data;
   },
 
-  async getDashboard(userId: string): Promise<DashboardStats> {
+  async getDashboard(): Promise<DashboardStats> {
     const response = await api.get<{ success: boolean; data: DashboardStats }>(
       `/astronaut/stats`,
     );

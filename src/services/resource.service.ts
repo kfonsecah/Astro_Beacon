@@ -11,47 +11,47 @@ export interface ResourceAlert {
 export interface PaginatedResources extends PaginatedResponse<Recurso> {}
 
 export interface ResourceService {
-  getAll(userId: string, page?: number, limit?: number): Promise<PaginatedResources>;
-  getById(userId: string, resourceId: string): Promise<Recurso | null>;
-  create(userId: string, data: CreateRecursoDTO): Promise<Recurso>;
-  update(userId: string, resourceId: string, data: UpdateRecursoDTO): Promise<Recurso>;
-  delete(userId: string, resourceId: string): Promise<void>;
-  recordMovement(userId: string, resourceId: string, data: CreateRecursoMovimientoDTO): Promise<Recurso>;
-  getAlerts(userId: string): Promise<ResourceAlert[]>;
+  getAll(page?: number, limit?: number): Promise<PaginatedResources>;
+  getById(resourceId: string): Promise<Recurso | null>;
+  create(data: CreateRecursoDTO): Promise<Recurso>;
+  update(resourceId: string, data: UpdateRecursoDTO): Promise<Recurso>;
+  delete(resourceId: string): Promise<void>;
+  recordMovement(resourceId: string, data: CreateRecursoMovimientoDTO): Promise<Recurso>;
+  getAlerts(): Promise<ResourceAlert[]>;
 }
 
 export const resourceService: ResourceService = {
-  async getAll(userId: string, page = 1, limit = 20): Promise<PaginatedResources> {
-    const response = await api.get<{ success: boolean; data: PaginatedResources }>(`/resources/${userId}`, { params: { page, limit } });
+  async getAll(page = 1, limit = 20): Promise<PaginatedResources> {
+    const response = await api.get<{ success: boolean; data: PaginatedResources }>(`/resources`, { params: { page, limit } });
     return response.data.data;
   },
 
-  async getById(userId: string, resourceId: string): Promise<Recurso | null> {
-    const response = await api.get<{ success: boolean; data: Recurso | null }>(`/resources/${userId}/${resourceId}`);
+  async getById(resourceId: string): Promise<Recurso | null> {
+    const response = await api.get<{ success: boolean; data: Recurso | null }>(`/resources/${resourceId}`);
     return response.data.data;
   },
 
-  async create(userId: string, data: CreateRecursoDTO): Promise<Recurso> {
-    const response = await api.post<{ success: boolean; data: Recurso }>(`/resources/${userId}`, data);
+  async create(data: CreateRecursoDTO): Promise<Recurso> {
+    const response = await api.post<{ success: boolean; data: Recurso }>(`/resources`, data);
     return response.data.data;
   },
 
-  async update(userId: string, resourceId: string, data: UpdateRecursoDTO): Promise<Recurso> {
-    const response = await api.put<{ success: boolean; data: Recurso }>(`/resources/${userId}/${resourceId}`, data);
+  async update(resourceId: string, data: UpdateRecursoDTO): Promise<Recurso> {
+    const response = await api.put<{ success: boolean; data: Recurso }>(`/resources/${resourceId}`, data);
     return response.data.data;
   },
 
-  async delete(userId: string, resourceId: string): Promise<void> {
-    await api.delete(`/resources/${userId}/${resourceId}`);
+  async delete(resourceId: string): Promise<void> {
+    await api.delete(`/resources/${resourceId}`);
   },
 
-  async recordMovement(userId: string, resourceId: string, data: CreateRecursoMovimientoDTO): Promise<Recurso> {
-    const response = await api.post<{ success: boolean; data: Recurso }>(`/resources/${userId}/${resourceId}/movement`, data);
+  async recordMovement(resourceId: string, data: CreateRecursoMovimientoDTO): Promise<Recurso> {
+    const response = await api.post<{ success: boolean; data: Recurso }>(`/resources/${resourceId}/movement`, data);
     return response.data.data;
   },
 
-  async getAlerts(userId: string): Promise<ResourceAlert[]> {
-    const response = await api.get<{ success: boolean; data: ResourceAlert[] }>(`/resources/${userId}/alerts`);
+  async getAlerts(): Promise<ResourceAlert[]> {
+    const response = await api.get<{ success: boolean; data: ResourceAlert[] }>(`/resources/alerts`);
     return response.data.data;
   },
 };
