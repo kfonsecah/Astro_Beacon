@@ -2,29 +2,34 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tripService } from '../services/trip.service';
 import type { Viaje, CreateViajeDTO, UpdateViajeDTO } from '@/types-dtos';
 
-export function useTrips(userId: string, page = 1, limit = 20, status?: string) {
+const QUERY_KEYS = {
+  list: (page = 1, limit = 20, status?: string) => 
+    ['trips', 'list', page, limit, status] as const,
+  detail: (id: string) => ['trips', 'detail', id] as const,
+} as const;
+
+export function useTrips(page = 1, limit = 20, status?: string) {
   return useQuery({
-    queryKey: ['trips', 'list', userId, page, limit, status],
-    queryFn: () => tripService.getAll(userId, page, limit, status),
-    enabled: !!userId,
+    queryKey: QUERY_KEYS.list(page, limit, status),
+    queryFn: () => tripService.getAll(page, limit, status),
   });
 }
 
-export function useTripById(userId: string, tripId: string) {
+export function useTripById(id: string) {
   return useQuery({
-    queryKey: ['trips', 'detail', userId, tripId],
-    queryFn: () => tripService.getById(userId, tripId),
-    enabled: !!userId && !!tripId,
+    queryKey: QUERY_KEYS.detail(id),
+    queryFn: () => tripService.getById(id),
+    enabled: !!id,
   });
 }
 
 export function useCreateTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: CreateViajeDTO }) => 
-      tripService.create(userId, data),
-    onSuccess: (_data, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['trips', 'list', userId] });
+    mutationFn: (data: CreateViajeDTO) => 
+      tripService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trips'] });
     },
   });
 }
@@ -32,11 +37,11 @@ export function useCreateTrip() {
 export function useUpdateTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, tripId, data }: { userId: string; tripId: string; data: UpdateViajeDTO }) => 
-      tripService.update(userId, tripId, data),
-    onSuccess: (_data, { userId, tripId }) => {
-      queryClient.invalidateQueries({ queryKey: ['trips', 'detail', userId, tripId] });
-      queryClient.invalidateQueries({ queryKey: ['trips', 'list', userId] });
+    mutationFn: ({ id, data }: { id: string; data: UpdateViajeDTO }) => 
+      tripService.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
     },
   });
 }
@@ -44,11 +49,11 @@ export function useUpdateTrip() {
 export function useStartTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, tripId, data }: { userId: string; tripId: string; data?: { notes?: string } }) => 
-      tripService.start(userId, tripId, data),
-    onSuccess: (_data, { userId, tripId }) => {
-      queryClient.invalidateQueries({ queryKey: ['trips', 'detail', userId, tripId] });
-      queryClient.invalidateQueries({ queryKey: ['trips', 'list', userId] });
+    mutationFn: ({ id, data }: { id: string; data?: { notes?: string } }) => 
+      tripService.start(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
     },
   });
 }
@@ -56,11 +61,11 @@ export function useStartTrip() {
 export function useCompleteTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, tripId, data }: { userId: string; tripId: string; data?: { notes?: string; resourcesUsed?: string[] } }) => 
-      tripService.complete(userId, tripId, data),
-    onSuccess: (_data, { userId, tripId }) => {
-      queryClient.invalidateQueries({ queryKey: ['trips', 'detail', userId, tripId] });
-      queryClient.invalidateQueries({ queryKey: ['trips', 'list', userId] });
+    mutationFn: ({ id, data }: { id: string; data?: { notes?: string; resourcesUsed?: string[] } }) => 
+      tripService.complete(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
     },
   });
 }
@@ -68,11 +73,22 @@ export function useCompleteTrip() {
 export function useAbortTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, tripId, data }: { userId: string; tripId: string; data?: { notes?: string } }) => 
-      tripService.abort(userId, tripId, data),
-    onSuccess: (_data, { userId, tripId }) => {
-      queryClient.invalidateQueries({ queryKey: ['trips', 'detail', userId, tripId] });
-      queryClient.invalidateQueries({ queryKey: ['trips', 'list', userId] });
+    mutationFn: ({ id, data }: { id: string; data?: { notes?: string } }) => 
+      tripService.abort(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
+    },
+  });
+}
+
+export function useDeleteTrip() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => 
+      tripService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['trips'] });
     },
   });
 }

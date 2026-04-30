@@ -2,29 +2,34 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { resourceService, type ResourceAlert } from '../services/resource.service';
 import type { Recurso, CreateRecursoDTO, UpdateRecursoDTO, CreateRecursoMovimientoDTO } from '@/types-dtos';
 
-export function useResources(userId: string, page = 1, limit = 20) {
+const QUERY_KEYS = {
+  list: (page = 1, limit = 20) => ['resources', 'list', page, limit] as const,
+  detail: (id: string) => ['resources', 'detail', id] as const,
+  alerts: ['resources', 'alerts'] as const,
+} as const;
+
+export function useResources(page = 1, limit = 20) {
   return useQuery({
-    queryKey: ['resources', 'list', userId, page, limit],
-    queryFn: () => resourceService.getAll(userId, page, limit),
-    enabled: !!userId,
+    queryKey: QUERY_KEYS.list(page, limit),
+    queryFn: () => resourceService.getAll(page, limit),
   });
 }
 
-export function useResourceById(userId: string, resourceId: string) {
+export function useResourceById(id: string) {
   return useQuery({
-    queryKey: ['resources', 'detail', userId, resourceId],
-    queryFn: () => resourceService.getById(userId, resourceId),
-    enabled: !!userId && !!resourceId,
+    queryKey: QUERY_KEYS.detail(id),
+    queryFn: () => resourceService.getById(id),
+    enabled: !!id,
   });
 }
 
 export function useCreateResource() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: CreateRecursoDTO }) => 
-      resourceService.create(userId, data),
-    onSuccess: (_data, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['resources', 'list', userId] });
+    mutationFn: (data: CreateRecursoDTO) => 
+      resourceService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resources'] });
     },
   });
 }
@@ -32,11 +37,11 @@ export function useCreateResource() {
 export function useUpdateResource() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, resourceId, data }: { userId: string; resourceId: string; data: UpdateRecursoDTO }) => 
-      resourceService.update(userId, resourceId, data),
-    onSuccess: (_data, { userId, resourceId }) => {
-      queryClient.invalidateQueries({ queryKey: ['resources', 'detail', userId, resourceId] });
-      queryClient.invalidateQueries({ queryKey: ['resources', 'list', userId] });
+    mutationFn: ({ id, data }: { id: string; data: UpdateRecursoDTO }) => 
+      resourceService.update(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['resources', 'list'] });
     },
   });
 }
@@ -44,30 +49,29 @@ export function useUpdateResource() {
 export function useDeleteResource() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, resourceId }: { userId: string; resourceId: string }) => 
-      resourceService.delete(userId, resourceId),
-    onSuccess: (_data, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['resources', 'list', userId] });
+    mutationFn: (id: string) => 
+      resourceService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['resources'] });
     },
   });
 }
 
-export function useConsumeResource() {
+export function useRecordResourceMovement() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, resourceId, data }: { userId: string; resourceId: string; data: CreateRecursoMovimientoDTO }) => 
-      resourceService.recordMovement(userId, resourceId, data),
-    onSuccess: (_data, { userId, resourceId }) => {
-      queryClient.invalidateQueries({ queryKey: ['resources', 'detail', userId, resourceId] });
-      queryClient.invalidateQueries({ queryKey: ['resources', 'list', userId] });
+    mutationFn: ({ id, data }: { id: string; data: CreateRecursoMovimientoDTO }) => 
+      resourceService.recordMovement(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['resources', 'list'] });
     },
   });
 }
 
-export function useResourceAlerts(userId: string) {
+export function useResourceAlerts() {
   return useQuery({
-    queryKey: ['resources', 'alerts', userId],
-    queryFn: () => resourceService.getAlerts(userId),
-    enabled: !!userId,
+    queryKey: QUERY_KEYS.alerts,
+    queryFn: () => resourceService.getAlerts(),
   });
 }
