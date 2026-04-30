@@ -12,7 +12,7 @@
 - [ ] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios
 - [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API
 - [ ] **Phase 17: Error Handling & Offline** - Error boundaries y soporte offline
-- [ ] **Phase 13: Auth Integration** - Conectar login con API (registro diferido)
+- [x] **Phase 13: Auth Integration** - Conectar login con API (registro diferido) (completed 2026-04-30)
 
 ---
 
@@ -90,7 +90,7 @@ Plans:
 
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
-| 13. Auth Integration | 1/2 | In Progress|  |
+| 13. Auth Integration | 1/2 | Complete    | 2026-04-30 |
 | 14. API Client Setup | 1/1 | Complete | 2026-04-28 |
 | 15. Domain Services + Hooks | 2/2 | Planned | - |
 | 16. Screen Integration | 0/X | Not started | - |
