@@ -68,7 +68,15 @@ Plans:
   3. All detail screens fetch and display real data via useQuery
   4. All screens use design system tokens (useTheme, constants) with zero hardcoded values
   5. All screens handle loading states with ActivityIndicator and user-friendly error messages
-**Plans**: TBD
+**Plans**: 6 plans
+
+Plans:
+- [ ] 16-01-PLAN.md — Connect Dashboard to API (UI-03, UI-13, UI-14, UI-15, UI-16)
+- [ ] 16-02-PLAN.md — Connect Resources to API with pagination (UI-04, UI-05, UI-14, UI-15, UI-16)
+- [ ] 16-03-PLAN.md — Connect Logbook to API with pagination (UI-06, UI-07, UI-14, UI-15, UI-16)
+- [ ] 16-04-PLAN.md — Connect Bestiary (Species) to API with pagination (UI-08, UI-09, UI-14, UI-15, UI-16)
+- [ ] 16-05-PLAN.md — Connect Map/Supplies to API (UI-12, UI-14, UI-15, UI-16)
+- [ ] 16-06-PLAN.md — Create Trips screens and connect to API (UI-10, UI-11, UI-14, UI-15, UI-16)
 **UI hint**: yes
 
 ### Phase 17: Error Handling & Offline
@@ -92,7 +100,7 @@ Plans:
 |-------|-------|--------|-----------|
 | 13. Auth Integration | 1/2 | Complete    | 2026-04-30 |
 | 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
-| 15. Domain Services + Hooks | 2/2 | Complete   | 2026-04-30 |
+| 15. Domain Services + Hooks | 2/2 | Complete    | 2026-04-30 |
 | 16. Screen Integration | 0/X | Not started | - |
 | 17. Error Handling & Offline | 0/X | Not started | - |
 

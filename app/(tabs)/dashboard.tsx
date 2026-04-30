@@ -1,37 +1,21 @@
 import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
-import { colors } from "@/constants/colors";
-import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Card } from "@/components/ui/Card";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useAstronautProfile, useAstronautDashboard } from "@/hooks/useAstronaut";
-import { useAuthStore } from "@/stores/auth.store";
-
-const mockResources = [
-  { id: "o2", name: "OXÍGENO", current: 87, max: 100, unit: "%", critical: false },
-  { id: "h2o", name: "AGUA", current: 62, max: 100, unit: "%", critical: false },
-  { id: "food", name: "COMIDA", current: 45, max: 100, unit: "%", critical: false },
-  { id: "med", name: "MÉDICO", current: 78, max: 100, unit: "%", critical: false },
-];
-
-const mockAlerts = [
-  { id: 1, type: "warning", message: "Suministro #47 expira en 2 días" },
-];
+import type { Astronauta } from "@/types-dtos";
 
 export default function DashboardScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
   const router = useRouter();
 
-  const user = useAuthStore.getState().user;
-  const userId = user?.id || 'user-123';
-
-  const { data: astronaut, isLoading: loadingProfile, error: errorProfile } = useAstronautProfile(userId);
-  const { data: stats, isLoading: loadingStats } = useAstronautDashboard(userId);
+  const { data: astronaut, isLoading: loadingProfile, error: errorProfile } = useAstronautProfile();
+  const { data: stats, isLoading: loadingStats, error: errorStats } = useAstronautDashboard();
 
   const isLoading = loadingProfile || loadingStats;
-  const error = errorProfile;
+  const error = errorProfile || errorStats;
 
   if (isLoading) {
     return (
@@ -51,39 +35,31 @@ export default function DashboardScreen() {
     );
   }
 
+  const resourcesCount = stats?.recursosCount ?? 0;
+  const activeTrips = stats?.activeTrips ?? 0;
+  const speciesDiscovered = stats?.speciesDiscovered ?? 0;
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <HudHeader title="PANEL DE CONTROL" subtitle="DÍA 47 · PLANETA DESCONOCIDO" />
-
-        {mockAlerts.map((alert) => (
-          <View key={alert.id} style={{ flexDirection: "row", alignItems: "center", backgroundColor: colors.warningMuted, borderWidth: 1, borderColor: colors.warningBorder, padding: 12, marginBottom: 16 }}>
-            <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
-            <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>{alert.message}</Text>
-          </View>
-        ))}
-
-        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>RECURSOS ACTIVOS</Text>
-
-        {mockResources.map((resource) => (
-          <ProgressBar
-            key={resource.id}
-            label={resource.name}
-            value={resource.current}
-            max={resource.max}
-            criticalThreshold={resource.critical ? 15 : 100}
-          />
-        ))}
+        <HudHeader
+          title="PANEL DE CONTROL"
+          subtitle={astronaut ? `${astronaut.nombre.toUpperCase()} · ${astronaut.estado.toUpperCase()}` : "CARGANDO..."}
+        />
 
         <View style={{ marginTop: 8 }}>
-          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>PROGRESO DE MISIÓN</Text>
+          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>ESTADÍSTICAS DE MISIÓN</Text>
           <Card>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>ASTRONAUTA</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{astronaut?.nombre || 'N/A'}</Text>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>ESTADO</Text>
-            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>ACTIVA</Text>
-            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>SEÑAL</Text>
-            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>ESTABLE · 847ms</Text>
-            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>PRÓXIMO SUMINISTRO</Text>
-            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>ETA: 2d 14h</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{astronaut?.estado || 'N/A'}</Text>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>RECURSOS ACTIVOS</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{resourcesCount}</Text>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>VIAJES EN CURSO</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{activeTrips}</Text>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>ESPECIES DESCUBIERTAS</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{speciesDiscovered}</Text>
           </Card>
         </View>
 

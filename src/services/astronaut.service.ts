@@ -1,15 +1,10 @@
+import { api } from "./api";
 import type {
   Astronauta,
   CreateAstronautaDTO,
   UpdateAstronautaDTO,
+  DashboardStats,
 } from "@/types-dtos";
-import { api } from "./api";
-
-export interface DashboardStats {
-  resourcesCount: number;
-  activeTrips: number;
-  speciesDiscovered: number;
-}
 
 export interface AstronautService {
   getProfile(): Promise<Astronauta | null>;
