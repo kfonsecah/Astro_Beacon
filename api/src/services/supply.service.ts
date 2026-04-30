@@ -114,6 +114,59 @@ export class SupplyService {
   }
 
   /**
+   * Update a supply (partial update)
+   */
+  async update(
+    userId: string,
+    supplyId: string,
+    input: UpdateSupplyInput
+  ): Promise<ISupply> {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const existing = await Supply.findOne({
+      _id: new mongoose.Types.ObjectId(supplyId),
+      userId: userObjectId
+    });
+
+    if (!existing) {
+      throw new AppError('Supply not found', 404);
+    }
+
+    const updated = await Supply.findByIdAndUpdate(
+      new mongoose.Types.ObjectId(supplyId),
+      {
+        ...input,
+        lastModified: new Date()
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!updated) {
+      throw new AppError('Supply not found', 404);
+    }
+
+    return updated;
+  }
+
+  /**
+   * Delete a supply
+   */
+  async delete(userId: string, supplyId: string): Promise<void> {
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    const existing = await Supply.findOne({
+      _id: new mongoose.Types.ObjectId(supplyId),
+      userId: userObjectId
+    });
+
+    if (!existing) {
+      throw new AppError('Supply not found', 404);
+    }
+
+    await Supply.findByIdAndDelete(new mongoose.Types.ObjectId(supplyId));
+  }
+
+  /**
    * Expire a supply (status: pendiente -> expirado)
    */
   async expire(supplyId: string): Promise<ISupply> {
