@@ -147,3 +147,14 @@ None.
 
 *Phase: 15-domain-services-hooks*
 *Completed: 2026-04-30*
+
+## Self-Check: PASSED
+
+- [✓] SUMMARY.md exists at `.planning/phases/15-domain-services-hooks/15-01-SUMMARY.md`
+- [✓] Commit `10d0f22` - docs(15-01): complete domain service layer plan
+- [✓] Commit `c11a905` - feat(15-01): create domain service layer with typed functions
+- [✓] All 7 service files exist in `src/services/` with correct line counts (≥ plan minimums)
+- [✓] TypeScript compiles without errors in services and types-dtos directories
+- [✓] STATE.md updated with phase progress and key decisions
+- [✓] ROADMAP.md updated with plan 15-01 progress (status: Complete)
+- [✓] Requirements DOM-01 through DOM-08 marked as complete
