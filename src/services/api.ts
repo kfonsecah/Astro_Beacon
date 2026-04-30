@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/stores/auth.store";
 import axios, { AxiosError, AxiosInstance } from "axios";
 import * as SecureStore from "expo-secure-store";
-import { API_BASE_URL } from "./auth.service";
+import { API_BASE_URL } from "@/config/api";
 import { authService } from "./auth.service";
 
 const API_TIMEOUT = 15000;
