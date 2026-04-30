@@ -67,11 +67,17 @@ Accent reserved for: primary CTAs, key stat numbers, active navigation indicator
 
 ---
 
+## Visual Hierarchy
+
+Focal point: the primary CTA and key stat numbers use the accent color to draw first attention. Headings (16px, weight 700) establish section priority, and secondary-surface cards group related data so content reads top-to-bottom in clear chunks.
+
+---
+
 ## Copywriting Contract
 
 | Element | Copy |
 |---------|------|
-| Primary CTA | Reintentar |
+| Primary CTA | Reintentar carga |
 | Empty state heading | Sin registros aún. |
 | Empty state body | Agrega el primer registro para comenzar. |
 | Error state | No se pudo cargar. Reintenta. |
