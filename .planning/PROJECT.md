@@ -31,11 +31,12 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 | Recursos y viajes | v1.0 | Complete |
 | Pantalla principal | v1.0 | Complete |
 | Diseño y estilos | v1.0 | Complete |
+| Autenticación (login, JWT, sesión) | 13 | Complete |
+| Seguridad y autenticación | 13 | Complete |
 
 ### Active
 
 - [ ] API REST con Node.js + Express v4
-- [ ] Autenticación (register, login, JWT, sesión)
 - [ ] Endpoints de dominio (astronautas, recursos, bitácora, especies, viajes, suministros)
 - [ ] Conexión a base de datos y modelos
 - [ ] Middleware de seguridad (JWT, validación)
@@ -43,7 +44,6 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 - [ ] Gestión de recursos (oxígeno, comida, agua, alertas)
 - [ ] Recursos y viajes (mapa GPS, consumo de oxígeno, conteo)
 - [ ] Pantalla principal con métricas del campamento
-- [ ] Seguridad y autenticación
 - [ ] Diseño, animaciones y estilos temáticos
 - [ ] Gestos (mínimo 2) para procesos clave
 - [ ] Uso de IA asistida en desarrollo
