@@ -5,8 +5,9 @@ import { authService } from '../services/auth.service';
 
 interface AuthUser {
   id: string;
-  name: string;
+  nombre: string;
   email: string;
+  rol: string;
 }
 
 interface AuthState {
@@ -34,6 +35,23 @@ const secureStoreStorage = {
   removeItem: async (name: string): Promise<void> => {
     await SecureStore.deleteItemAsync(name);
   },
+};
+
+const migrateAuthStorage = async (persistedState: any, version: number): Promise<Partial<AuthState>> => {
+  // Migration from legacy 'auth_token' key (D-17)
+  if (version === 0) {
+    try {
+      const legacyToken = await SecureStore.getItemAsync('auth_token');
+      if (legacyToken) {
+        await SecureStore.setItemAsync('access_token', legacyToken);
+        await SecureStore.deleteItemAsync('auth_token');
+        persistedState.accessToken = legacyToken;
+      }
+    } catch (error) {
+      console.warn('[Auth] Migration from auth_token failed:', error);
+    }
+  }
+  return persistedState;
 };
 
 export const useAuthStore = create<AuthState>()(
@@ -73,11 +91,11 @@ export const useAuthStore = create<AuthState>()(
         try {
           const response = await authService.login({ email, password });
           const { accessToken, refreshToken, user } = response;
-          
+
           await SecureStore.setItemAsync('access_token', accessToken);
           await SecureStore.setItemAsync('refresh_token', refreshToken);
           await SecureStore.setItemAsync('user_data', JSON.stringify(user));
-          
+
           set({
             accessToken,
             refreshToken,
@@ -105,7 +123,7 @@ export const useAuthStore = create<AuthState>()(
           const accessToken = await SecureStore.getItemAsync('access_token');
           const refreshToken = await SecureStore.getItemAsync('refresh_token');
           const userData = await SecureStore.getItemAsync('user_data');
-          
+
           if (accessToken && userData) {
             set({
               accessToken,
@@ -132,8 +150,10 @@ export const useAuthStore = create<AuthState>()(
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
+        // isAuthenticated and isLoading are UI state, not persisted
       }),
+      version: 1,
+      migrate: migrateAuthStorage,
     }
   )
 );
