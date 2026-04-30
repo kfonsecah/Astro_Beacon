@@ -8,11 +8,11 @@
 
 ## Phases
 
-- [ ] **Phase 13: Auth Integration** - Conectar login/registro con API, almacenamiento seguro de tokens, manejo de JWT
 - [ ] **Phase 14: API Client Setup** - Configurar TanStack Query y detección de red
 - [ ] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios
 - [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API
 - [ ] **Phase 17: Error Handling & Offline** - Error boundaries y soporte offline
+- [ ] **Phase 13: Auth Integration** - Conectar login con API (registro diferido)
 
 ---
 
@@ -20,24 +20,24 @@
 
 ### Phase 13: Auth Integration
 **Goal**: Users can authenticate with the backend, maintain secure sessions, and access protected screens.
-**Depends on**: Nothing (first phase of this milestone)
-**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-02, API-03, API-05, API-06
+**Depends on**: Phase 16 (screens integrated with API data), Phase 17 (offline handling ready)
+**Requirements**: AUTH-01, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-02, API-03, API-05, API-06
 **Success Criteria** (what must be TRUE):
   1. User can log in with email/password and is redirected to home screen with no back button to login
-  2. User can register a new account with email/password and receive confirmation
-  3. JWT and refresh tokens are stored securely in expo-secure-store (not accessible via unencrypted storage)
-  4. Unauthenticated users are redirected to login screen when accessing protected routes
-  5. Expired JWTs are automatically refreshed via axios interceptor without user intervention
+  2. JWT and refresh tokens are stored securely in expo-secure-store (not accessible via unencrypted storage)
+  3. Unauthenticated users are redirected to login screen when accessing protected routes
+  4. Expired JWTs are automatically refreshed via axios interceptor without user intervention
+  5. Register flow is deferred (no register screen or register integration in this phase)
 **Plans**: 2 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 13-01-PLAN.md — Update auth store with persist middleware + register screen (AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-08, API-06)
-- [ ] 13-02-PLAN.md — Update API client with refresh interceptor + protected routes (AUTH-05, AUTH-06, AUTH-07, API-02, API-03, API-05)
+- [ ] 13-01-PLAN.md — Update auth DTOs + store persistence (AUTH-03, AUTH-04, API-06)
+- [ ] 13-02-PLAN.md — Login screen + refresh interceptor + protected routes (AUTH-01, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-02, API-03, API-05)
 
 ### Phase 14: API Client Setup
 **Goal**: Configure TanStack Query for server state management and network detection for offline awareness.
-**Depends on**: Phase 13 (auth tokens available for API client)
+**Depends on**: Nothing (first phase of this milestone)
 **Requirements**: API-01, API-04
 **Success Criteria** (what must be TRUE):
   1. App initializes with TanStack Query provider in root layout, enabling useQuery/useMutation in all screens
@@ -46,13 +46,17 @@ Plans:
 
 ### Phase 15: Domain Services + Hooks
 **Goal**: Create service layer and custom hooks for all domain entities to fetch and mutate data.
-**Depends on**: Phase 13 (JWT auth), Phase 14 (TanStack Query + network detection)
+**Depends on**: Phase 14 (TanStack Query + network detection)
 **Requirements**: DOM-01, DOM-02, DOM-03, DOM-04, DOM-05, DOM-06, DOM-07, DOM-08, DOM-09
 **Success Criteria** (what must be TRUE):
   1. All domain services (auth, astronauts, resources, logbook, species, trips, supplies) have typed API functions matching backend DTOs
   2. All domain hooks wrap TanStack Query with proper query keys and mutation support
   3. TypeScript types are correctly defined for all API request/response shapes
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 15-01-PLAN.md — Create domain service layer (DOM-01 to DOM-08)
+- [ ] 15-02-PLAN.md — Create domain hooks layer (DOM-09)
 
 ### Phase 16: Screen Integration
 **Goal**: Connect all existing screens to real API data via domain hooks, with proper loading/error states and design system compliance.
@@ -87,8 +91,8 @@ Plans:
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
 | 13. Auth Integration | 2/2 | Planned | - |
-| 14. API Client Setup | 0/X | Not started | - |
-| 15. Domain Services + Hooks | 0/X | Not started | - |
+| 14. API Client Setup | 1/1 | Complete | 2026-04-28 |
+| 15. Domain Services + Hooks | 2/2 | Planned | - |
 | 16. Screen Integration | 0/X | Not started | - |
 | 17. Error Handling & Offline | 0/X | Not started | - |
 
