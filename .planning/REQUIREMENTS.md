@@ -11,8 +11,8 @@ Requirements for API-Frontend integration milestone. Scope estricto: integrar pa
 
 - [ ] **AUTH-01**: User can login with email and password (integrate with POST /api/v1/auth/login)
 - [ ] **AUTH-02**: User can register with email and password (integrate with POST /api/v1/auth/register)
-- [ ] **AUTH-03**: JWT access token stored securely in expo-secure-store (not AsyncStorage)
-- [ ] **AUTH-04**: Refresh token stored securely for session persistence
+- [x] **AUTH-03**: JWT access token stored securely in expo-secure-store (not AsyncStorage)
+- [x] **AUTH-04**: Refresh token stored securely for session persistence
 - [ ] **AUTH-05**: JWT token automatically attached to API requests via axios request interceptor
 - [ ] **AUTH-06**: Protected routes redirect unauthenticated users to login screen
 - [ ] **AUTH-07**: Token refresh flow handles 401 responses automatically via axios response interceptor
@@ -25,7 +25,7 @@ Requirements for API-Frontend integration milestone. Scope estricto: integrar pa
 - [ ] **API-03**: Axios response interceptor for global error handling (401, 403, 400, 500)
 - [ ] **API-04**: Network detection with @react-native-community/netinfo for offline awareness
 - [ ] **API-05**: Environment-based API URL via EXPO_PUBLIC_API_URL
-- [ ] **API-06**: Zustand persist middleware to sync auth state with expo-secure-store
+- [x] **API-06**: Zustand persist middleware to sync auth state with expo-secure-store
 
 ### Domain Services & Hooks (DOM)
 
@@ -111,8 +111,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | AUTH-01 | Phase 13 | Pending |
 | AUTH-02 | Phase 13 | Pending |
-| AUTH-03 | Phase 13 | Pending |
-| AUTH-04 | Phase 13 | Pending |
+| AUTH-03 | Phase 13 | Complete |
+| AUTH-04 | Phase 13 | Complete |
 | AUTH-05 | Phase 13 | Pending |
 | AUTH-06 | Phase 13 | Pending |
 | AUTH-07 | Phase 13 | Pending |
@@ -122,7 +122,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-03 | Phase 13 | Pending |
 | API-04 | Phase 14 | Pending |
 | API-05 | Phase 13 | Pending |
-| API-06 | Phase 13 | Pending |
+| API-06 | Phase 13 | Complete |
 | DOM-01 | Phase 15 | Pending |
 | DOM-02 | Phase 15 | Pending |
 | DOM-03 | Phase 15 | Pending |

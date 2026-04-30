@@ -32,7 +32,7 @@
 **UI hint**: yes
 
 Plans:
-- [ ] 13-01-PLAN.md — Update auth DTOs + store persistence (AUTH-03, AUTH-04, API-06)
+- [x] 13-01-PLAN.md — Update auth DTOs + store persistence (AUTH-03, AUTH-04, API-06)
 - [ ] 13-02-PLAN.md — Login screen + refresh interceptor + protected routes (AUTH-01, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-02, API-03, API-05)
 
 ### Phase 14: API Client Setup
@@ -90,7 +90,7 @@ Plans:
 
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
-| 13. Auth Integration | 2/2 | Planned | - |
+| 13. Auth Integration | 1/2 | In Progress|  |
 | 14. API Client Setup | 1/1 | Complete | 2026-04-28 |
 | 15. Domain Services + Hooks | 2/2 | Planned | - |
 | 16. Screen Integration | 0/X | Not started | - |
