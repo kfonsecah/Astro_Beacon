@@ -23,7 +23,7 @@ Scope: ONLY integrate existing backend endpoints (Phase 9) with existing fronten
 - **D-04:** Use Zustand persist middleware with SecureStore storage
 - **D-05:** Store structure: `{ accessToken, refreshToken, user, isAuthenticated, isLoading }`
 - **D-06:** login() calls `POST /api/v1/auth/login` → stores tokens + user in state (auto-persisted)
-- **D-07:** register() calls `POST /api/v1/auth/register` → same flow as login after successful registration
+- **D-07:** register() deferred — skip register screen for now; login only
 - **D-08:** logout() calls `POST /api/v1/auth/logout` (revoke refresh token) → clears state
 
 ### Protected Routes
@@ -33,7 +33,7 @@ Scope: ONLY integrate existing backend endpoints (Phase 9) with existing fronten
 
 ### Navigation After Auth
 - **D-12:** After login: `router.replace('/(app)/(tabs)/home')` — prevents back navigation to login
-- **D-13:** After register: same as login (user is automatically logged in after registration per Phase 9 backend)
+- **D-13:** After register deferred — login only
 - **D-14:** Use `router.replace()` not `router.navigate()` to prevent back stack issues
 
 ### Token Storage Keys
@@ -43,7 +43,7 @@ Scope: ONLY integrate existing backend endpoints (Phase 9) with existing fronten
 
 ### The Agent's Discretion
 - Exact Zustand persist middleware configuration (storage adapter for SecureStore)
-- Error handling in login/register forms (field-specific vs global errors)
+- Error handling in login form (field-specific vs global errors)
 - Whether to show loading spinner or disable button during auth mutations
 - Token refresh interceptor implementation details (queue mechanics)
 
@@ -71,7 +71,7 @@ Scope: ONLY integrate existing backend endpoints (Phase 9) with existing fronten
 - `src/services/api.ts` — Axios instance with interceptors (needs refresh token logic added)
 - `app/_layout.tsx` — Root layout where Stack.Protected should be added
 - `app/(auth)/login.tsx` — Login screen to consume useLogin mutation
-- `app/(auth)/register.tsx` — Register screen to consume useRegister mutation
+- `app/(auth)/register.tsx` — Register screen deferred (not in scope now)
 
 ### Requirements
 - `.planning/REQUIREMENTS.md` § Authentication (AUTH-01 to AUTH-08) — All auth requirements for this phase

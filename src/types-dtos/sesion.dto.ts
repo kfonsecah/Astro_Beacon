@@ -19,14 +19,12 @@ export interface RegisterDTO {
 }
 
 export interface LoginResponse {
-  token: string;
+  accessToken: string;
   refreshToken: string;
-  expiraEn: Date;
-  astronauta: {
+  user: {
     id: string;
-    nombre: string;
+    name: string;
     email: string;
-    rol: string;
   };
 }
 

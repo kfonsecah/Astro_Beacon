@@ -1,10 +1,12 @@
-import { View, Text, ScrollView, SafeAreaView, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
 import { colors } from "@/constants/colors";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { Card } from "@/components/ui/Card";
 import { HudHeader } from "@/components/ui/HudHeader";
+import { useAstronautProfile, useAstronautDashboard } from "@/hooks/useAstronaut";
+import { useAuthStore } from "@/stores/auth.store";
 
 const mockResources = [
   { id: "o2", name: "OXÍGENO", current: 87, max: 100, unit: "%", critical: false },
@@ -21,6 +23,33 @@ export default function DashboardScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
   const router = useRouter();
+
+  const user = useAuthStore.getState().user;
+  const userId = user?.id || 'user-123';
+
+  const { data: astronaut, isLoading: loadingProfile, error: errorProfile } = useAstronautProfile(userId);
+  const { data: stats, isLoading: loadingStats } = useAstronautDashboard(userId);
+
+  const isLoading = loadingProfile || loadingStats;
+  const error = errorProfile;
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={tc.primary} />
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, marginTop: 12 }}>CARGANDO DATOS...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 16 }}>
+        <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>ERROR AL CARGAR DATOS</Text>
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 8, textAlign: "center" }}>{error.message || 'Intente de nuevo más tarde'}</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>

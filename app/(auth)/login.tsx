@@ -1,5 +1,5 @@
-import { useAuth } from "@/stores/auth.store";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuthStore } from "@/stores/auth.store";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -220,26 +220,27 @@ function PulsingDot({ primaryColor }: { primaryColor: string }) {
 }
 
 export default function LoginScreen() {
-  const [agentId, setAgentId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
-  const { login } = useAuth();
+  const login = useAuthStore((state) => state.login);
   const theme = useTheme();
   const { colors: tc } = theme;
   const router = useRouter();
 
   const handleLogin = useCallback(async () => {
-    if (!agentId.trim() || isAuthenticating) return;
+    if (!email.trim() || isAuthenticating) return;
     setIsAuthenticating(true);
     try {
-      await login(agentId, password);
+      await login(email, password);
       router.replace('/(tabs)/dashboard');
-    } catch {
+    } catch (error) {
+      console.error('Login failed:', error);
       setIsAuthenticating(false);
     }
-  }, [agentId, password, isAuthenticating, login]);
+  }, [email, password, isAuthenticating, login]);
 
   const btnScale = useSharedValue(1);
   const animatedBtnStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
@@ -267,19 +268,20 @@ export default function LoginScreen() {
 
             {/* Login form */}
             <Animated.View entering={SlideInDown.delay(800).duration(600)} style={{ gap: 20 }}>
-              {/* Agent ID */}
+              {/* Email / Agent ID */}
               <View>
-                <Text style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: 3, color: tc.textMuted, marginBottom: 8 }}>ID DE AGENTE</Text>
+                <Text style={{ fontFamily: "monospace", fontSize: 9, letterSpacing: 3, color: tc.textMuted, marginBottom: 8 }}>ID DE AGENTE / EMAIL</Text>
                 <View style={{ position: "relative" }}>
                   <TextInput
-                    value={agentId}
-                    onChangeText={setAgentId}
+                    value={email}
+                    onChangeText={setEmail}
                     onFocus={() => setFocusedField("agent")}
                     onBlur={() => setFocusedField(null)}
                     style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: focusedField === "agent" ? tc.primary : tc.primaryBorder, paddingHorizontal: 16, paddingVertical: 14, fontFamily: "monospace", fontSize: 14, letterSpacing: 2, color: tc.primary }}
-                    placeholder="INGRESE ID..."
+                    placeholder="INGRESE ID O EMAIL..."
                     placeholderTextColor={tc.textDisabled}
                     autoCapitalize="none"
+                    keyboardType="email-address"
                     returnKeyType="next"
                   />
                   {focusedField === "agent" && <BlinkingCursor primaryColor={tc.primary} />}
@@ -313,8 +315,8 @@ export default function LoginScreen() {
               <Animated.View style={animatedBtnStyle}>
                 <Pressable
                   onPress={handleLogin}
-                  disabled={!agentId.trim() || isAuthenticating}
-                  style={({ pressed }) => [{ borderWidth: 1, borderColor: tc.primaryBorder, paddingVertical: 14, alignItems: "center", justifyContent: "center", minHeight: 48, opacity: !agentId.trim() || isAuthenticating ? 0.3 : 1 }, pressed && { backgroundColor: tc.primaryMuted }]}
+                  disabled={!email.trim() || isAuthenticating}
+                  style={({ pressed }) => [{ borderWidth: 1, borderColor: tc.primaryBorder, paddingVertical: 14, alignItems: "center", justifyContent: "center", minHeight: 48, opacity: !email.trim() || isAuthenticating ? 0.3 : 1 }, pressed && { backgroundColor: tc.primaryMuted }]}
                   onPressIn={() => { btnScale.value = withTiming(0.98, { duration: 100 }); }}
                   onPressOut={() => { btnScale.value = withTiming(1, { duration: 150 }); }}
                 >
