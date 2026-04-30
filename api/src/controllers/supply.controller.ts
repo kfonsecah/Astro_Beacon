@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { supplyService } from '../services/supply.service.js';
 import {
   createSupplySchema,
+  updateSupplySchema,
   collectSupplySchema,
   nearbyQuerySchema
 } from '../schemas/supply.schema.js';
@@ -193,6 +194,71 @@ export async function getNearbySupplies(
     res.status(200).json({
       success: true,
       data: supplies
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * PUT /api/v1/supplies/:id
+ * Update a supply (partial update)
+ */
+export async function updateSupply(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const input = updateSupplySchema.parse(req.body);
+    const userId = (req as any).user?.sub;
+    const id = req.params.id as string;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+      return;
+    }
+
+    const supply = await supplyService.update(userId, id, input);
+
+    res.status(200).json({
+      success: true,
+      data: supply
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * DELETE /api/v1/supplies/:id
+ * Delete a supply
+ */
+export async function deleteSupply(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = (req as any).user?.sub;
+    const id = req.params.id as string;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+      return;
+    }
+
+    await supplyService.delete(userId, id);
+
+    res.status(200).json({
+      success: true,
+      data: { message: 'Supply deleted successfully' }
     });
   } catch (error) {
     next(error);

@@ -3,6 +3,8 @@ import {
   getSupplies,
   getSupply,
   createSupply,
+  updateSupply,
+  deleteSupply,
   collectSupply,
   expireSupply,
   getNearbySupplies
@@ -31,5 +33,11 @@ router.post('/:id/collect', collectSupply);
 
 // POST /api/v1/supplies/:id/expire - Expire supply (typically for scheduled jobs)
 router.post('/:id/expire', expireSupply);
+
+// PUT /api/v1/supplies/:id - Update supply
+router.put('/:id', updateSupply);
+
+// DELETE /api/v1/supplies/:id - Delete supply
+router.delete('/:id', deleteSupply);
 
 export default router;
