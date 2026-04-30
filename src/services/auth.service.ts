@@ -17,7 +17,7 @@ const unauthenticatedApi: AxiosInstance = axios.create({
 export interface AuthService {
   login(data: LoginDTO): Promise<LoginResponse>;
   register(data: RegisterDTO): Promise<LoginResponse>;
-  refresh(refreshToken: string): Promise<{ accessToken: string }>;
+  refresh(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>;
   logout(): Promise<void>;
 }
 
@@ -38,10 +38,10 @@ export const authService: AuthService = {
     return response.data.data;
   },
 
-  async refresh(refreshToken: string): Promise<{ accessToken: string }> {
+  async refresh(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
     const response = await unauthenticatedApi.post<{
       success: boolean;
-      data: { accessToken: string };
+      data: { accessToken: string; refreshToken: string };
     }>("/auth/refresh", { refreshToken });
     return response.data.data;
   },
