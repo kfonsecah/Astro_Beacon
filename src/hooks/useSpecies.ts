@@ -2,29 +2,33 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { speciesService } from '../services/species.service';
 import type { Especie, CreateEspecieDTO } from '@/types-dtos';
 
-export function useSpecies(userId: string, page = 1, limit = 20) {
+const QUERY_KEYS = {
+  list: (page = 1, limit = 20) => ['species', 'list', page, limit] as const,
+  detail: (id: string) => ['species', 'detail', id] as const,
+} as const;
+
+export function useSpecies(page = 1, limit = 20) {
   return useQuery({
-    queryKey: ['species', 'list', userId, page, limit],
-    queryFn: () => speciesService.getAll(userId, page, limit),
-    enabled: !!userId,
+    queryKey: QUERY_KEYS.list(page, limit),
+    queryFn: () => speciesService.getAll(page, limit),
   });
 }
 
-export function useSpeciesById(userId: string, speciesId: string) {
+export function useSpeciesById(id: string) {
   return useQuery({
-    queryKey: ['species', 'detail', userId, speciesId],
-    queryFn: () => speciesService.getById(userId, speciesId),
-    enabled: !!userId && !!speciesId,
+    queryKey: QUERY_KEYS.detail(id),
+    queryFn: () => speciesService.getById(id),
+    enabled: !!id,
   });
 }
 
 export function useCreateSpecies() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: CreateEspecieDTO }) => 
-      speciesService.create(userId, data),
-    onSuccess: (_data, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: ['species', 'list', userId] });
+    mutationFn: (data: CreateEspecieDTO) => 
+      speciesService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['species'] });
     },
   });
 }
