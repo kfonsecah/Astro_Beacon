@@ -8,7 +8,7 @@
 
 ## Phases
 
-- [ ] **Phase 14: API Client Setup** - Configurar TanStack Query y detección de red
+- [x] **Phase 14: API Client Setup** - Configurar TanStack Query y detección de red (completed 2026-04-30)
 - [ ] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios
 - [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API
 - [ ] **Phase 17: Error Handling & Offline** - Error boundaries y soporte offline
@@ -91,7 +91,7 @@ Plans:
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
 | 13. Auth Integration | 1/2 | Complete    | 2026-04-30 |
-| 14. API Client Setup | 1/1 | Complete | 2026-04-28 |
+| 14. API Client Setup | 1/1 | Complete   | 2026-04-30 |
 | 15. Domain Services + Hooks | 2/2 | Planned | - |
 | 16. Screen Integration | 0/X | Not started | - |
 | 17. Error Handling & Offline | 0/X | Not started | - |

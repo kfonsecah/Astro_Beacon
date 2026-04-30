@@ -20,10 +20,10 @@ Requirements for API-Frontend integration milestone. Scope estricto: integrar pa
 
 ### API Client Setup (API)
 
-- [ ] **API-01**: TanStack Query provider (QueryClientProvider) setup in root layout (app/_layout.tsx)
+- [x] **API-01**: TanStack Query provider (QueryClientProvider) setup in root layout (app/_layout.tsx)
 - [ ] **API-02**: Axios instance with request interceptor for JWT injection from Zustand store
 - [ ] **API-03**: Axios response interceptor for global error handling (401, 403, 400, 500)
-- [ ] **API-04**: Network detection with @react-native-community/netinfo for offline awareness
+- [x] **API-04**: Network detection with @react-native-community/netinfo for offline awareness
 - [ ] **API-05**: Environment-based API URL via EXPO_PUBLIC_API_URL
 - [x] **API-06**: Zustand persist middleware to sync auth state with expo-secure-store
 
@@ -117,10 +117,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AUTH-06 | Phase 13 | Pending |
 | AUTH-07 | Phase 13 | Pending |
 | AUTH-08 | Phase 13 | Pending |
-| API-01 | Phase 14 | Pending |
+| API-01 | Phase 14 | Complete |
 | API-02 | Phase 13 | Pending |
 | API-03 | Phase 13 | Pending |
-| API-04 | Phase 14 | Pending |
+| API-04 | Phase 14 | Complete |
 | API-05 | Phase 13 | Pending |
 | API-06 | Phase 13 | Complete |
 | DOM-01 | Phase 15 | Pending |
