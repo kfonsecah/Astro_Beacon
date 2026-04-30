@@ -9,7 +9,7 @@
 ## Phases
 
 - [x] **Phase 14: API Client Setup** - Configurar TanStack Query y detección de red (completed 2026-04-30)
-- [ ] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios
+- [x] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios (completed 2026-04-30)
 - [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API
 - [ ] **Phase 17: Error Handling & Offline** - Error boundaries y soporte offline
 - [x] **Phase 13: Auth Integration** - Conectar login con API (registro diferido) (completed 2026-04-30)
@@ -55,7 +55,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 15-01-PLAN.md — Create domain service layer (DOM-01 to DOM-08)
+- [x] 15-01-PLAN.md — Create domain service layer (DOM-01 to DOM-08)
 - [x] 15-02-PLAN.md — Create domain hooks layer (DOM-09)
 
 ### Phase 16: Screen Integration
@@ -92,7 +92,7 @@ Plans:
 |-------|-------|--------|-----------|
 | 13. Auth Integration | 1/2 | Complete    | 2026-04-30 |
 | 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
-| 15. Domain Services + Hooks | 1/2 | In Progress|  |
+| 15. Domain Services + Hooks | 2/2 | Complete   | 2026-04-30 |
 | 16. Screen Integration | 0/X | Not started | - |
 | 17. Error Handling & Offline | 0/X | Not started | - |
 

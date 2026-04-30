@@ -36,7 +36,7 @@ Requirements for API-Frontend integration milestone. Scope estricto: integrar pa
 - [x] **DOM-05**: Species service + hook (useSpecies with pagination, useSpeciesById, useCreateSpecies)
 - [x] **DOM-06**: Trips service + hook (useTrips with pagination, useTripById, usePlanTrip, useStartTrip, useCompleteTrip)
 - [x] **DOM-07**: Supplies service + hook (useSupplies, useNearbySupplies, useCollectSupply)
-- [ ] **DOM-08**: All services return TypeScript-typed data matching backend DTOs
+- [x] **DOM-08**: All services return TypeScript-typed data matching backend DTOs
 - [x] **DOM-09**: All hooks use TanStack Query useQuery/useMutation with proper query keys
 
 ### Screen Integration (UI)
@@ -130,7 +130,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DOM-05 | Phase 15 | Complete |
 | DOM-06 | Phase 15 | Complete |
 | DOM-07 | Phase 15 | Complete |
-| DOM-08 | Phase 15 | Pending |
+| DOM-08 | Phase 15 | Complete |
 | DOM-09 | Phase 15 | Complete |
 | UI-01 | Phase 16 | Pending |
 | UI-02 | Phase 16 | Pending |
