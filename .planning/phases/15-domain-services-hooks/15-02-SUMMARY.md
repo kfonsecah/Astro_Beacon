@@ -158,6 +158,34 @@ None - no external service configuration required.
 - Service layer bug fixed - API calls will now match backend expectations
 - Ready for Phase 16 (UI screen integration)
 
+## Self-Check: PASSED
+
+All hook files exist: ✓
+- src/hooks/useAuth.ts (980 bytes)
+- src/hooks/useAstronaut.ts (980 bytes)
+- src/hooks/useResources.ts (2412 bytes)
+- src/hooks/useLogbook.ts (1886 bytes)
+- src/hooks/useSpecies.ts (1016 bytes)
+- src/hooks/useSupplies.ts (1585 bytes)
+- src/hooks/useTrips.ts (2954 bytes)
+
+All service files fixed and exist: ✓
+- src/services/auth.service.ts
+- src/services/astronaut.service.ts
+- src/services/resource.service.ts
+- src/services/logbook.service.ts
+- src/services/species.service.ts
+- src/services/trip.service.ts
+- src/services/supply.service.ts
+
+Commits verified: ✓
+- 449ffcb feat(15-02): create auth hooks
+- 7504d6c feat(15-02): create logbook hooks
+- 7f2c394 feat(15-02): create resource hooks
+- 3b55c0d feat(15-02): create species hooks
+- 9dba37f fix(15-02): fix service layer to match backend JWT auth
+- 05745e3 docs(15-02): complete domain-services-hooks plan 02
+
 ---
 
 *Phase: 15-domain-services-hooks*
