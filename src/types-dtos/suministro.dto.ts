@@ -24,3 +24,11 @@ export interface UpdateSuministroDTO {
 export interface SuministroConDistancia extends Suministro {
   distanciaKm: number;
 }
+
+export interface PaginatedSupplies {
+  items: Suministro[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}

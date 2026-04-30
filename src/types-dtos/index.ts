@@ -21,6 +21,7 @@ export type {
   Astronauta,
   CreateAstronautaDTO,
   UpdateAstronautaDTO,
+  DashboardStats,
 } from './astronauta.dto';
 
 export type {
@@ -29,18 +30,22 @@ export type {
   UpdateRecursoDTO,
   RecursoMovimiento,
   CreateRecursoMovimientoDTO,
+  ResourceAlert,
+  PaginatedResources,
 } from './recurso.dto';
 
 export type {
   Especie,
   CreateEspecieDTO,
   EspecieClasificada,
+  PaginatedSpecies,
 } from './especie.dto';
 
 export type {
   BitacoraEntrada,
   CreateBitacoraEntradaDTO,
   BitacoraEntradaResponse,
+  PaginatedLogbookEntries,
 } from './bitacora.dto';
 
 export type {
@@ -48,6 +53,7 @@ export type {
   CreateViajeDTO,
   UpdateViajeDTO,
   ViajeResumen,
+  PaginatedTrips,
 } from './viaje.dto';
 
 export type {
@@ -55,6 +61,7 @@ export type {
   CreateSuministroDTO,
   UpdateSuministroDTO,
   SuministroConDistancia,
+  PaginatedSupplies,
 } from './suministro.dto';
 
 export type {

@@ -1,8 +1,21 @@
 import { api } from './api';
-import type { Suministro, CreateSuministroDTO, UpdateSuministroDTO, SuministroConDistancia, PaginatedResponse } from '@/types-dtos';
+import type { Suministro, CreateSuministroDTO, UpdateSuministroDTO, SuministroConDistancia } from '@/types-dtos';
 
-export interface PaginatedSupplies extends PaginatedResponse<Suministro> {}
+/**
+ * PaginatedSupplies defines the structure for paginated supply lists.
+ */
+export interface PaginatedSupplies {
+  items: Suministro[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
+/**
+ * SupplyService interface defines all available operations for managing supplies.
+ * This includes listing, viewing details, collecting supplies, and finding nearby supplies by location.
+ */
 export interface SupplyService {
   getAll(page?: number, limit?: number, status?: string): Promise<PaginatedSupplies>;
   getById(supplyId: string): Promise<Suministro | null>;

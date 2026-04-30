@@ -1,8 +1,21 @@
 import { api } from './api';
-import type { Especie, CreateEspecieDTO, PaginatedResponse } from '@/types-dtos';
+import type { Especie, CreateEspecieDTO } from '@/types-dtos';
 
-export interface PaginatedSpecies extends PaginatedResponse<Especie> {}
+/**
+ * PaginatedSpecies defines the structure for paginated species lists.
+ */
+export interface PaginatedSpecies {
+  items: Especie[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
+/**
+ * SpeciesService interface defines all available operations for managing species.
+ * This includes listing, viewing details, and creating new species entries.
+ */
 export interface SpeciesService {
   getAll(page?: number, limit?: number): Promise<PaginatedSpecies>;
   getById(speciesId: string): Promise<Especie | null>;

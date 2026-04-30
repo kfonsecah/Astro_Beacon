@@ -4,6 +4,8 @@ import { API_BASE_URL } from "@/config/api";
 
 const timeout = 15000;
 
+// Create an unauthenticated API instance for auth endpoints
+// This instance does not include the auth interceptor to avoid circular dependencies
 const unauthenticatedApi: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout,

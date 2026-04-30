@@ -1,8 +1,21 @@
 import { api } from './api';
-import type { Viaje, CreateViajeDTO, UpdateViajeDTO, PaginatedResponse } from '@/types-dtos';
+import type { Viaje, CreateViajeDTO, UpdateViajeDTO } from '@/types-dtos';
 
-export interface PaginatedTrips extends PaginatedResponse<Viaje> {}
+/**
+ * PaginatedTrips defines the structure for paginated trip lists.
+ */
+export interface PaginatedTrips {
+  items: Viaje[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
+/**
+ * TripService interface defines all available operations for managing trips.
+ * This includes CRUD operations plus trip lifecycle management (start, complete, abort).
+ */
 export interface TripService {
   getAll(page?: number, limit?: number, status?: string): Promise<PaginatedTrips>;
   getById(tripId: string): Promise<Viaje | null>;

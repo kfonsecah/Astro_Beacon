@@ -25,3 +25,9 @@ export interface UpdateAstronautaDTO {
   estado?: AstronautStatus;
   baseCampLocation?: GeoPoint;
 }
+
+export interface DashboardStats {
+  recursosCount: number;
+  activeTrips: number;
+  speciesDiscovered: number;
+}

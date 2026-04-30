@@ -24,3 +24,11 @@ export interface EspecieClasificada {
   confianza: number;
   nombreSugerido?: string;
 }
+
+export interface PaginatedSpecies {
+  items: Especie[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}

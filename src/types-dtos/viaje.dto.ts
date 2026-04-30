@@ -33,3 +33,11 @@ export interface ViajeResumen {
   recursosRecolectados: number;
   distanciaRecorrida: number;
 }
+
+export interface PaginatedTrips {
+  items: Viaje[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}

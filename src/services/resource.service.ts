@@ -1,6 +1,10 @@
 import { api } from './api';
-import type { Recurso, CreateRecursoDTO, UpdateRecursoDTO, RecursoMovimiento, CreateRecursoMovimientoDTO, PaginatedResponse } from '@/types-dtos';
+import type { Recurso, CreateRecursoDTO, UpdateRecursoDTO, RecursoMovimiento, CreateRecursoMovimientoDTO } from '@/types-dtos';
 
+/**
+ * ResourceAlert interface represents an alert for resources that are running low
+ * or have reached a critical level based on the configured thresholds.
+ */
 export interface ResourceAlert {
   id: string;
   type: 'low' | 'critical';
@@ -8,8 +12,21 @@ export interface ResourceAlert {
   message: string;
 }
 
-export interface PaginatedResources extends PaginatedResponse<Recurso> {}
+/**
+ * PaginatedResources extends the base paginated response for resource lists.
+ */
+export interface PaginatedResources {
+  items: Recurso[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
+/**
+ * ResourceService interface defines all available operations for managing resources.
+ * This includes CRUD operations, movement tracking, and alert monitoring.
+ */
 export interface ResourceService {
   getAll(page?: number, limit?: number): Promise<PaginatedResources>;
   getById(resourceId: string): Promise<Recurso | null>;

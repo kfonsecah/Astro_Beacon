@@ -45,3 +45,18 @@ export interface CreateRecursoMovimientoDTO {
   razon: string;
   viajeId?: string;
 }
+
+export interface PaginatedResources {
+  items: Recurso[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ResourceAlert {
+  id: string;
+  type: 'low' | 'critical';
+  resourceId: string;
+  message: string;
+}

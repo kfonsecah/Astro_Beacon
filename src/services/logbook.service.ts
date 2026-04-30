@@ -1,8 +1,21 @@
 import { api } from './api';
-import type { BitacoraEntrada, CreateBitacoraEntradaDTO, PaginatedResponse } from '@/types-dtos';
+import type { BitacoraEntrada, CreateBitacoraEntradaDTO } from '@/types-dtos';
 
-export interface PaginatedLogbookEntries extends PaginatedResponse<BitacoraEntrada> {}
+/**
+ * PaginatedLogbookEntries defines the structure for paginated logbook entries.
+ */
+export interface PaginatedLogbookEntries {
+  items: BitacoraEntrada[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
+/**
+ * LogbookService interface defines all available operations for managing logbook entries.
+ * This includes CRUD operations with support for filtering by species.
+ */
 export interface LogbookService {
   getAll(page?: number, limit?: number, speciesId?: string): Promise<PaginatedLogbookEntries>;
   getById(entryId: string): Promise<BitacoraEntrada | null>;

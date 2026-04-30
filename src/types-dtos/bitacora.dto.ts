@@ -22,3 +22,11 @@ export interface BitacoraEntradaResponse extends BitacoraEntrada {
   especieNombre?: string;
   especieClasificacion?: string;
 }
+
+export interface PaginatedLogbookEntries {
+  items: BitacoraEntrada[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
