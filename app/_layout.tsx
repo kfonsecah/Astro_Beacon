@@ -1,4 +1,4 @@
-import { Stack, Redirect, usePathname } from "expo-router";
+import { Stack, usePathname } from "expo-router";
 import { useAuthStore } from "@/stores/auth.store";
 import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator } from "react-native";
@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/utils/queryClient";
 
-function AuthGuard({ children }: { children: React.ReactNode }) {
+export default function RootLayout() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
   const theme = useTheme();
   const { colors: tc } = theme;
@@ -25,25 +25,15 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated && !pathname?.includes("login")) {
-    return <Redirect href="/(auth)/login" />;
-  }
-
-  return <>{children}</>;
-}
-
-export default function RootLayout() {
-  const theme = useTheme();
-
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthGuard>
-        <StatusBar style={theme.isDark ? "light" : "dark"} />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(tabs)" />
-        </Stack>
-      </AuthGuard>
+      <StatusBar style={theme.isDark ? "light" : "dark"} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Protected group="(app)" guard={() => isAuthenticated}>
+          <Stack.Screen name="(app)" />
+        </Stack.Protected>
+      </Stack>
     </QueryClientProvider>
   );
 }
