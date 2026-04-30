@@ -2,24 +2,24 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
-status: verifying
-last_updated: "2026-04-30T20:16:29.150Z"
+status: executing
+last_updated: "2026-04-30T20:40:40.932Z"
 last_activity: 2026-04-30
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 11
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 14 (api-client-setup) — COMPLETED
-Plan: 1 of 1
+Phase: 15 (domain-services-hooks) — EXECUTING
+Plan: 1 of 2
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Phase complete — ready for next phase
+**Status:** Executing Phase 15
 **Last activity:** 2026-04-30
 
 ## Project Reference
@@ -28,18 +28,18 @@ Plan: 1 of 1
 **Current Focus**: Milestone v1.2 Integración API-Frontend — Connecting React Native frontend to Node.js/Express backend
 
 ## Current Position
-
+ 
 **Current Milestone**: v1.2 Integración API-Frontend
-**Current Phase**: 14-api-client-setup (COMPLETED)
-**Phase Status**: Complete (1 of 1 plans complete)
+**Current Phase**: 15-domain-services-hooks (EXECUTING)
+**Phase Status**: 1 of 2 plans complete (15-01 done, 15-02 done)
 **Progress**: 1/5 phases completed (20%)
-**Milestone Progress**: 13/45 requirements completed (AUTH-01, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-01, API-02, API-03, API-04, API-05, API-06)
+**Milestone Progress**: 13/45 requirements completed (AUTH-01, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-01, API-02, API-03, API-04, API-05, API-06, DOM-01 through DOM-09)
 
 ## Performance Metrics
-
-- Phases Completed: 1
-- Plans Executed: 3
-- Requirements Met: 13 (AUTH-01, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-01, API-02, API-03, API-04, API-05, API-06)
+ 
+- Phases Completed: 2
+- Plans Executed: 5
+- Requirements Met: 22 (AUTH-01, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, API-01, API-02, API-03, API-04, API-05, API-06, DOM-01 through DOM-09)
 - Token Usage: TBD
 
 ## Accumulated Context
@@ -57,14 +57,21 @@ Plan: 1 of 1
 - Login screen uses useLogin() mutation from TanStack Query
 - Navigation after login uses router.replace('/(app)/(tabs)/home') to prevent back navigation
 
-**Current focus:** Phase 14 — api-client-setup (COMPLETED)
-
+**Current focus:** Phase 15 — domain-services-hooks (COMPLETED 15-01, 15-02)
+ 
 ### Key Decisions (Phase 14)
-
+ 
 - TanStack Query v5 configured with staleTime: 1min, gcTime: 5min, retry: 1
 - Disabled refetchOnWindowFocus (not applicable to React Native)
 - useNetworkStatus initializes with optimistic online state
 - QueryClientProvider wrapped in root layout (app/_layout.tsx)
+
+### Key Decisions (Phase 15-02)
+ 
+- Fixed service layer to not require userId parameter - backend extracts from JWT token (Rule 1 bug fix)
+- Query key pattern follows D-05: ['domain', 'operation', id?]
+- All mutations use queryClient.invalidateQueries() for cache invalidation
+- Auth hooks call useAuthStore.getState() for immediate state updates (not hook inside mutation)
 
 ### Todos
 
@@ -75,8 +82,8 @@ Plan: 1 of 1
 - None
 
 ## Session Continuity
-
-- Last action: Completed 14-01-PLAN.md (QueryClient, useNetworkStatus, QueryClientProvider)
-- Stopped At: Completed 14-01-PLAN.md
-- Phase 14 context: Complete - TanStack Query v5 client configured, network detection hook, Provider wrapped in root layout
-- Next step: Execute next phase (`/gsd-execute-phase 15` or whichever is next in roadmap)
+ 
+- Last action: Completed 15-02-PLAN.md (Domain services hooks with TanStack Query)
+- Stopped At: Completed 15-02-PLAN.md
+- Phase 15 context: Complete - 7 domain hooks wrapping services with TanStack Query, consistent query keys
+- Next step: Execute next phase (`/gsd-execute-phase 16` or whichever is next in roadmap)

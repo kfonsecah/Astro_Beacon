@@ -56,7 +56,7 @@ Plans:
 
 Plans:
 - [ ] 15-01-PLAN.md — Create domain service layer (DOM-01 to DOM-08)
-- [ ] 15-02-PLAN.md — Create domain hooks layer (DOM-09)
+- [x] 15-02-PLAN.md — Create domain hooks layer (DOM-09)
 
 ### Phase 16: Screen Integration
 **Goal**: Connect all existing screens to real API data via domain hooks, with proper loading/error states and design system compliance.
@@ -91,8 +91,8 @@ Plans:
 | Phase | Plans | Status | Completed |
 |-------|-------|--------|-----------|
 | 13. Auth Integration | 1/2 | Complete    | 2026-04-30 |
-| 14. API Client Setup | 1/1 | Complete   | 2026-04-30 |
-| 15. Domain Services + Hooks | 2/2 | Planned | - |
+| 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
+| 15. Domain Services + Hooks | 1/2 | In Progress|  |
 | 16. Screen Integration | 0/X | Not started | - |
 | 17. Error Handling & Offline | 0/X | Not started | - |
 
