@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { BitacoraEntrada, CreateBitacoraEntradaDTO } from '@/types-dtos';
+import type { BitacoraEntrada, BitacoraEntradaResponse, CreateBitacoraEntradaDTO } from '@/types-dtos';
 
 /**
  * PaginatedLogbookEntries defines the structure for paginated logbook entries.
@@ -25,11 +25,17 @@ export interface LogbookService {
 }
 
 export const logbookService: LogbookService = {
-  async getAll(page = 1, limit = 20, speciesId?: string): Promise<PaginatedLogbookEntries> {
-    const response = await api.get<{ success: boolean; data: PaginatedLogbookEntries }>(`/logbook`, { 
-      params: { page, limit, speciesId } 
+  async   getAll(page = 1, limit = 20, speciesId?: string): Promise<PaginatedLogbookEntries> {
+    const response = await api.get<{ success: boolean; data: { items: BitacoraEntradaResponse[]; page: number; limit: number; total: number; totalPages: number } }>(`/logbook`, {
+      params: { page, limit, speciesId }
     });
-    return response.data.data;
+    return {
+      items: response.data.data.items,
+      page: response.data.data.page,
+      limit: response.data.data.limit,
+      total: response.data.data.total,
+      totalPages: response.data.data.totalPages,
+    };
   },
 
   async getById(entryId: string): Promise<BitacoraEntrada | null> {

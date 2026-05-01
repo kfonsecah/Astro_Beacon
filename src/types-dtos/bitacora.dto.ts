@@ -24,7 +24,7 @@ export interface BitacoraEntradaResponse extends BitacoraEntrada {
 }
 
 export interface PaginatedLogbookEntries {
-  items: BitacoraEntrada[];
+  items: BitacoraEntradaResponse[];
   page: number;
   limit: number;
   total: number;
