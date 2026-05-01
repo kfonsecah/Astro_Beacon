@@ -133,6 +133,7 @@ export default function DashboardScreen() {
             <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
           </TouchableOpacity>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
