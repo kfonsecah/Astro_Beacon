@@ -118,7 +118,7 @@ export default function DashboardScreen() {
           </Card>
         </View>
 
-        <View style={{ flexDirection: "row", gap: 12, marginTop: 24, marginBottom: 12 }}>
+        <View style={{ flexDirection: "row", marginTop: 24, marginBottom: 12 }}>
           <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
             onPress={() => router.push("/trips")}
