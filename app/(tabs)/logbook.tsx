@@ -66,19 +66,22 @@ export default function LogbookScreen() {
         renderItem={({ item }) => (
           <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: tc.primary }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
-                Día {new Date(item.creadoEn).getDate()}
-              </Text>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+              {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
+            </Text>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <Text style={{ fontSize: 10 }}>{item.sincronizadoEn ? "✅" : "⏳"}</Text>
-                <Text style={{ fontFamily: "monospace", fontSize: 8, color: item.sincronizadoEn ? tc.success : tc.warning }}>
-                  {item.sincronizadoEn ? "Sincronizado" : "Pendiente"}
+                <Text style={{ fontSize: 10 }}>{item.updatedAt ? "✅" : "⏳"}</Text>
+                <Text style={{ fontFamily: "monospace", fontSize: 8, color: item.updatedAt ? tc.success : tc.warning }}>
+                  {item.updatedAt ? "Sincronizado" : "Pendiente"}
                 </Text>
               </View>
             </View>
-            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18, marginBottom: 6 }}>{item.descripcion}</Text>
-            {item.especieNombre && (
-              <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>🏷️ {item.especieNombre}</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18, marginBottom: 6 }}>{item.description}</Text>
+            {item.title && (
+              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginBottom: 6 }}>{item.title}</Text>
+            )}
+            {item.speciesName && (
+              <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>🏷️ {item.speciesName}</Text>
             )}
           </View>
         )}

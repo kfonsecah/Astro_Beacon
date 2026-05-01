@@ -2,25 +2,27 @@ import { GeoPoint } from './shared.types';
 
 export interface BitacoraEntrada {
   id: string;
-  astronautaId: string;
-  especieId?: string;
-  descripcion: string;
-  imagenUrl: string;
-  ubicacion: GeoPoint;
-  creadoEn: Date;
-  esOffline: boolean;
-  sincronizadoEn?: Date;
+  astronautId: string;
+  speciesId?: string;
+  title: string;
+  description: string;
+  photoUrl: string;
+  location: GeoPoint;
+  lastModified: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CreateBitacoraEntradaDTO {
-  imagenUri: string;
-  descripcion: string;
-  ubicacion: GeoPoint;
+  photoUrl?: string;
+  description: string;
+  location: GeoPoint;
 }
 
 export interface BitacoraEntradaResponse extends BitacoraEntrada {
-  especieNombre?: string;
-  especieClasificacion?: string;
+  speciesName?: string;
+  speciesClassification?: string;
+  updatedAt?: Date;
 }
 
 export interface PaginatedLogbookEntries {

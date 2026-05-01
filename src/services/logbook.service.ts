@@ -26,15 +26,25 @@ export interface LogbookService {
 
 export const logbookService: LogbookService = {
   async   getAll(page = 1, limit = 20, speciesId?: string): Promise<PaginatedLogbookEntries> {
-    const response = await api.get<{ success: boolean; data: { items: BitacoraEntradaResponse[]; page: number; limit: number; total: number; totalPages: number } }>(`/logbook`, {
+    const response = await api.get<{
+      success: boolean;
+      data: Array<BitacoraEntradaResponse & { speciesId?: { name?: string; classification?: string } }>;
+      pagination: { page: number; limit: number; total: number; totalPages: number };
+    }>(`/logbook`, {
       params: { page, limit, speciesId }
     });
+    // Flatten populated speciesId fields
+    const items = response.data.data.map(entry => ({
+      ...entry,
+      speciesName: entry.speciesId?.name,
+      speciesClassification: entry.speciesId?.classification,
+    }));
     return {
-      items: response.data.data.items,
-      page: response.data.data.page,
-      limit: response.data.data.limit,
-      total: response.data.data.total,
-      totalPages: response.data.data.totalPages,
+      items,
+      page: response.data.pagination.page,
+      limit: response.data.pagination.limit,
+      total: response.data.pagination.total,
+      totalPages: response.data.pagination.totalPages,
     };
   },
 
