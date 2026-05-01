@@ -131,3 +131,17 @@ None - plan executed successfully with minor deviations documented above.
 ---
 *Phase: 13-auth-integration*
 *Completed: 2026-04-30*
+
+## Self-Check: PASSED
+
+All key files verified on disk:
+- FOUND: src/types-dtos/sesion.dto.ts
+- FOUND: src/services/auth.service.ts
+- FOUND: src/stores/auth.store.ts
+- FOUND: .planning/phases/13-auth-integration/13-01-SUMMARY.md
+
+All commits verified in git log:
+- FOUND: fc50f0f (Task 1)
+- FOUND: 9d8a3ff (Task 2)
+- FOUND: a8eedfb (Task 3)
+- FOUND: 88d9246 (Plan metadata)
