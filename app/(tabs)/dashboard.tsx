@@ -137,14 +137,14 @@ export default function DashboardScreen() {
         <View style={{ flexDirection: "row", marginTop: 24, marginBottom: 12 }}>
           <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
-            onPress={() => router.push("/(tabs)/trips")}
+            onPress={() => router.push("/trips")}
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
-            onPress={() => router.push("/(tabs)/trips")}
+            onPress={() => router.push("/trips")}
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
