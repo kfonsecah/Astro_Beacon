@@ -1,6 +1,8 @@
 import { useState, useCallback } from "react";
-import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator, Pressable } from "react-native";
+import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
+import { useRouter } from "expo-router";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useTrips } from "@/hooks/useTrips";
 import type { Viaje } from "@/types-dtos";
@@ -22,6 +24,8 @@ const statusLabelMap: Record<string, string> = {
 export default function TripsScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -43,28 +47,34 @@ export default function TripsScreen() {
 
   if (isLoading && page === 1) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", marginTop: 8 }}>CARGANDO VIAJES...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (isError) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 20 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 14, marginBottom: 8 }}>ERROR DE CONEXIÓN</Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           No se pudieron cargar los viajes. Verifica tu conexión.
         </Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   const trips = (data?.items || []) as Viaje[];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
+      <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: tc.border }}>
+        <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 12 }}>
+          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 14 }}>← VOLVER</Text>
+        </TouchableOpacity>
+        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, flex: 1 }}>REGISTROS DE VIAJE</Text>
+      </View>
       <FlatList
         data={trips}
         keyExtractor={(item) => item.id || item._id || Math.random().toString()}
@@ -74,7 +84,6 @@ export default function TripsScreen() {
         }
         ListHeaderComponent={() => (
           <>
-            <HudHeader title="REGISTROS DE VIAJE" subtitle="BITÁCORA DE EXPLORACIÓN" />
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
               {data?.total || 0} VIAJES
             </Text>
@@ -104,17 +113,17 @@ export default function TripsScreen() {
 
             {item.notes && (
               <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18, marginBottom: 6 }}>
-                 {item.notes}
+                {item.notes}
               </Text>
             )}
 
-              {item.status === 'planificado' && (
-              <Pressable
+            {item.status === 'planificado' && (
+              <TouchableOpacity
                 style={{ backgroundColor: tc.primary, padding: 8, alignItems: "center", marginTop: 8 }}
                 onPress={() => {}}
               >
                 <Text style={{ color: tc.background, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>INICIAR VIAJE</Text>
-              </Pressable>
+              </TouchableOpacity>
             )}
           </View>
         )}
@@ -133,6 +142,6 @@ export default function TripsScreen() {
           </View>
         }
       />
-    </SafeAreaView>
+    </View>
   );
 }

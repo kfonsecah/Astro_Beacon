@@ -1,4 +1,5 @@
-import { View, Text, FlatList, RefreshControl, ActivityIndicator, SafeAreaView } from "react-native";
+import { View, Text, FlatList, RefreshControl, ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { HudHeader } from "@/components/ui/HudHeader";
@@ -9,6 +10,7 @@ import type { Recurso } from "@/types-dtos";
 export default function ResourcesScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
+  const insets = useSafeAreaInsets();
 
   const [page, setPage] = useState(1);
   const [allResources, setAllResources] = useState<Recurso[]>([]);
@@ -45,30 +47,30 @@ export default function ResourcesScreen() {
 
   if (isLoading && page === 1) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, marginTop: 12 }}>
           CARGANDO RECURSOS...
         </Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 16 }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 16 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           ERROR AL CARGAR RECURSOS
         </Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 8, textAlign: "center" }}>
           {error.message || 'Intente de nuevo más tarde'}
         </Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
       <FlatList
         data={allResources}
         keyExtractor={(item: Recurso) => item.id || (item as any)._id || Math.random().toString()}
@@ -172,6 +174,6 @@ export default function ResourcesScreen() {
           </View>
         );
       })}
-    </SafeAreaView>
+    </View>
   );
 }
