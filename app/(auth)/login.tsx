@@ -238,7 +238,7 @@ export default function LoginScreen() {
       const response = await loginMutation.mutateAsync({ email, password });
       // Update auth store with tokens and user data
       useAuthStore.getState().setAuth(response.accessToken, response.refreshToken, response.user);
-      router.replace('/(app)/(tabs)/home');
+      router.replace('/(tabs)/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
       setIsAuthenticating(false);

@@ -39,8 +39,14 @@ export interface ResourceService {
 
 export const resourceService: ResourceService = {
   async getAll(page = 1, limit = 20): Promise<PaginatedResources> {
-    const response = await api.get<{ success: boolean; data: PaginatedResources }>(`/resources`, { params: { page, limit } });
-    return response.data.data;
+    const response = await api.get<{ success: boolean; data: Recurso[]; pagination: any }>(`/resources`, { params: { page, limit } });
+    return {
+      items: response.data.data ?? [],
+      page: response.data.pagination?.page ?? page,
+      limit: response.data.pagination?.limit ?? limit,
+      total: response.data.pagination?.total ?? 0,
+      totalPages: response.data.pagination?.totalPages ?? 0,
+    };
   },
 
   async getById(resourceId: string): Promise<Recurso | null> {

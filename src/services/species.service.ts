@@ -24,10 +24,20 @@ export interface SpeciesService {
 
 export const speciesService: SpeciesService = {
   async getAll(page = 1, limit = 20): Promise<PaginatedSpecies> {
-    const response = await api.get<{ success: boolean; data: PaginatedSpecies }>(`/species`, { 
-      params: { page, limit } 
+    const response = await api.get<{
+      success: boolean;
+      data: Especie[];
+      pagination: { page: number; limit: number; total: number; totalPages: number };
+    }>(`/species`, {
+      params: { page, limit }
     });
-    return response.data.data;
+    return {
+      items: response.data.data,
+      page: response.data.pagination.page,
+      limit: response.data.pagination.limit,
+      total: response.data.pagination.total,
+      totalPages: response.data.pagination.totalPages,
+    };
   },
 
   async getById(speciesId: string): Promise<Especie | null> {

@@ -15,6 +15,7 @@ export enum DangerLevel {
   CAUTELOSO = 'cauteloso',
   PELIGROSO = 'peligroso',
   LETAL = 'letal',
+  DESCONOCIDO = 'desconocido',
 }
 
 // Species interface

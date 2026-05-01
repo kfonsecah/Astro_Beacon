@@ -10,7 +10,7 @@
 
 - [x] **Phase 14: API Client Setup** - Configurar TanStack Query y detección de red (completed 2026-04-30)
 - [x] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios (completed 2026-04-30)
-- [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API
+- [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API (6/6 plans done)
 - [ ] **Phase 17: Error Handling & Offline** - Error boundaries y soporte offline
 - [x] **Phase 13: Auth Integration** - Conectar login con API (registro diferido) (completed 2026-04-30)
 
@@ -72,7 +72,7 @@ Plans:
 
 Plans:
 - [x] 16-01-PLAN.md — Connect Dashboard to API (UI-03, UI-13, UI-14, UI-15, UI-16)
-- [ ] 16-02-PLAN.md — Connect Resources to API with pagination (UI-04, UI-05, UI-14, UI-15, UI-16)
+- [x] 16-02-PLAN.md — Connect Resources to API with pagination (UI-04, UI-05, UI-14, UI-15, UI-16)
 - [ ] 16-03-PLAN.md — Connect Logbook to API with pagination (UI-06, UI-07, UI-14, UI-15, UI-16)
 - [ ] 16-04-PLAN.md — Connect Bestiary (Species) to API with pagination (UI-08, UI-09, UI-14, UI-15, UI-16)
 - [ ] 16-05-PLAN.md — Connect Map/Supplies to API (UI-12, UI-14, UI-15, UI-16)
@@ -101,7 +101,7 @@ Plans:
 | 13. Auth Integration | 1/2 | Complete    | 2026-04-30 |
 | 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
 | 15. Domain Services + Hooks | 2/2 | Complete    | 2026-04-30 |
-| 16. Screen Integration | 1/6 | In Progress|  |
+| 16. Screen Integration | 2/6 | In Progress|  |
 | 17. Error Handling & Offline | 0/X | Not started | - |
 
 ---

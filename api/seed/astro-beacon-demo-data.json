@@ -1,0 +1,443 @@
+{
+  "profileUserId": "69f11212fc14ebd54aad1fb3",
+  "astronautId": "69f30108c5dd5efe5924acca",
+  "astronauts": [
+    {
+      "_id": "69f30108c5dd5efe5924acca",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Ken Vega",
+      "status": "activo",
+      "birthDate": "1992-08-14T00:00:00.000Z",
+      "specializations": [
+        "navigation",
+        "field geology",
+        "systems repair",
+        "survival medicine"
+      ],
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    }
+  ],
+  "resources": [
+    {
+      "_id": "69f50108c5dd5efe5924acc1",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Oxygen Reserve",
+      "category": "oxigeno",
+      "currentAmount": 12,
+      "unit": "kg",
+      "threshold": 20,
+      "movements": [
+        {
+          "type": "ingreso",
+          "amount": 18,
+          "notes": "Initial tank refill",
+          "timestamp": "2026-04-25T09:00:00.000Z",
+          "previousAmount": 0,
+          "newAmount": 18
+        },
+        {
+          "type": "egreso",
+          "amount": 6,
+          "notes": "Life support calibration",
+          "timestamp": "2026-04-28T18:30:00.000Z",
+          "previousAmount": 18,
+          "newAmount": 12
+        }
+      ],
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f50108c5dd5efe5924acc2",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Water Tank A",
+      "category": "agua",
+      "currentAmount": 38,
+      "unit": "L",
+      "threshold": 15,
+      "movements": [
+        {
+          "type": "ingreso",
+          "amount": 40,
+          "notes": "Collected from condenser",
+          "timestamp": "2026-04-26T11:15:00.000Z",
+          "previousAmount": 0,
+          "newAmount": 40
+        },
+        {
+          "type": "egreso",
+          "amount": 2,
+          "notes": "Crew daily use",
+          "timestamp": "2026-04-29T07:45:00.000Z",
+          "previousAmount": 40,
+          "newAmount": 38
+        }
+      ],
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f50108c5dd5efe5924acc3",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Food Rations",
+      "category": "comida",
+      "currentAmount": 24,
+      "unit": "packs",
+      "threshold": 10,
+      "movements": [
+        {
+          "type": "ingreso",
+          "amount": 30,
+          "notes": "Supply dock delivery",
+          "timestamp": "2026-04-24T14:20:00.000Z",
+          "previousAmount": 0,
+          "newAmount": 30
+        },
+        {
+          "type": "egreso",
+          "amount": 6,
+          "notes": "Crew meal cycle",
+          "timestamp": "2026-04-29T19:10:00.000Z",
+          "previousAmount": 30,
+          "newAmount": 24
+        }
+      ],
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f50108c5dd5efe5924acc4",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Medical Kits",
+      "category": "medico",
+      "currentAmount": 7,
+      "unit": "kits",
+      "threshold": 0,
+      "movements": [
+        {
+          "type": "ingreso",
+          "amount": 5,
+          "notes": "Emergency restock",
+          "timestamp": "2026-04-23T16:00:00.000Z",
+          "previousAmount": 0,
+          "newAmount": 5
+        },
+        {
+          "type": "ingreso",
+          "amount": 2,
+          "notes": "Med bay transfer",
+          "timestamp": "2026-04-29T10:30:00.000Z",
+          "previousAmount": 5,
+          "newAmount": 7
+        }
+      ],
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f50108c5dd5efe5924acc5",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Tool Crate",
+      "category": "equipo",
+      "currentAmount": 11,
+      "unit": "items",
+      "threshold": 0,
+      "movements": [
+        {
+          "type": "ingreso",
+          "amount": 11,
+          "notes": "Base tool inventory",
+          "timestamp": "2026-04-22T08:00:00.000Z",
+          "previousAmount": 0,
+          "newAmount": 11
+        }
+      ],
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    }
+  ],
+  "species": [
+    {
+      "_id": "69f40108c5dd5efe5924acc1",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Aurora Moss",
+      "classification": "planta",
+      "dangerLevel": "amigable",
+      "description": "Soft glowing plant found near warm vents. Useful as a humidity marker.",
+      "imageUrl": "https://placehold.co/800x600/png?text=Aurora+Moss",
+      "notes": "Low risk and good for navigation by light.",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f40108c5dd5efe5924acc2",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Crimson Burrower",
+      "classification": "animal",
+      "dangerLevel": "cauteloso",
+      "description": "Small burrowing creature that reacts to vibrations and keeps to the ridge edges.",
+      "imageUrl": "https://placehold.co/800x600/png?text=Crimson+Burrower",
+      "notes": "Approach slowly and avoid bright light bursts.",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f40108c5dd5efe5924acc3",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Spore Veil",
+      "classification": "microorganismo",
+      "dangerLevel": "peligroso",
+      "description": "Airborne spore cloud detected close to the crater perimeter.",
+      "imageUrl": "https://placehold.co/800x600/png?text=Spore+Veil",
+      "notes": "Respiratory protection required.",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f40108c5dd5efe5924acc4",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Glass Horn Predator",
+      "classification": "animal",
+      "dangerLevel": "letal",
+      "description": "Large predator with reflective horns. Avoid direct contact and movement at dusk.",
+      "imageUrl": "https://placehold.co/800x600/png?text=Glass+Horn+Predator",
+      "notes": "High threat level. Keep distance at all times.",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f40108c5dd5efe5924acc5",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Unknown Mineral Bloom",
+      "classification": "recurso",
+      "dangerLevel": "desconocido",
+      "description": "Reactive mineral growth seen near the eastern trench.",
+      "imageUrl": "https://placehold.co/800x600/png?text=Unknown+Mineral+Bloom",
+      "notes": "Sample pending classification.",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    }
+  ],
+  "trips": [
+    {
+      "_id": "69f60108c5dd5efe5924acc1",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Recon Route North",
+      "destination": "Sector A-12",
+      "status": "activo",
+      "startDate": "2026-04-29T08:00:00.000Z",
+      "endDate": null,
+      "plannedDuration": 6,
+      "O2Config": {
+        "baseRate": 1.2,
+        "manualAdjustments": [
+          {
+            "amount": 2,
+            "note": "Cold weather buffer",
+            "timestamp": "2026-04-29T08:15:00.000Z"
+          }
+        ]
+      },
+      "O2Consumed": 18,
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f60108c5dd5efe5924acc2",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Crater Survey Alpha",
+      "destination": "South Crater Rim",
+      "status": "planificado",
+      "startDate": "2026-05-02T06:30:00.000Z",
+      "endDate": null,
+      "plannedDuration": 4,
+      "O2Config": {
+        "baseRate": 1,
+        "manualAdjustments": []
+      },
+      "O2Consumed": 0,
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f60108c5dd5efe5924acc3",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Sample Recovery West",
+      "destination": "Western Ridge",
+      "status": "completado",
+      "startDate": "2026-04-27T09:00:00.000Z",
+      "endDate": "2026-04-27T15:45:00.000Z",
+      "plannedDuration": 5,
+      "O2Config": {
+        "baseRate": 1.1,
+        "manualAdjustments": [
+          {
+            "amount": 1.5,
+            "note": "Rough terrain adjustment",
+            "timestamp": "2026-04-27T11:00:00.000Z"
+          }
+        ]
+      },
+      "O2Consumed": 14,
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f60108c5dd5efe5924acc4",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Ridge Escape",
+      "destination": "North Ridge Exit",
+      "status": "abortado",
+      "startDate": "2026-04-22T10:00:00.000Z",
+      "endDate": "2026-04-22T10:40:00.000Z",
+      "plannedDuration": 2,
+      "O2Config": {
+        "baseRate": 1,
+        "manualAdjustments": [
+          {
+            "amount": 0.5,
+            "note": "Emergency evasive maneuver",
+            "timestamp": "2026-04-22T10:18:00.000Z"
+          }
+        ]
+      },
+      "O2Consumed": 4,
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    }
+  ],
+  "supplies": [
+    {
+      "_id": "69f70108c5dd5efe5924acc1",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Supply Drop Delta",
+      "description": "Emergency box left near the north ridge.",
+      "status": "pendiente",
+      "location": {
+        "lat": -31.5211,
+        "lng": -64.4097
+      },
+      "contents": ["water", "food packs", "bandages"],
+      "deliveredAt": null,
+      "collectedAt": null,
+      "expiresAt": "2026-05-04T00:00:00.000Z",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f70108c5dd5efe5924acc2",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Supply Drop Echo",
+      "description": "Dropped at a protected shelter and already delivered.",
+      "status": "entregado",
+      "location": {
+        "lat": -31.5335,
+        "lng": -64.4181
+      },
+      "contents": ["oxygen canister", "water", "thermal blanket"],
+      "deliveredAt": "2026-04-28T17:20:00.000Z",
+      "collectedAt": null,
+      "expiresAt": "2026-05-03T00:00:00.000Z",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f70108c5dd5efe5924acc3",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "name": "Supply Drop Foxtrot",
+      "description": "Recovered from the cave entrance and brought back to base.",
+      "status": "recogido",
+      "location": {
+        "lat": -31.5279,
+        "lng": -64.4023
+      },
+      "contents": ["tools", "field rations", "signal flare"],
+      "deliveredAt": "2026-04-24T13:15:00.000Z",
+      "collectedAt": "2026-04-25T08:40:00.000Z",
+      "expiresAt": "2026-04-30T23:59:59.000Z",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    }
+  ],
+  "logbookEntries": [
+    {
+      "_id": "69f80108c5dd5efe5924acc1",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "title": "Glow trail by Vent 3",
+      "description": "Observed Aurora Moss spreading across the warm rock line. Visibility stayed high thanks to the glow.",
+      "photoUrl": "https://placehold.co/900x600/png?text=Glow+Trail",
+      "location": {
+        "lat": -31.5204,
+        "lng": -64.4078
+      },
+      "speciesId": "69f40108c5dd5efe5924acc1",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f80108c5dd5efe5924acc2",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "title": "Tracks on western ridge",
+      "description": "Found burrow marks and fresh movement near a shaded passage. Possible Crimson Burrower activity.",
+      "photoUrl": "https://placehold.co/900x600/png?text=Ridge+Tracks",
+      "location": {
+        "lat": -31.5288,
+        "lng": -64.4167
+      },
+      "speciesId": "69f40108c5dd5efe5924acc2",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f80108c5dd5efe5924acc3",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "title": "Spore cloud near crater edge",
+      "description": "Air samples confirmed Spore Veil in the area. Crew switched masks immediately.",
+      "photoUrl": "https://placehold.co/900x600/png?text=Spore+Cloud",
+      "location": {
+        "lat": -31.5361,
+        "lng": -64.4214
+      },
+      "speciesId": "69f40108c5dd5efe5924acc3",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    },
+    {
+      "_id": "69f80108c5dd5efe5924acc4",
+      "userId": "69f11212fc14ebd54aad1fb3",
+      "title": "Hostile contact warning",
+      "description": "Visual contact with Glass Horn Predator from a safe distance. No pursuit attempted.",
+      "photoUrl": "https://placehold.co/900x600/png?text=Hostile+Contact",
+      "location": {
+        "lat": -31.5442,
+        "lng": -64.3996
+      },
+      "speciesId": "69f40108c5dd5efe5924acc4",
+      "lastModified": "2026-04-30T12:00:00.000Z",
+      "createdAt": "2026-04-30T12:00:00.000Z",
+      "updatedAt": "2026-04-30T12:00:00.000Z"
+    }
+  ]
+}

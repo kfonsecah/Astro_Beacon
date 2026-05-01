@@ -1,0 +1,50 @@
+[
+  {
+    "_id": { "$oid": "69f81108c5dd5efe5924acc1" },
+    "userId": { "$oid": "69f11212fc14ebd54aad1fb3" },
+    "title": "Rastro luminoso junto al Vent 3",
+    "description": "Aurora Moss expandiéndose en la línea de roca tibia. Se observó un patrón de crecimiento en franjas que podría indicar microcorrientes de humedad.",
+    "photoUrl": "https://placehold.co/900x600/png?text=Aurora+Moss+Vent3",
+    "location": { "lat": -31.52045, "lng": -64.40782 },
+    "speciesId": { "$oid": "69f40108c5dd5efe5924acc1" },
+    "lastModified": "2026-04-30T12:30:00.000Z",
+    "createdAt": "2026-04-30T12:30:00.000Z",
+    "updatedAt": "2026-04-30T12:30:00.000Z"
+  },
+  {
+    "_id": { "$oid": "69f81108c5dd5efe5924acc2" },
+    "userId": { "$oid": "69f11212fc14ebd54aad1fb3" },
+    "title": "Huella y madriguera en la cresta oeste",
+    "description": "Marcas recientes en la arena fina. Probable actividad del 'Crimson Burrower'. Se recolectó una pequeña muestra de sedimento para análisis.",
+    "photoUrl": "https://placehold.co/900x600/png?text=Burrower+Tracks",
+    "location": { "lat": -31.5288, "lng": -64.4167 },
+    "speciesId": { "$oid": "69f40108c5dd5efe5924acc2" },
+    "lastModified": "2026-04-30T13:05:00.000Z",
+    "createdAt": "2026-04-30T13:05:00.000Z",
+    "updatedAt": "2026-04-30T13:05:00.000Z"
+  },
+  {
+    "_id": { "$oid": "69f81108c5dd5efe5924acc3" },
+    "userId": { "$oid": "69f11212fc14ebd54aad1fb3" },
+    "title": "Nube de esporas en el borde del cráter",
+    "description": "Detección de 'Spore Veil' en la columna de aire; muestras tomadas. Activar protocolo respiratorio y marcar la zona como riesgosa.",
+    "photoUrl": "https://placehold.co/900x600/png?text=Spore+Veil+Sample",
+    "location": { "lat": -31.5361, "lng": -64.4214 },
+    "speciesId": { "$oid": "69f40108c5dd5efe5924acc3" },
+    "lastModified": "2026-04-30T14:20:00.000Z",
+    "createdAt": "2026-04-30T14:20:00.000Z",
+    "updatedAt": "2026-04-30T14:20:00.000Z"
+  },
+  {
+    "_id": { "$oid": "69f81108c5dd5efe5924acc4" },
+    "userId": { "$oid": "69f11212fc14ebd54aad1fb3" },
+    "title": "Avistamiento: Glass Horn Predator (distancia segura)",
+    "description": "Contacto visual con un ejemplar adulto de 'Glass Horn Predator' a 120m. No se acercó; se mantuvo observación y retirada. Señales de caza al atardecer.",
+    "photoUrl": "https://placehold.co/900x600/png?text=Glass+Horn+Predator+Sight",
+    "location": { "lat": -31.5442, "lng": -64.3996 },
+    "speciesId": { "$oid": "69f40108c5dd5efe5924acc4" },
+    "lastModified": "2026-04-30T15:02:00.000Z",
+    "createdAt": "2026-04-30T15:02:00.000Z",
+    "updatedAt": "2026-04-30T15:02:00.000Z"
+  }
+]
