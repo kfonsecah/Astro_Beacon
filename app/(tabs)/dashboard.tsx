@@ -57,15 +57,17 @@ export default function DashboardScreen() {
 
         {/* Alerts - only show when there are alerts */}
             {alerts && alerts.length > 0 && (
-          <View style={{ marginBottom: 16 }}>
-            {alerts.map((alert) => (
-              <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.warning, padding: 12, marginBottom: 8 }}>
-                <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
-                <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>{alert.message}</Text>
+              <View style={{ marginBottom: 16 }}>
+                {alerts.map((alert: any) => (
+                  <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: "rgba(251,146,60,0.1)", borderWidth: 1, borderColor: "rgba(251,146,60,0.3)", padding: 12, marginBottom: 8 }}>
+                    <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
+                    <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
+                      {alert.message}
+                    </Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
-        )}
+            )}
 
         {/* Signal Status */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 16 }}>
@@ -77,28 +79,39 @@ export default function DashboardScreen() {
 
         <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>RECURSOS ACTIVOS</Text>
 
-        {resources.length > 0 ? resources.map((resource: any) => {
+        <View style={{ marginTop: 8 }}>
+          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>RECURSOS ACTIVOS</Text>
+          {resources.length > 0 ? resources.map((resource: any) => {
             const resId = resource._id || resource.id;
             const resName = resource.name || resource.nombre || 'UNKNOWN';
             const current = resource.currentAmount ?? 0;
             const max = resource.capacidadMaxima ?? resource.capacity ?? 100;
             const thresholdPercentage = max > 0 ? ((resource.threshold ?? 0) / max) * 100 : 0;
             const isCritical = (current / max) * 100 < thresholdPercentage;
+
             return (
               <View key={resId} style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
                 <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
                   <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>{resName.toUpperCase()}</Text>
                   <Text style={{ color: isCritical ? tc.danger : tc.primary, fontFamily: "monospace", fontSize: 12 }}>
-                    {current}/{max} {resource.unidad || resource.unit || ''}
+                    {current}/{max} {resource.unit || ''}
                   </Text>
                 </View>
                 <ProgressBar value={current} max={max} criticalThreshold={thresholdPercentage} showValue={true} />
-                {isCritical && <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 6 }}>⚠️ NIVEL CRÍTICO</Text>}
+                {isCritical && (
+                  <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 6 }}>⚠️ NIVEL CRÍTICO</Text>
+                )}
               </View>
             );
           }) : (
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, marginBottom: 10 }}>NO ACTIVE RESOURCES</Text>
           )}
+        </View>
+            </View>
+          );
+        }) : (
+          <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, marginBottom: 10 }}>NO HAY RECURSOS ACTIVOS</Text>
+        )}
 
         <View style={{ marginTop: 8 }}>
           <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>PROGRESO DE MISIÓN</Text>
@@ -125,8 +138,25 @@ export default function DashboardScreen() {
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
-           </TouchableOpacity>
-          <TouchableOpacity>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
+            onPress={() => router.push("/(tabs)/logbook")}
+          >
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={{ flexDirection: "row", marginTop: 24, marginBottom: 12 }}>
+          <TouchableOpacity
+            style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
+            onPress={() => router.push("/trips")}
+          >
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
             onPress={() => router.push("/(tabs)/logbook")}
           >
