@@ -131,13 +131,13 @@ export default function ResourcesScreen() {
             </View>
           );
         }}
-        ListFooterComponent={() =>
+        ListFooterComponent={() => (
           isLoading && page > 1 ? (
             <View style={{ padding: 16, alignItems: "center" }}>
               <ActivityIndicator size="small" color={tc.primary} />
             </View>
           ) : null
-        }
+        )}
         ListEmptyComponent={() => (
           <View style={{ alignItems: "center", marginTop: 40 }}>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
@@ -146,6 +146,32 @@ export default function ResourcesScreen() {
           </View>
         )}
       />
+      
+      {/* Historial de Movimientos */}
+      {allResources.map((resource) => {
+        const movements = (resource as any).movements || [];
+        if (movements.length === 0) return null;
+        return (
+          <View key={`history-${resource.id}`} style={{ marginTop: 20 }}>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>
+              HISTORIAL DE MOVIMIENTOS - {resource.name.toUpperCase()}
+            </Text>
+            {movements.map((mov: any, idx: number) => (
+              <View key={idx} style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                <Text style={{ fontSize: 12 }}>{mov.type === 'ingreso' ? 'TrendingUp' : 'TrendingDown'}</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 10 }}>
+                    {mov.notes || `${mov.type} ${resource.name}`}
+                  </Text>
+                  <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 8 }}>
+                    {mov.type === 'ingreso' ? '+' : ''}{mov.amount} {resource.unit} · {new Date(mov.timestamp).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        );
+      })}
     </SafeAreaView>
   );
 }

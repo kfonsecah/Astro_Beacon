@@ -63,8 +63,10 @@ export default function MapScreen() {
 
   const supplies = (data?.items || []) as Suministro[];
 
-  const formatContents = (contenido: { resourceId: string; cantidad: number }[]) => {
-    return contenido.map(item => `${item.resourceId.slice(-6)} x${item.cantidad}`).join(" + ");
+  const getEta = (status: string) => {
+    if (status === 'pendiente') return 'ETA: 2d 14h';
+    if (status === 'entregado') return 'Recogido';
+    return '';
   };
 
   return (
@@ -107,6 +109,7 @@ export default function MapScreen() {
               </Text>
               <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 2 }}>
                 📍 {item.location.lat.toFixed(2)}, {item.location.lng.toFixed(2)}
+                {getEta(item.status)}
               </Text>
             </View>
           </View>

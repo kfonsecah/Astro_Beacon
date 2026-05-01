@@ -55,8 +55,8 @@ export default function DashboardScreen() {
           subtitle={astronaut?.name ? `${String(astronaut.name).toUpperCase()} · ${String(astronaut.status ?? '').toUpperCase()}` : "CARGANDO..."}
         />
 
-        {/* Alerts */}
-        {alerts && alerts.length > 0 && (
+        {/* Alerts - only show when there are alerts */}
+            {alerts && alerts.length > 0 && (
           <View style={{ marginBottom: 16 }}>
             {alerts.map((alert) => (
               <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.warning, padding: 12, marginBottom: 8 }}>
@@ -119,14 +119,20 @@ export default function DashboardScreen() {
         </View>
 
         <View style={{ flexDirection: "row", gap: 12, marginTop: 24, marginBottom: 12 }}>
-          <View style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}>
+          <Pressable
+            style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
+            onPress={() => router.push("/trips")}
+          >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
-          </View>
-          <View style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}>
+          </Pressable>
+          <Pressable
+            style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
+            onPress={() => router.push("/(tabs)/logbook")}
+          >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
-          </View>
+          </Pressable>
         </View>
 
         {/* UAT: Reanimated Test */}
