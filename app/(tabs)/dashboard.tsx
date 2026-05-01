@@ -125,23 +125,14 @@ export default function DashboardScreen() {
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
-          </Pressable>
-          <TouchableOpacity
+           </TouchableOpacity>
+          <TouchableOpacity>
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
             onPress={() => router.push("/(tabs)/logbook")}
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
-          </Pressable>
-        </View>
-
-        {/* UAT: Reanimated Test */}
-        <TouchableOpacity
-          style={{ borderWidth: 1, borderColor: tc.danger, paddingVertical: 14, alignItems: "center", marginTop: 8 }}
-          onPress={() => router.push("/reanimated-test")}
-        >
-          <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>🧪 UAT: REANIMATED TEST</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
