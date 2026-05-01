@@ -25,17 +25,16 @@ export class SpeciesService {
    * Find all species for a user with optional filters and pagination
    */
   async findAll(
-    userId: string,
     page: number = 1,
     limit: number = 20,
     classification?: SpeciesClassification,
     dangerLevel?: DangerLevel
   ) {
-    const userObjectId = new mongoose.Types.ObjectId(userId);
+
     const skip = (page - 1) * limit;
 
-    // Build filter
-    const filter: Record<string, any> = { userId: userObjectId };
+    // Build filter - species are global, no userId filter
+    const filter: Record<string, any> = {};
     if (classification) {
       filter.classification = classification;
     }
@@ -63,11 +62,9 @@ export class SpeciesService {
   /**
    * Find a single species by ID
    */
-  async findOne(userId: string, speciesId: string): Promise<ISpecies> {
-    const userObjectId = new mongoose.Types.ObjectId(userId);
+  async findOne(speciesId: string): Promise<ISpecies> {
     const species = await Species.findOne({
       _id: new mongoose.Types.ObjectId(speciesId),
-      userId: userObjectId
     });
 
     if (!species) {
@@ -85,8 +82,11 @@ export class SpeciesService {
     speciesId: string,
     input: UpdateSpeciesInput
   ): Promise<ISpecies> {
-    // Verify ownership
-    await this.findOne(userId, speciesId);
+    // Verify species exists (species are global, no userId filter)
+    const existing = await this.findOne(speciesId);
+    if (!existing) {
+      throw new AppError('Species not found', 404);
+    }
 
     const species = await Species.findByIdAndUpdate(
       new mongoose.Types.ObjectId(speciesId),
@@ -108,8 +108,11 @@ export class SpeciesService {
    * Delete a species
    */
   async delete(userId: string, speciesId: string): Promise<void> {
-    // Verify ownership
-    await this.findOne(userId, speciesId);
+    // Verify species exists (species are global, no userId filter)
+    const existing = await this.findOne(speciesId);
+    if (!existing) {
+      throw new AppError('Species not found', 404);
+    }
 
     await Species.findByIdAndDelete(new mongoose.Types.ObjectId(speciesId));
   }
@@ -118,10 +121,9 @@ export class SpeciesService {
    * Get species by classification
    */
   async getByClassification(
-    userId: string,
     classification: SpeciesClassification
   ) {
-    return this.findAll(userId, 1, 100, classification);
+    return this.findAll(1, 100, classification);
   }
 }
 

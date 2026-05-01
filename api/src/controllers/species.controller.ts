@@ -28,7 +28,6 @@ export async function getSpecies(
     }
 
     const { species, pagination } = await speciesService.findAll(
-      userId,
       query.page,
       query.limit,
       query.classification as any,
@@ -66,7 +65,7 @@ export async function getSpeciesById(
       return;
     }
 
-    const species = await speciesService.findOne(userId, id);
+    const species = await speciesService.findOne(id);
 
     res.status(200).json({
       success: true,
