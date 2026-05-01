@@ -38,8 +38,8 @@ export default function TripsScreen() {
     }
   };
 
-  const getStatusColor = (estado: string) => statusColorMap[estado] || tc.textMuted;
-  const getStatusLabel = (estado: string) => statusLabelMap[estado] || estado.toUpperCase();
+  const getStatusColor = (status: string) => statusColorMap[status] || tc.textMuted;
+  const getStatusLabel = (status: string) => statusLabelMap[status] || status.toUpperCase();
 
   if (isLoading && page === 1) {
     return (
@@ -86,29 +86,29 @@ export default function TripsScreen() {
               <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
                 VIAJE #{item.id.slice(-4)}
               </Text>
-              <View style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: getStatusColor(item.estado) + "33" }}>
-                <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: getStatusColor(item.estado) }}>
-                  {getStatusLabel(item.estado)}
+              <View style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: getStatusColor(item.status) + "33" }}>
+                <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: getStatusColor(item.status) }}>
+                  {getStatusLabel(item.status)}
                 </Text>
               </View>
             </View>
 
             <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
               <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>
-                O₂: {item.oxigenoConsumido}/{item.oxigenoPresupuestado}
+                O₂: {item.oxygenConsumed}/{item.oxygenBudgeted}
               </Text>
               <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>
-                Recursos: {item.recursosRecolectados || 0}
+                Recursos: {item.resourcesCollected || 0}
               </Text>
             </View>
 
-            {item.notas && (
+            {item.notes && (
               <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18, marginBottom: 6 }}>
-                {item.notas}
+                 {item.notes}
               </Text>
             )}
 
-            {item.estado === 'planificado' && (
+              {item.status === 'planificado' && (
               <Pressable
                 style={{ backgroundColor: tc.primary, padding: 8, alignItems: "center", marginTop: 8 }}
                 onPress={() => {}}

@@ -3,37 +3,36 @@ import { useTheme } from "@/hooks/use-theme";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useResources, useResourceAlerts } from "@/hooks/useResources";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { Recurso } from "@/types-dtos";
 
 export default function ResourcesScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
 
   const [page, setPage] = useState(1);
-  const [allResources, setAllResources] = useState<any[]>([]);
+  const [allResources, setAllResources] = useState<Recurso[]>([]);
   const [hasMore, setHasMore] = useState(true);
 
   const { data, isLoading, error, refetch } = useResources(page, 10);
   const { data: alerts } = useResourceAlerts();
 
   // Accumulate resources across pages
-  const resources = data?.items ?? [];
-  const total = data?.total ?? 0;
-
-  // Load more when page changes
-  if (resources.length > 0 && allResources.length < total) {
-    const newItems = resources.filter(
-      (r: any) => !allResources.some((existing: any) => existing._id === r._id)
-    );
-    if (newItems.length > 0) {
-      setAllResources(prev => [...prev, ...newItems]);
-    }
-  }
+    useEffect(() => {
+      const newItems = data?.items ?? [];
+      if (newItems.length > 0) {
+        setAllResources(prev => {
+          const existingIds = new Set(prev.map(r => r.id));
+          const filtered = newItems.filter(r => !existingIds.has(r.id));
+          return filtered.length > 0 ? [...prev, ...filtered] : prev;
+        });
+        setHasMore((data?.total ?? 0) > allResources.length + newItems.length);
+      }
+    }, [data]);
 
   const loadMore = () => {
-    if (hasMore && !isLoading && allResources.length < total) {
+    if (hasMore && !isLoading && allResources.length < (data?.total ?? 0)) {
       setPage(p => p + 1);
-      setHasMore(allResources.length + (data?.items?.length ?? 0) < total);
     }
   };
 
@@ -72,7 +71,7 @@ export default function ResourcesScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={allResources}
-        keyExtractor={(item: any) => item._id || item.id}
+        keyExtractor={(item: Recurso) => item.id}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl
@@ -103,24 +102,24 @@ export default function ResourcesScreen() {
             )}
 
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12, marginTop: 8 }}>
-              RECURSOS ({allResources.length}/{total})
+              RECURSOS ({allResources.length}/{data?.total ?? 0})
             </Text>
           </>
         )}
-        renderItem={({ item: resource }: { item: any }) => {
-          const current = resource.currentAmount ?? 0;
-          const max = resource.capacidadMaxima ?? 100;
-          const thresholdPercentage = max > 0 ? ((resource.threshold ?? 0) / max) * 100 : 0;
+        renderItem={({ item }: { item: Recurso }) => {
+            const current = item.currentAmount ?? 0;
+            const max = item.threshold ? item.threshold * 2 : 100;
+            const thresholdPercentage = max > 0 ? ((item.threshold ?? 0) / max) * 100 : 0;
           const isCritical = (current / max) * 100 < thresholdPercentage;
 
           return (
             <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
                 <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
-                  {(resource.nombre || resource.name || 'UNKNOWN').toUpperCase()}
+                  {item.name.toUpperCase()}
                 </Text>
                 <Text style={{ color: isCritical ? tc.danger : tc.primary, fontFamily: "monospace", fontSize: 12 }}>
-                  {current}/{max} {resource.unidad || resource.unit || ''}
+                   {current}/{max} {item.unit || ''}
                 </Text>
               </View>
               <ProgressBar value={current} max={max} criticalThreshold={thresholdPercentage} showValue={true} />

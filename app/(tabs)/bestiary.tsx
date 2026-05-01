@@ -80,27 +80,27 @@ export default function BestiaryScreen() {
           </>
         }
         renderItem={({ item }) => {
-          const classColor = classificationColorMap[item.clasificacion] || tc.textMuted;
-          const dngColor = dangerColorMap[item.nivelPeligro] || tc.textMuted;
+          const classColor = classificationColorMap[item.classification] || tc.textMuted;
+          const dngColor = dangerColorMap[item.dangerLevel] || tc.textMuted;
 
           return (
             <View style={{ flexDirection: "row", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 12, padding: 12 }}>
               <View style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12 }} />
               <View style={{ flex: 1, justifyContent: "center" }}>
                 <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1, marginBottom: 8 }}>
-                  {item.nombre.toUpperCase()}
+                  {item.name.toUpperCase()}
                 </Text>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                   <View style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: classColor + "33" }}>
                     <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: classColor }}>
-                      {item.clasificacion.toUpperCase()}
+                      {item.classification.toUpperCase()}
                     </Text>
                   </View>
                   <View style={{ width: 12, height: 12, borderRadius: 6, borderWidth: 1, borderColor: tc.textDisabled, alignItems: "center", justifyContent: "center" }}>
                     <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: dngColor }} />
                   </View>
                   <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>
-                    IA: {Math.round((item.iaConfianza || 0) * 100)}%
+                     IA: {Math.round((item.iaConfidence || 0) * 100)}%
                   </Text>
                 </View>
               </View>

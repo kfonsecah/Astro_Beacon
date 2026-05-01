@@ -2,27 +2,27 @@ import { SpeciesClassification, DangerLevel } from './enums';
 
 export interface Especie {
   id: string;
-  nombre: string;
-  clasificacion: SpeciesClassification;
-  nivelPeligro: DangerLevel;
-  descripcion: string;
-  imagenUrl: string;
-  descubiertoEn: Date;
-  clasificadoPorIA: boolean;
-  iaConfianza: number;
+  name: string;
+  classification: SpeciesClassification;
+  dangerLevel: DangerLevel;
+  description: string;
+  imageUrl: string;
+  discoveredAt: Date;
+  classifiedByAI: boolean;
+  iaConfidence: number;
 }
 
 export interface CreateEspecieDTO {
-  imagenUri: string;
-  descripcion: string;
-  ubicacion?: { lat: number; lng: number };
+  imageUrl?: string;
+  description: string;
+  location?: { lat: number; lng: number };
 }
 
 export interface EspecieClasificada {
-  clasificacion: SpeciesClassification;
-  nivelPeligro: DangerLevel;
-  confianza: number;
-  nombreSugerido?: string;
+  classification: SpeciesClassification;
+  dangerLevel: DangerLevel;
+  confidence: number;
+  suggestedName?: string;
 }
 
 export interface PaginatedSpecies {

@@ -38,8 +38,8 @@ export default function MapScreen() {
     }
   };
 
-  const getStatusColor = (estado: string) => statusColorMap[estado] || tc.textMuted;
-  const getStatusLabel = (estado: string) => statusLabelMap[estado] || estado.toUpperCase();
+  const getStatusColor = (status: string) => statusColorMap[status] || tc.textMuted;
+  const getStatusLabel = (status: string) => statusLabelMap[status] || status.toUpperCase();
 
   if (isLoading && page === 1) {
     return (
@@ -96,17 +96,17 @@ export default function MapScreen() {
         }
         renderItem={({ item }) => (
           <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 12, marginBottom: 8 }}>
-            <View style={{ paddingHorizontal: 8, paddingVertical: 4, marginRight: 12, backgroundColor: getStatusColor(item.estado) + "33" }}>
-              <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: getStatusColor(item.estado) }}>
-                {getStatusLabel(item.estado)}
+            <View style={{ paddingHorizontal: 8, paddingVertical: 4, marginRight: 12, backgroundColor: getStatusColor(item.status) + "33" }}>
+              <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: getStatusColor(item.status) }}>
+                {getStatusLabel(item.status)}
               </Text>
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
-                {formatContents(item.contenido)}
+                {formatContents(item.contents)}
               </Text>
               <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 2 }}>
-                📍 {item.ubicacion.lat.toFixed(2)}, {item.ubicacion.lng.toFixed(2)}
+                📍 {item.location.lat.toFixed(2)}, {item.location.lng.toFixed(2)}
               </Text>
             </View>
           </View>

@@ -3,26 +3,26 @@ import { GeoPoint } from './shared.types';
 
 export interface Astronauta {
   id: string;
-  nombre: string;
+  name: string;
   email: string;
   passwordHash: string;
   rol: UserRole;
-  estado: AstronautStatus;
+  status: AstronautStatus;
   baseCampLocation: GeoPoint;
   creadoEn: Date;
   ultimaActividad: Date;
 }
 
 export interface CreateAstronautaDTO {
-  nombre: string;
+  name: string;
   email: string;
   password: string;
   baseCampLocation?: GeoPoint;
 }
 
 export interface UpdateAstronautaDTO {
-  nombre?: string;
-  estado?: AstronautStatus;
+  name?: string;
+  status?: AstronautStatus;
   baseCampLocation?: GeoPoint;
 }
 
