@@ -1,66 +1,152 @@
-import { View, Text, ScrollView, SafeAreaView } from "react-native";
+import { View, Text, FlatList, RefreshControl, ActivityIndicator, SafeAreaView } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { HudHeader } from "@/components/ui/HudHeader";
-
-const mockResources = [
-  { id: "o2", name: "OXÍGENO", category: "oxigeno", current: 87, max: 100, unit: "%", threshold: 15 },
-  { id: "h2o", name: "AGUA", category: "agua", current: 62, max: 100, unit: "%", threshold: 15 },
-  { id: "food", name: "COMIDA", category: "comida", current: 45, max: 100, unit: "%", threshold: 15 },
-  { id: "med", name: "MÉDICO", category: "medico", current: 78, max: 100, unit: "%", threshold: 10 },
-  { id: "equip", name: "EQUIPO", category: "equipo", current: 92, max: 100, unit: "%", threshold: 20 },
-];
-
-const mockMovements = [
-  { id: "1", type: "ingreso", resource: "AGUA", amount: 15, reason: "Suministro #46", date: "Día 47" },
-  { id: "2", type: "egreso", resource: "OXÍGENO", amount: 8, reason: "Expedición al norte", date: "Día 46" },
-  { id: "3", type: "egreso", resource: "COMIDA", amount: 3, reason: "Ración diaria", date: "Día 46" },
-  { id: "4", type: "ingreso", resource: "MÉDICO", amount: 10, reason: "Suministro #45", date: "Día 44" },
-];
+import { useResources, useResourceAlerts } from "@/hooks/useResources";
+import { useState } from "react";
 
 export default function ResourcesScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
 
+  const [page, setPage] = useState(1);
+  const [allResources, setAllResources] = useState<any[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
+  const { data, isLoading, error, refetch } = useResources(page, 10);
+  const { data: alerts } = useResourceAlerts();
+
+  // Accumulate resources across pages
+  const resources = data?.items ?? [];
+  const total = data?.total ?? 0;
+
+  // Load more when page changes
+  if (resources.length > 0 && allResources.length < total) {
+    const newItems = resources.filter(
+      (r: any) => !allResources.some((existing: any) => existing._id === r._id)
+    );
+    if (newItems.length > 0) {
+      setAllResources(prev => [...prev, ...newItems]);
+    }
+  }
+
+  const loadMore = () => {
+    if (hasMore && !isLoading && allResources.length < total) {
+      setPage(p => p + 1);
+      setHasMore(allResources.length + (data?.items?.length ?? 0) < total);
+    }
+  };
+
+  const onRefresh = async () => {
+    setPage(1);
+    setAllResources([]);
+    setHasMore(true);
+    await refetch();
+  };
+
+  if (isLoading && page === 1) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={tc.primary} />
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, marginTop: 12 }}>
+          CARGANDO RECURSOS...
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 16 }}>
+        <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
+          ERROR AL CARGAR RECURSOS
+        </Text>
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 8, textAlign: "center" }}>
+          {error.message || 'Intente de nuevo más tarde'}
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <HudHeader title="GESTIÓN DE RECURSOS" subtitle="INVENTARIO ACTUAL" />
+      <FlatList
+        data={allResources}
+        keyExtractor={(item: any) => item._id || item.id}
+        contentContainerStyle={{ padding: 16 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading && page === 1}
+            onRefresh={onRefresh}
+            colors={[tc.primary]}
+            tintColor={tc.primary}
+          />
+        }
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.5}
+        ListHeaderComponent={() => (
+          <>
+            <HudHeader title="GESTIÓN DE RECURSOS" subtitle="INVENTARIO ACTUAL" />
 
-        {mockResources.map((resource) => {
-          const isCritical = (resource.current / resource.max) * 100 < resource.threshold;
+            {/* Alerts */}
+            {alerts && alerts.length > 0 && (
+              <View style={{ marginBottom: 16 }}>
+                {alerts.map((alert: any) => (
+                  <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: "rgba(251,146,60,0.1)", borderWidth: 1, borderColor: "rgba(251,146,60,0.3)", padding: 12, marginBottom: 8 }}>
+                    <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
+                    <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
+                      {alert.message}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12, marginTop: 8 }}>
+              RECURSOS ({allResources.length}/{total})
+            </Text>
+          </>
+        )}
+        renderItem={({ item: resource }: { item: any }) => {
+          const current = resource.currentAmount ?? 0;
+          const max = resource.capacidadMaxima ?? 100;
+          const thresholdPercentage = max > 0 ? ((resource.threshold ?? 0) / max) * 100 : 0;
+          const isCritical = (current / max) * 100 < thresholdPercentage;
+
           return (
-            <View key={resource.id} style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
+            <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
-                <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>{resource.name}</Text>
+                <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+                  {(resource.nombre || resource.name || 'UNKNOWN').toUpperCase()}
+                </Text>
                 <Text style={{ color: isCritical ? tc.danger : tc.primary, fontFamily: "monospace", fontSize: 12 }}>
-                  {resource.current}/{resource.max} {resource.unit}
+                  {current}/{max} {resource.unidad || resource.unit || ''}
                 </Text>
               </View>
-              <ProgressBar value={resource.current} max={resource.max} criticalThreshold={resource.threshold} showValue={false} />
-              {isCritical && <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 6 }}>⚠️ NIVEL CRÍTICO</Text>}
+              <ProgressBar value={current} max={max} criticalThreshold={thresholdPercentage} showValue={true} />
+              {isCritical && (
+                <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 6 }}>
+                  ⚠️ NIVEL CRÍTICO
+                </Text>
+              )}
             </View>
           );
-        })}
-
-        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12, marginTop: 24 }}>HISTORIAL DE MOVIMIENTOS</Text>
-
-        {mockMovements.map((movement) => (
-          <View key={movement.id} style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 12, marginBottom: 8 }}>
-            <Text style={{ fontSize: 18, marginRight: 12 }}>{movement.type === "ingreso" ? "📥" : "📤"}</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>{movement.resource}</Text>
-              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 2 }}>{movement.reason}</Text>
+        }}
+        ListFooterComponent={() =>
+          isLoading && page > 1 ? (
+            <View style={{ padding: 16, alignItems: "center" }}>
+              <ActivityIndicator size="small" color={tc.primary} />
             </View>
-            <View style={{ alignItems: "flex-end" }}>
-              <Text style={{ fontFamily: "monospace", fontSize: 14, fontWeight: "bold", color: movement.type === "ingreso" ? tc.success : tc.danger }}>
-                {movement.type === "ingreso" ? "+" : "-"}{movement.amount}
-              </Text>
-              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 8 }}>{movement.date}</Text>
-            </View>
+          ) : null
+        }
+        ListEmptyComponent={() => (
+          <View style={{ alignItems: "center", marginTop: 40 }}>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+              NO HAY RECURSOS ACTIVOS
+            </Text>
           </View>
-        ))}
-      </ScrollView>
+        )}
+      />
     </SafeAreaView>
   );
 }
