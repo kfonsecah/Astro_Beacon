@@ -71,12 +71,12 @@ export default function MapScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={supplies}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
         }
-        ListHeaderComponent={
+        ListHeaderComponent={() => (
           <>
             <HudHeader title="MAPA DE EXPLORACIÓN" subtitle="SUMINISTROS DISPONIBLES" />
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
@@ -87,13 +87,13 @@ export default function MapScreen() {
             <View style={{ height: 180, backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 20, alignItems: "center", justifyContent: "center" }}>
               <Text style={{ fontSize: 40 }}>🗺️</Text>
               <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 8, letterSpacing: 2, marginTop: 8 }}>
-                MAPA DE ubicación próximamente
+                MAPA DE UBICACIÓN PRÓXIMAMENTE
               </Text>
             </View>
 
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>LISTA DE SUMINISTROS</Text>
           </>
-        }
+        )}
         renderItem={({ item }) => (
           <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 12, marginBottom: 8 }}>
             <View style={{ paddingHorizontal: 8, paddingVertical: 4, marginRight: 12, backgroundColor: getStatusColor(item.status) + "33" }}>
@@ -113,11 +113,11 @@ export default function MapScreen() {
         )}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
+        ListFooterComponent={() => (
           isFetching && page > 1 ? (
             <ActivityIndicator size="small" color={tc.primary} style={{ marginVertical: 16 }} />
           ) : null
-        }
+        )}
         ListEmptyComponent={
           <View style={{ alignItems: "center", paddingTop: 40 }}>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 12 }}>

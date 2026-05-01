@@ -50,19 +50,19 @@ export default function LogbookScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={entries}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
         }
-        ListHeaderComponent={
+        ListHeaderComponent={() => (
           <>
             <HudHeader title="REGISTROS DE MISIÓN" subtitle="BITÁCORA ACTUAL" />
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
               {data?.total || 0} ENTRADAS
             </Text>
           </>
-        }
+        )}
         renderItem={({ item }) => (
           <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: tc.primary }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
@@ -87,11 +87,11 @@ export default function LogbookScreen() {
         )}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
+        ListFooterComponent={() => (
           isFetching && page > 1 ? (
             <ActivityIndicator size="small" color={tc.primary} style={{ marginVertical: 16 }} />
           ) : null
-        }
+        )}
       />
     </SafeAreaView>
   );

@@ -66,19 +66,19 @@ export default function BestiaryScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={species}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
         }
-        ListHeaderComponent={
+        ListHeaderComponent={() => (
           <>
             <HudHeader title="BITÁCORA DE ESPECIES" subtitle="BESTIARIO PLANETARIO" />
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
               {data?.total || 0} REGISTROS
             </Text>
           </>
-        }
+        )}
         renderItem={({ item }) => {
           const classColor = classificationColorMap[item.classification] || tc.textMuted;
           const dngColor = dangerColorMap[item.dangerLevel] || tc.textMuted;
@@ -109,11 +109,11 @@ export default function BestiaryScreen() {
         }}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={
+        ListFooterComponent={() => (
           isFetching && page > 1 ? (
             <ActivityIndicator size="small" color={tc.primary} style={{ marginVertical: 16 }} />
           ) : null
-        }
+        )}
       />
     </SafeAreaView>
   );
