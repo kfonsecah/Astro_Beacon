@@ -149,6 +149,32 @@ export default function ResourcesScreen() {
         )}
       />
 
+      {/* Historial de Movimientos */}
+      {allResources.map((resource, rIdx) => {
+        const movements = (resource as any).movements || [];
+        if (movements.length === 0) return null;
+        const resourceKey = (resource as any)._id || resource.id || `resource-${rIdx}`;
+        return (
+          <View key={`history-${resourceKey}`} style={{ paddingHorizontal: 16, marginTop: 20 }}>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>
+              HISTORIAL DE MOVIMIENTOS - {resource.name.toUpperCase()}
+            </Text>
+            {movements.map((mov: any, idx: number) => (
+              <View key={`${resourceKey}-mov-${idx}`} style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                <Text style={{ fontSize: 12, width: 20 }}>{mov.type === 'ingreso' ? '↑' : '↓'}</Text>
+                <View style={{ flex: 1, marginLeft: 8 }}>
+                  <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 10 }}>
+                    {mov.type === 'ingreso' ? '+' : '-'}{mov.amount} {resource.unit}
+                  </Text>
+                  <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 8 }}>
+                    {mov.notes || 'Ajuste de inventario'} · {new Date(mov.timestamp).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        );
+      })}
     </View>
   );
 }
