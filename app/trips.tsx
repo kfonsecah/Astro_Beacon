@@ -77,7 +77,7 @@ export default function TripsScreen() {
       </View>
       <FlatList
         data={trips}
-        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
+        keyExtractor={(item, index) => item.id || `trip-${index}`}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />}
         ListHeaderComponent={() => (

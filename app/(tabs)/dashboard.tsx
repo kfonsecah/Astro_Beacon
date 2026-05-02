@@ -1,4 +1,4 @@
-﻿import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useTheme } from "@/hooks/use-theme";
@@ -6,14 +6,12 @@ import { useAstronautDashboard, useAstronautProfile } from "@/hooks/useAstronaut
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useResourceAlerts, useResources } from "@/hooks/useResources";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function DashboardScreen() {
   const theme = useTheme();
   const tc = theme.colors;
   const router = useRouter();
-  const insets = useSafeAreaInsets();
 
   const { data: astronaut, isLoading: loadingProfile, error: errorProfile } = useAstronautProfile();
   const { data: stats, isLoading: loadingStats, error: errorStats } = useAstronautDashboard();
@@ -26,25 +24,25 @@ export default function DashboardScreen() {
 
   if (isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, marginTop: 12 }}>
           CARGANDO DATOS...
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 16 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 16 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           ERROR AL CARGAR DATOS
         </Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 8, textAlign: "center" }}>
-          {error.message || 'Intente de nuevo mÃ¡s tarde'}
+          {error.message || 'Intente de nuevo más tarde'}
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -56,12 +54,12 @@ export default function DashboardScreen() {
   const supplyETA = "2d 14h";
 
   return (
-    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
 
         <HudHeader
           title="PANEL DE CONTROL"
-          subtitle={astronaut?.name ? `${String(astronaut.name).toUpperCase()} Â· ${String(astronaut.status ?? '').toUpperCase()}` : "CARGANDO..."}
+          subtitle={astronaut?.name ? `${String(astronaut.name).toUpperCase()} · ${String(astronaut.status ?? '').toUpperCase()}` : "CARGANDO..."}
         />
 
         {/* Alerts - only show when there are alerts */}
@@ -69,7 +67,7 @@ export default function DashboardScreen() {
           <View style={{ marginBottom: 16 }}>
             {alerts.map((alert: any) => (
               <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: "rgba(251,146,60,0.1)", borderWidth: 1, borderColor: "rgba(251,146,60,0.3)", padding: 12, marginBottom: 8 }}>
-                <Text style={{ fontSize: 16, marginRight: 8 }}>âš ï¸</Text>
+                <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
                 <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
                   {alert.message}
                 </Text>
@@ -80,9 +78,9 @@ export default function DashboardScreen() {
 
         {/* Signal Status */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 16 }}>
-          <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 3 }}>DÃA 47 Â· PLANETA DESCONOCIDO</Text>
+          <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 3 }}>DÍA 47 · PLANETA DESCONOCIDO</Text>
           <Text style={{ color: networkStatus.isConnected ? tc.success : tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 1 }}>
-            {networkStatus.isConnected ? 'EN LÃNEA' : 'SIN CONEXIÃ“N'}
+            {networkStatus.isConnected ? 'EN LÍNEA' : 'SIN CONEXIÓN'}
           </Text>
         </View>
 
@@ -109,7 +107,7 @@ export default function DashboardScreen() {
                 <ProgressBar value={current} max={max} criticalThreshold={thresholdPercentage} showValue={true} />
                 {isCritical && (
                   <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 6 }}>
-                    âš ï¸ NIVEL CRÃTICO
+                    ⚠️ NIVEL CRÍTICO
                   </Text>
                 )}
               </View>
@@ -119,13 +117,13 @@ export default function DashboardScreen() {
           )}
 
         <View style={{ marginTop: 8 }}>
-          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>PROGRESO DE MISIÃ“N</Text>
+          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>PROGRESO DE MISIÓN</Text>
           <Card>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>ESTADO</Text>
             <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{(astronaut?.status ?? 'N/A').toUpperCase()}</Text>
-            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>SEÃ‘AL</Text>
-            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{networkStatus.isConnected ? 'ESTABLE Â· 847ms' : 'OFFLINE'}</Text>
-            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>PRÃ“XIMO SUMINISTRO</Text>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>SEÑAL</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{networkStatus.isConnected ? 'ESTABLE · 847ms' : 'OFFLINE'}</Text>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>PRÓXIMO SUMINISTRO</Text>
             <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>ETA: {supplyETA}</Text>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>RECURSOS ACTIVOS</Text>
             <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{resourcesCount}</Text>
@@ -141,14 +139,14 @@ export default function DashboardScreen() {
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
             onPress={() => router.push("/trips")}
           >
-            <Text style={{ fontSize: 24, marginBottom: 8 }}>ðŸš€</Text>
-            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÃ“N</Text>
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
             onPress={() => router.push("/trips")}
           >
-            <Text style={{ fontSize: 24, marginBottom: 8 }}>ðŸ“·</Text>
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
           </TouchableOpacity>
         </View>
@@ -158,9 +156,9 @@ export default function DashboardScreen() {
           style={{ borderWidth: 1, borderColor: tc.danger, paddingVertical: 14, alignItems: "center", marginTop: 8 }}
           onPress={() => router.push("/reanimated-test")}
         >
-          <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>ðŸ§ª UAT: REANIMATED TEST</Text>
+          <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>🧪 UAT: REANIMATED TEST</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

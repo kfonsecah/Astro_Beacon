@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
-import { View, Text, FlatList, RefreshControl, ActivityIndicator } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useLogbookEntries } from "@/hooks/useLogbook";
@@ -9,7 +8,6 @@ import type { BitacoraEntradaResponse } from "@/types-dtos";
 export default function LogbookScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
-  const insets = useSafeAreaInsets();
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -28,31 +26,31 @@ export default function LogbookScreen() {
 
   if (isLoading && page === 1) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", marginTop: 8 }}>CARGANDO BITÁCORA...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (isError) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 14, marginBottom: 8 }}>ERROR DE CONEXIÓN</Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           No se pudo cargar la bitácora. Verifica tu conexión.
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   const entries = (data?.items || []) as BitacoraEntradaResponse[];
 
   return (
-    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={entries}
-        keyExtractor={(item) => item.id || (item as any)._id || Math.random().toString()}
+        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
@@ -68,9 +66,9 @@ export default function LogbookScreen() {
         renderItem={({ item }) => (
           <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: tc.primary }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
-                {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
-              </Text>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+              {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
+            </Text>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <Text style={{ fontSize: 10 }}>{item.updatedAt ? "✅" : "⏳"}</Text>
                 <Text style={{ fontFamily: "monospace", fontSize: 8, color: item.updatedAt ? tc.success : tc.warning }}>
@@ -95,6 +93,6 @@ export default function LogbookScreen() {
           ) : null
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }

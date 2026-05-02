@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
-import { View, Text, FlatList, RefreshControl, ActivityIndicator } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useSupplies } from "@/hooks/useSupplies";
@@ -23,7 +22,6 @@ const statusLabelMap: Record<string, string> = {
 export default function MapScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
-  const insets = useSafeAreaInsets();
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -45,45 +43,37 @@ export default function MapScreen() {
 
   if (isLoading && page === 1) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", marginTop: 8 }}>CARGANDO SUMINISTROS...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (isError) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 14, marginBottom: 8 }}>ERROR DE CONEXIÓN</Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           No se pudieron cargar los suministros. Verifica tu conexión.
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   const supplies = (data?.items || []) as Suministro[];
 
   const getEta = (status: string) => {
-    if (status === 'pendiente') return ' · PENDIENTE';
-    if (status === 'entregado') return ' · LISTO PARA RECOGER';
-    if (status === 'recogido') return ' · YA RECOGIDO';
+    if (status === 'pendiente') return 'ETA: 2d 14h';
+    if (status === 'entregado') return 'Recogido';
     return '';
   };
 
-  const formatContents = (contents: any) => {
-    if (!contents) return 'Suministro';
-    if (typeof contents === 'string') return contents;
-    if (Array.isArray(contents)) return contents.map((c: any) => c.name || c).join(', ');
-    return contents.name || 'Suministro';
-  };
-
   return (
-    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={supplies}
-        keyExtractor={(item) => item.id || (item as any)._id || Math.random().toString()}
+        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
@@ -139,6 +129,6 @@ export default function MapScreen() {
           </View>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
