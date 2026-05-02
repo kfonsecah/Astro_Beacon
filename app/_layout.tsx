@@ -30,8 +30,10 @@ export default function RootLayout() {
       <StatusBar style={theme.isDark ? "light" : "dark"} />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />
-        <Stack.Protected group="(app)" guard={() => isAuthenticated}>
-          <Stack.Screen name="(app)" />
+        <Stack.Protected group="authenticated" guard={() => isAuthenticated}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="trips" />
+          <Stack.Screen name="reanimated-test" />
         </Stack.Protected>
       </Stack>
     </QueryClientProvider>
