@@ -19,17 +19,18 @@ export default function ResourcesScreen() {
   const { data, isLoading, error, refetch } = useResources(page, 10);
   const { data: alerts } = useResourceAlerts();
 
-  useEffect(() => {
-    const newItems = data?.items ?? [];
-    if (newItems.length > 0) {
-      setAllResources(prev => {
-        const existingIds = new Set(prev.map(r => r.id));
-        const filtered = newItems.filter(r => !existingIds.has(r.id));
-        return filtered.length > 0 ? [...prev, ...filtered] : prev;
-      });
-      setHasMore((data?.total ?? 0) > allResources.length + newItems.length);
-    }
-  }, [data]);
+  // Accumulate resources across pages
+    useEffect(() => {
+      const newItems = data?.items ?? [];
+      if (newItems.length > 0) {
+        setAllResources(prev => {
+          const existingIds = new Set(prev.map(r => r.id));
+          const filtered = newItems.filter(r => !existingIds.has(r.id));
+          return filtered.length > 0 ? [...prev, ...filtered] : prev;
+        });
+        setHasMore((data?.total ?? 0) > allResources.length + newItems.length);
+      }
+    }, [data]);
 
   const loadMore = () => {
     if (hasMore && !isLoading && allResources.length < (data?.total ?? 0)) {
@@ -72,10 +73,7 @@ export default function ResourcesScreen() {
     <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
       <FlatList
         data={allResources}
-        keyExtractor={(item: Recurso) => {
-          const key = (item as any)._id || item.id || Math.random().toString();
-          return String(key);
-        }}
+        keyExtractor={(item: Recurso) => item.id || (item as any)._id || Math.random().toString()}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl
@@ -91,6 +89,7 @@ export default function ResourcesScreen() {
           <>
             <HudHeader title="GESTIÓN DE RECURSOS" subtitle="INVENTARIO ACTUAL" />
 
+            {/* Alerts */}
             {alerts && alerts.length > 0 && (
               <View style={{ marginBottom: 16 }}>
                 {alerts.map((alert: any) => (
@@ -134,13 +133,13 @@ export default function ResourcesScreen() {
             </View>
           );
         }}
-        ListFooterComponent={() => (
+        ListFooterComponent={() =>
           isLoading && page > 1 ? (
             <View style={{ padding: 16, alignItems: "center" }}>
               <ActivityIndicator size="small" color={tc.primary} />
             </View>
           ) : null
-        )}
+        }
         ListEmptyComponent={() => (
           <View style={{ alignItems: "center", marginTop: 40 }}>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
@@ -149,33 +148,6 @@ export default function ResourcesScreen() {
           </View>
         )}
       />
-
-      {/* Historial de Movimientos */}
-      {allResources.map((resource, rIdx) => {
-        const movements = (resource as any).movements || [];
-        if (movements.length === 0) return null;
-        const resourceKey = (resource as any)._id || resource.id || `resource-${rIdx}`;
-        return (
-          <View key={`history-${resourceKey}`} style={{ paddingHorizontal: 16, marginTop: 20 }}>
-            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>
-              HISTORIAL DE MOVIMIENTOS - {resource.name.toUpperCase()}
-            </Text>
-            {movements.map((mov: any, idx: number) => (
-              <View key={`${resourceKey}-mov-${idx}`} style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                <Text style={{ fontSize: 12 }}>{mov.type === 'ingreso' ? 'TrendingUp' : 'TrendingDown'}</Text>
-                <View style={{ flex: 1, marginLeft: 8 }}>
-                  <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 10 }}>
-                    {mov.notes || `${mov.type} ${resource.name}`}
-                  </Text>
-                  <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 8 }}>
-                    {mov.type === 'ingreso' ? '+' : ''}{mov.amount} {resource.unit} · {new Date(mov.timestamp).toLocaleDateString()}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        );
-      })}
-    </View>
+    </SafeAreaView>
   );
 }
