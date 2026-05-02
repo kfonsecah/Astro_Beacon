@@ -1,4 +1,5 @@
-import { View, Text, FlatList, RefreshControl, ActivityIndicator, SafeAreaView } from "react-native";
+import { View, Text, FlatList, RefreshControl, ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { HudHeader } from "@/components/ui/HudHeader";
@@ -9,6 +10,7 @@ import type { Recurso } from "@/types-dtos";
 export default function ResourcesScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
+  const insets = useSafeAreaInsets();
 
   const [page, setPage] = useState(1);
   const [allResources, setAllResources] = useState<Recurso[]>([]);
@@ -17,18 +19,17 @@ export default function ResourcesScreen() {
   const { data, isLoading, error, refetch } = useResources(page, 10);
   const { data: alerts } = useResourceAlerts();
 
-  // Accumulate resources across pages
-    useEffect(() => {
-      const newItems = data?.items ?? [];
-      if (newItems.length > 0) {
-        setAllResources(prev => {
-          const existingIds = new Set(prev.map(r => r.id));
-          const filtered = newItems.filter(r => !existingIds.has(r.id));
-          return filtered.length > 0 ? [...prev, ...filtered] : prev;
-        });
-        setHasMore((data?.total ?? 0) > allResources.length + newItems.length);
-      }
-    }, [data]);
+  useEffect(() => {
+    const newItems = data?.items ?? [];
+    if (newItems.length > 0) {
+      setAllResources(prev => {
+        const existingIds = new Set(prev.map(r => r.id));
+        const filtered = newItems.filter(r => !existingIds.has(r.id));
+        return filtered.length > 0 ? [...prev, ...filtered] : prev;
+      });
+      setHasMore((data?.total ?? 0) > allResources.length + newItems.length);
+    }
+  }, [data]);
 
   const loadMore = () => {
     if (hasMore && !isLoading && allResources.length < (data?.total ?? 0)) {
@@ -45,30 +46,30 @@ export default function ResourcesScreen() {
 
   if (isLoading && page === 1) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, marginTop: 12 }}>
           CARGANDO RECURSOS...
         </Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 16 }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 16 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           ERROR AL CARGAR RECURSOS
         </Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 8, textAlign: "center" }}>
           {error.message || 'Intente de nuevo más tarde'}
         </Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
       <FlatList
         data={allResources}
         keyExtractor={(item: Recurso) => item.id || (item as any)._id || Math.random().toString()}
@@ -87,7 +88,6 @@ export default function ResourcesScreen() {
           <>
             <HudHeader title="GESTIÓN DE RECURSOS" subtitle="INVENTARIO ACTUAL" />
 
-            {/* Alerts */}
             {alerts && alerts.length > 0 && (
               <View style={{ marginBottom: 16 }}>
                 {alerts.map((alert: any) => (
@@ -146,20 +146,21 @@ export default function ResourcesScreen() {
           </View>
         )}
       />
-      
+
       {/* Historial de Movimientos */}
-      {allResources.map((resource) => {
+      {allResources.map((resource, rIdx) => {
         const movements = (resource as any).movements || [];
         if (movements.length === 0) return null;
+        const resourceKey = resource.id || `resource-${rIdx}`;
         return (
-          <View key={`history-${resource.id}`} style={{ marginTop: 20 }}>
+          <View key={`history-${resourceKey}`} style={{ paddingHorizontal: 16, marginTop: 20 }}>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>
               HISTORIAL DE MOVIMIENTOS - {resource.name.toUpperCase()}
             </Text>
             {movements.map((mov: any, idx: number) => (
-              <View key={idx} style={{ flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <View key={`${resourceKey}-mov-${idx}`} style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
                 <Text style={{ fontSize: 12 }}>{mov.type === 'ingreso' ? 'TrendingUp' : 'TrendingDown'}</Text>
-                <View style={{ flex: 1 }}>
+                <View style={{ flex: 1, marginLeft: 8 }}>
                   <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 10 }}>
                     {mov.notes || `${mov.type} ${resource.name}`}
                   </Text>
@@ -172,6 +173,6 @@ export default function ResourcesScreen() {
           </View>
         );
       })}
-    </SafeAreaView>
+    </View>
   );
 }
