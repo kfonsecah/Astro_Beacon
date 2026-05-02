@@ -66,7 +66,7 @@ export default function BestiaryScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={species}
-        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
+        keyExtractor={(item, index) => item.id ?? `${item.name ?? 'specie'}-${index}`}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />

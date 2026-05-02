@@ -1,9 +1,9 @@
-import { useState, useCallback } from "react";
-import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
-import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
+import { useTheme } from "@/hooks/use-theme";
 import { useSupplies } from "@/hooks/useSupplies";
-import type { Suministro } from "@/types-dtos";
+import type { ResourceItem, Suministro } from "@/types-dtos";
+import { useCallback, useState } from "react";
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
 
 const statusColorMap: Record<string, string> = {
   pendiente: "#FFC107",
@@ -69,11 +69,15 @@ export default function MapScreen() {
     return '';
   };
 
+  function formatContents(contents: ResourceItem[]): import("react").ReactNode {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={supplies}
-        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
+        keyExtractor={(item) => String(item.id)}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />

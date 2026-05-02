@@ -50,7 +50,7 @@ export default function LogbookScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={entries}
-        keyExtractor={(item) => item.id || item._id || Math.random().toString()}
+        keyExtractor={(item) => item.id || Math.random().toString()}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
