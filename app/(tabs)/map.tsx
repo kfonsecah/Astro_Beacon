@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
-import { View, Text, FlatList, RefreshControl, ActivityIndicator } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useSupplies } from "@/hooks/useSupplies";
@@ -23,7 +22,6 @@ const statusLabelMap: Record<string, string> = {
 export default function MapScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
-  const insets = useSafeAreaInsets();
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -45,21 +43,21 @@ export default function MapScreen() {
 
   if (isLoading && page === 1) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", marginTop: 8 }}>CARGANDO SUMINISTROS...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (isError) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 14, marginBottom: 8 }}>ERROR DE CONEXIÓN</Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           No se pudieron cargar los suministros. Verifica tu conexión.
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -72,7 +70,7 @@ export default function MapScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={supplies}
         keyExtractor={(item) => item.id || item._id || Math.random().toString()}
@@ -131,6 +129,6 @@ export default function MapScreen() {
           </View>
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }

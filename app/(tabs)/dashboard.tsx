@@ -6,8 +6,7 @@ import { useAstronautDashboard, useAstronautProfile } from "@/hooks/useAstronaut
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useResourceAlerts, useResources } from "@/hooks/useResources";
 import { useRouter } from "expo-router";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ActivityIndicator, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function DashboardScreen() {
   const theme = useTheme();
@@ -23,42 +22,27 @@ export default function DashboardScreen() {
   const isLoading = loadingProfile || loadingStats || loadingResources;
   const error = errorProfile || errorStats;
 
-  const insets = useSafeAreaInsets();
-
   if (isLoading) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, marginTop: 12 }}>
           CARGANDO DATOS...
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (error) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 16 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 16 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           ERROR AL CARGAR DATOS
         </Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 8, textAlign: "center" }}>
           {error.message || 'Intente de nuevo más tarde'}
         </Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 16 }}>
-        <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
-          ERROR AL CARGAR DATOS
-        </Text>
-        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 8, textAlign: "center" }}>
-          {error.message || 'Intente de nuevo más tarde'}
-        </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -70,7 +54,7 @@ export default function DashboardScreen() {
   const supplyETA = "2d 14h";
 
   return (
-    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
 
         <HudHeader
@@ -153,14 +137,14 @@ export default function DashboardScreen() {
         <View style={{ flexDirection: "row", marginTop: 24, marginBottom: 12 }}>
           <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
-            onPress={() => router.push("/trips")}
+            onPress={() => router.push("/(tabs)/trips")}
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>🚀</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>EXPEDICIÓN</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
-            onPress={() => router.push("/trips")}
+            onPress={() => router.push("/(tabs)/trips")}
           >
             <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
@@ -175,6 +159,6 @@ export default function DashboardScreen() {
           <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>🧪 UAT: REANIMATED TEST</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

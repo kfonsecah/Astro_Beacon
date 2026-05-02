@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
-import { View, Text, FlatList, RefreshControl, ActivityIndicator } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useLogbookEntries } from "@/hooks/useLogbook";
@@ -9,7 +8,6 @@ import type { BitacoraEntradaResponse } from "@/types-dtos";
 export default function LogbookScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
-  const insets = useSafeAreaInsets();
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -28,28 +26,28 @@ export default function LogbookScreen() {
 
   if (isLoading && page === 1) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", marginTop: 8 }}>CARGANDO BITÁCORA...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   if (isError) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 14, marginBottom: 8 }}>ERROR DE CONEXIÓN</Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           No se pudo cargar la bitácora. Verifica tu conexión.
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   const entries = (data?.items || []) as BitacoraEntradaResponse[];
 
   return (
-    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={entries}
         keyExtractor={(item) => item.id || item._id || Math.random().toString()}
@@ -95,6 +93,6 @@ export default function LogbookScreen() {
           ) : null
         )}
       />
-    </View>
+    </SafeAreaView>
   );
 }
