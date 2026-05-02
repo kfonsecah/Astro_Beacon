@@ -72,7 +72,10 @@ export default function ResourcesScreen() {
     <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
       <FlatList
         data={allResources}
-        keyExtractor={(item: Recurso) => item.id || (item as any)._id || Math.random().toString()}
+        keyExtractor={(item: Recurso) => {
+          const key = (item as any)._id || item.id || Math.random().toString();
+          return String(key);
+        }}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl
@@ -151,7 +154,7 @@ export default function ResourcesScreen() {
       {allResources.map((resource, rIdx) => {
         const movements = (resource as any).movements || [];
         if (movements.length === 0) return null;
-        const resourceKey = resource.id || `resource-${rIdx}`;
+        const resourceKey = (resource as any)._id || resource.id || `resource-${rIdx}`;
         return (
           <View key={`history-${resourceKey}`} style={{ paddingHorizontal: 16, marginTop: 20 }}>
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>
