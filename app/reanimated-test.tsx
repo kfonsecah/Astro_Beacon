@@ -1,6 +1,7 @@
-//documento prueba de animaciones, no funcional ni necesaria 
+//documento prueba de animaciones, no funcional ni necesaria
 import { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export default function ReanimatedTestScreen() {
+  const insets = useSafeAreaInsets();
   const translateX = useSharedValue(0);
   const rotate = useSharedValue(0);
   const scale = useSharedValue(1);
@@ -48,7 +50,7 @@ export default function ReanimatedTestScreen() {
   }));
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.title}>REANIMATED UAT</Text>
       <Text style={styles.subtitle}>SDK 54 · New Architecture</Text>
 
@@ -78,7 +80,7 @@ export default function ReanimatedTestScreen() {
       >
         <Text style={styles.buttonText}>RESET ANIMACIONES</Text>
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -89,56 +91,52 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   title: {
-    color: '#6EE7B7',
     fontFamily: 'monospace',
-    fontSize: 20,
-    letterSpacing: 4,
+    fontSize: 14,
+    color: '#00E5FF',
+    letterSpacing: 3,
     textAlign: 'center',
     marginBottom: 4,
   },
   subtitle: {
-    color: '#6B7280',
     fontFamily: 'monospace',
-    fontSize: 10,
+    fontSize: 9,
+    color: '#6272a4',
     letterSpacing: 2,
     textAlign: 'center',
-    marginBottom: 32,
-  },
-  testArea: {
-    height: 200,
-    backgroundColor: '#111827',
-    borderWidth: 1,
-    borderColor: '#1F2937',
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: 24,
   },
+  testArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   box: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#6EE7B7',
+    width: 80,
+    height: 80,
+    backgroundColor: '#00E5FF',
+    borderRadius: 8,
   },
   results: {
+    marginBottom: 24,
     gap: 8,
-    marginBottom: 32,
   },
   resultText: {
-    color: '#22C55E',
     fontFamily: 'monospace',
-    fontSize: 12,
+    fontSize: 10,
+    color: '#8BE9FD',
     letterSpacing: 1,
+    textAlign: 'center',
   },
   button: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#6EE7B7',
-    paddingVertical: 14,
+    backgroundColor: '#00E5FF',
+    paddingVertical: 12,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#6EE7B7',
     fontFamily: 'monospace',
-    fontSize: 12,
-    letterSpacing: 3,
+    fontSize: 10,
+    color: '#0B1120',
+    letterSpacing: 2,
   },
 });
