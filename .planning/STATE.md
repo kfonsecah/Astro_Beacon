@@ -3,23 +3,22 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-01T06:30:00.000Z"
-last_activity: 2026-05-01
+last_updated: "2026-05-03T23:22:26Z"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 16
+  completed_plans: 12
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 16 (screen-integration) — COMPLETED
-Plan: 6 of 6 (all done)
+Phase: 17 (maps-trips-polish) — EXECUTING
+Plan: 2 of 4
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Phase 16 complete, ready for Phase 17
+**Status:** Executing Phase 17
 
 ## Project Reference
 
@@ -35,9 +34,9 @@ Plan: 6 of 6 (all done)
 **Milestone Progress**: 30/45 requirements completed
 
 ## Performance Metrics
- 
-- Phases Completed: 3
-- Plans Executed: 8
+  
+- Phases Completed: 4
+- Plans Executed: 12
 - Requirements Met: 30
 - Token Usage: TBD
 
@@ -55,7 +54,7 @@ Plan: 6 of 6 (all done)
 - Login screen uses useLogin() mutation from TanStack Query
 - Navigation after login uses router.replace('/(tabs)/dashboard') to prevent back navigation
 
-**Current focus:** Phase 16 completed — all screens connected to API
+**Current focus:** Phase 17 — maps-trips-polish
 
 ### Key Decisions (Phase 14)
  
@@ -73,7 +72,7 @@ Plan: 6 of 6 (all done)
 - All API calls go through api.ts Axios instance (never raw axios)
 
 ### Key Decisions (Phase 16)
- 
+  
 - 16-01: Dashboard connected to API (useAstronautProfile + useAstronautDashboard)
 - 16-02: Resources connected to API (useResources with FlatList pagination)
 - 16-03: Logbook connected to API (useLogbookEntries with FlatList pagination)
@@ -84,6 +83,14 @@ Plan: 6 of 6 (all done)
 - All screens have loading/error/pull-to-refresh states
 - Fixed TypeScript errors: Recurso field names, BitacoraEntradaResponse type, ResourceItem type
 
+### Key Decisions (Phase 17 - Plan 01)
+
+- 17-01: Fixed formatContents() in map.tsx - now returns formatted string with package symbols (📦) and quantities
+- 17-01: Created CategoryLegend component - collapsible legend explaining supply category symbols (🧪💧🍎💊🔧📦)
+- 17-01: Created TripStore with Zustand - manages active trip state, oxygen tracking, and GPS tracking status
+- Decision: formatContents() uses generic package symbol (📦) instead of category-specific symbols due to ResourceItem type limitation (only has resourceId + cantidad, no category field)
+- Decision: TripStore initializes oxygenRemaining from trip.oxygenBudgeted when setting active trip
+
 ### Todos
 
 - Phase 17: Maps & Trips Polish (next phase)
@@ -93,11 +100,11 @@ Plan: 6 of 6 (all done)
 - None
 
 ## Session Continuity
-     
-- Last action: Gathered Phase 17 context (Maps & Trips Polish)
-- Stopped At: Phase 17 context gathered
+      
+- Last action: Completed Phase 17 Plan 01 (fix formatContents, create CategoryLegend, create TripStore)
+- Stopped At: Phase 17 Plan 01 completed - formatContents fixed, CategoryLegend created, TripStore created
 - Phase 17 context: Full navigation mode with react-native-maps, real GPS routes, supply markers with category symbols, trip start with oxygen warning, real-time GPS tracking during trip, oxygen countdown, resource recording on return
-- Next step: Plan Phase 17 (Maps & Trips Polish)
+- Next step: Execute Phase 17 Plan 02 (Implement MapView with supply markers and user location)
 
 ### Roadmap Evolution
 

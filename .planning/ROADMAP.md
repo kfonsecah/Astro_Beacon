@@ -94,7 +94,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 17-01-PLAN.md — Fix formatContents, create CategoryLegend, create TripStore (depends on: none)
+- [x] 17-01-PLAN.md — Fix formatContents, create CategoryLegend, create TripStore (depends on: none)
 - [ ] 17-02-PLAN.md — Implement MapView with supply markers and user location (depends on: 17-01)
 - [ ] 17-03-PLAN.md — Implement trip start flow with confirmation dialog (depends on: 17-01)
 - [ ] 17-04-PLAN.md — Real-time GPS tracking and oxygen countdown (depends on: 17-02, 17-03)
@@ -122,10 +122,10 @@ Plans:
 | 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
 | 15. Domain Services + Hooks | 2/2 | Complete    | 2026-04-30 |
 | 16. Screen Integration | 2/6 | In Progress|  |
-| 17. Maps & Trips Polish | 0/X | Not started | - |
+| 17. Maps & Trips Polish | 1/4 | In Progress| 2026-05-03 |
 | 18. Error Handling & Offline | 0/X | Not started | - |
 
 ---
 
 **Coverage**: 45/45 v1.2 requirements mapped ✓
-**Last updated**: 2026-04-27
+**Last updated**: 2026-05-03
