@@ -11,7 +11,8 @@
 - [x] **Phase 14: API Client Setup** - Configurar TanStack Query y detección de red (completed 2026-04-30)
 - [x] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios (completed 2026-04-30)
 - [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API (6/6 plans done)
-- [ ] **Phase 17: Error Handling & Offline** - Error boundaries y soporte offline
+- [ ] **Phase 17: Maps & Trips Polish** - Fix map crash, implement trip start, complete map view
+- [ ] **Phase 18: Error Handling & Offline** - Error boundaries y soporte offline
 - [x] **Phase 13: Auth Integration** - Conectar login con API (registro diferido) (completed 2026-04-30)
 
 ---
@@ -79,9 +80,28 @@ Plans:
 - [ ] 16-06-PLAN.md — Create Trips screens and connect to API (UI-10, UI-11, UI-14, UI-15, UI-16)
 **UI hint**: yes
 
-### Phase 17: Error Handling & Offline
+### Phase 17: Maps & Trips Polish
+**Goal**: Fix map crash (formatContents), implement trip start flow with confirmation and oxygen warning, complete map view with react-native-maps showing supply markers, and implement full trip execution with real-time GPS tracking and oxygen countdown.
+**Depends on**: Phase 16 (screens integrated)
+**Requirements**: TBD
+**Success Criteria** (what must be TRUE):
+  1. `app/(tabs)/map.tsx` formatContents() no longer throws error
+  2. "INICIAR VIAJE" button in trips screen triggers trip start flow with oxygen warning
+  3. Map view renders actual map with supply markers (not placeholder)
+  4. Active trip shows real-time GPS tracking on map
+  5. Oxygen level decreases in real-time during trip
+**Plans**: 4 plans
+**UI hint**: yes
+
+Plans:
+- [ ] 17-01-PLAN.md — Fix formatContents, create CategoryLegend, create TripStore (depends on: none)
+- [ ] 17-02-PLAN.md — Implement MapView with supply markers and user location (depends on: 17-01)
+- [ ] 17-03-PLAN.md — Implement trip start flow with confirmation dialog (depends on: 17-01)
+- [ ] 17-04-PLAN.md — Real-time GPS tracking and oxygen countdown (depends on: 17-02, 17-03)
+
+### Phase 18: Error Handling & Offline
 **Goal**: Add error boundaries for graceful failure and offline detection with user feedback.
-**Depends on**: Phase 16 (screens integrated, errors can occur)
+**Depends on**: Phase 17 (maps & trips polished)
 **Requirements**: ERR-01, ERR-02, ERR-03, ERR-04, ERR-05, ERR-06
 **Success Criteria** (what must be TRUE):
   1. All route files export ErrorBoundary for graceful error recovery
@@ -102,7 +122,8 @@ Plans:
 | 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
 | 15. Domain Services + Hooks | 2/2 | Complete    | 2026-04-30 |
 | 16. Screen Integration | 2/6 | In Progress|  |
-| 17. Error Handling & Offline | 0/X | Not started | - |
+| 17. Maps & Trips Polish | 0/X | Not started | - |
+| 18. Error Handling & Offline | 0/X | Not started | - |
 
 ---
 
