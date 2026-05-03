@@ -39,9 +39,14 @@ This phase delivers: Fix map crash (formatContents), implement trip start flow w
 - **D-08:** Trip status changes to "activo" after successful start
 
 ### Trip Execution (Real-time)
-- **D-09:** Active trip shows real-time GPS tracking on map
-- **D-10:** Oxygen level decreases in real-time during trip (countdown timer)
+- **D-09:** Active trip shows real-time GPS tracking on map (expo-location)
+- **D-10:** Oxygen level decreases in real-time during trip (countdown timer, Zustand store persists state)
 - **D-11:** On arrival/return: app records resources collected during trip
+- **D-12:** Active trip state stored in Zustand TripStore (not background location) — persists in memory when switching screens
+
+### Legend & UI
+- **D-13:** Collapsible panel for supply category legend (hidden by default, tap to expand)
+- **D-14:** Supply markers show category symbols (🧪 oxígeno, 💧 agua, 🍎 comida, 💊 medical) + quantity from `contents[]` array
 
 ### the agent's Discretion
 - Exact implementation of client-side route calculation (library choice: react-native-maps Polyline vs third-party routing service)
@@ -78,7 +83,15 @@ This phase delivers: Fix map crash (formatContents), implement trip start flow w
 - POST `/api/v1/trips/:id/start` — Start trip
 - POST `/api/v1/trips/:id/complete` — Complete trip
 - POST `/api/v1/trips/:id/abort` — Abort trip
-- GET `/api/v1/suministros` — List supplies with location data
+- GET `/api/v1/suministros` — List supplies with location data (lat/lng from MongoDB)
+- GET `/api/v1/suministros/nearby?lat=&lng=&radius=` — Geospatial query for nearby supplies
+- POST `/api/v1/suministros` — Create supply (professor loads positions manually/algorithmically)
+- POST `/api/v1/suministros/:id/collect` — Collect supply (status: pendiente → recogido)
+
+### Backend Models & Controllers
+- `api/src/models/supply.model.ts` — ISupply interface, GeoPoint {lat, lng}, contents: string[]
+- `api/src/controllers/supply.controller.ts` — Supply CRUD + nearby geospatial query
+- `api/src/services/supply.service.ts` — Business logic for supply operations
 
 </canonical_refs>
 
