@@ -2,8 +2,11 @@ import { HudHeader } from "@/components/ui/HudHeader";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupplies } from "@/hooks/useSupplies";
 import type { ResourceItem, Suministro } from "@/types-dtos";
-import { useCallback, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
+import * as Location from "expo-location";
+import { CategoryLegend } from "@/components/map/CategoryLegend";
 
 const statusColorMap: Record<string, string> = {
   pendiente: "#FFC107",
@@ -27,10 +30,39 @@ export default function MapScreen() {
 
   const { data, isLoading, isError, refetch, isFetching } = useSupplies(page, limit);
 
-  const onRefresh = useCallback(() => {
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [region, setRegion] = useState<Region>({
+    latitude: -12.0464, // Default to Lima, Peru
+    longitude: -77.0428,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.warn("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      const lat = location.coords.latitude;
+      const lng = location.coords.longitude;
+      setUserLocation({ lat, lng });
+      setRegion({
+        latitude: lat,
+        longitude: lng,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+      });
+    })();
+  }, []);
+
+  const onRefresh = () => {
     setPage(1);
     refetch();
-  }, [refetch]);
+  };
 
   const loadMore = () => {
     if (data && page < data.totalPages) {
@@ -64,15 +96,15 @@ export default function MapScreen() {
   const supplies = (data?.items || []) as Suministro[];
 
   const getEta = (status: string) => {
-    if (status === 'pendiente') return 'ETA: 2d 14h';
-    if (status === 'entregado') return 'Recogido';
-    return '';
+    if (status === "pendiente") return "ETA: 2d 14h";
+    if (status === "entregido") return "Recogido";
+    return "";
   };
 
-   function formatContents(contents: ResourceItem[]): string {
-     if (!contents || contents.length === 0) return 'Vacío';
-     return contents.map(item => `📦 x${item.cantidad}`).join(' + ');
-   }
+  function formatContents(contents: ResourceItem[]): string {
+    if (!contents || contents.length === 0) return "Vacío";
+    return contents.map(item => `📦 x${item.cantidad}`).join(" + ");
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
@@ -90,15 +122,34 @@ export default function MapScreen() {
               {data?.total || 0} SUMINISTROS
             </Text>
 
-            {/* Placeholder map view */}
-            <View style={{ height: 180, backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 20, alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ fontSize: 40 }}>🗺️</Text>
-              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 8, letterSpacing: 2, marginTop: 8 }}>
-                MAPA DE UBICACIÓN PRÓXIMAMENTE
-              </Text>
+            {/* Map View with supply markers */}
+            <View style={{ height: 300, marginBottom: 20 }}>
+              <MapView
+                provider={PROVIDER_GOOGLE}
+                style={{ flex: 1 }}
+                region={region}
+                showsUserLocation={true}
+                showsMyLocationButton={true}
+              >
+                {supplies.map((supply) => (
+                  <Marker
+                    key={supply.id}
+                    coordinate={{
+                      latitude: supply.location.lat,
+                      longitude: supply.location.lng,
+                    }}
+                    pinColor={statusColorMap[supply.status] || "#666"}
+                    title={`Supply ${supply.id.slice(-4)}`}
+                    description={`Status: ${supply.status}`}
+                  />
+                ))}
+              </MapView>
             </View>
 
-            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>LISTA DE SUMINISTROS</Text>
+            {/* Category Legend */}
+            <CategoryLegend />
+
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12, marginTop: 12 }}>LISTA DE SUMINISTROS</Text>
           </>
         )}
         renderItem={({ item }) => (
@@ -121,11 +172,11 @@ export default function MapScreen() {
         )}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={() => (
+        ListFooterComponent={() =>
           isFetching && page > 1 ? (
             <ActivityIndicator size="small" color={tc.primary} style={{ marginVertical: 16 }} />
           ) : null
-        )}
+        }
         ListEmptyComponent={
           <View style={{ alignItems: "center", paddingTop: 40 }}>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 12 }}>
