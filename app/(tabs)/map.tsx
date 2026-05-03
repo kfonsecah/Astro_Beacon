@@ -69,9 +69,10 @@ export default function MapScreen() {
     return '';
   };
 
-  function formatContents(contents: ResourceItem[]): import("react").ReactNode {
-    throw new Error("Function not implemented.");
-  }
+   function formatContents(contents: ResourceItem[]): string {
+     if (!contents || contents.length === 0) return 'Vacío';
+     return contents.map(item => `📦 x${item.cantidad}`).join(' + ');
+   }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
