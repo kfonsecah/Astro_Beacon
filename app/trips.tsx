@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
-import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
 import { useRouter } from "expo-router";
 import { HudHeader } from "@/components/ui/HudHeader";
-import { useTrips } from "@/hooks/useTrips";
+import { useTrips, useStartTrip } from "@/hooks/useTrips";
 import type { Viaje } from "@/types-dtos";
 
 const statusColorMap: Record<string, string> = {
@@ -30,6 +30,33 @@ export default function TripsScreen() {
   const limit = 20;
 
   const { data, isLoading, isError, refetch, isFetching } = useTrips(page, limit);
+  const startTripMutation = useStartTrip();
+
+  const handleStartTrip = (trip: Viaje) => {
+    Alert.alert(
+      'INICIAR VIAJE',
+      `Este viaje consumirá ${trip.oxygenBudgeted} unidades de oxígeno. ¿Continuar?`,
+      [
+        { text: 'CANCELAR', style: 'cancel' },
+        {
+          text: 'INICIAR',
+          onPress: () => {
+            startTripMutation.mutate(
+              { id: trip.id },
+              {
+                onSuccess: () => {
+                  // Trip list will refresh automatically via query invalidation
+                },
+                onError: (error) => {
+                  Alert.alert('ERROR', 'No se pudo iniciar el viaje');
+                },
+              }
+            );
+          },
+        },
+      ]
+    );
+  };
 
   const onRefresh = useCallback(() => {
     setPage(1);
@@ -119,9 +146,12 @@ export default function TripsScreen() {
             {item.status === 'planificado' && (
               <TouchableOpacity
                 style={{ backgroundColor: tc.primary, padding: 8, alignItems: "center", marginTop: 8 }}
-                onPress={() => {}}
+                onPress={() => handleStartTrip(item)}
+                disabled={startTripMutation.isPending}
               >
-                <Text style={{ color: tc.background, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>INICIAR VIAJE</Text>
+                <Text style={{ color: tc.background, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>
+                  {startTripMutation.isPending ? 'INICIANDO...' : 'INICIAR VIAJE'}
+                </Text>
               </TouchableOpacity>
             )}
           </View>
