@@ -1,6 +1,7 @@
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useTheme } from "@/hooks/use-theme";
 import { useSupplies } from "@/hooks/useSupplies";
+import { useTripStore } from "@/stores/trip.store";
 import type { ResourceItem, Suministro } from "@/types-dtos";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
@@ -38,6 +39,10 @@ export default function MapScreen() {
     longitudeDelta: 0.0421,
   });
 
+  // Trip store integration
+  const { activeTrip, isTracking, startTracking, stopTracking, oxygenRemaining } = useTripStore();
+  const [locationSubscription, setLocationSubscription] = useState<Location.LocationSubscription | null>(null);
+
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -58,6 +63,59 @@ export default function MapScreen() {
       });
     })();
   }, []);
+
+  // GPS tracking during active trip
+  useEffect(() => {
+    let subscription: Location.LocationSubscription | null = null;
+
+    const startGpsTracking = async () => {
+      if (activeTrip?.status === 'activo' && !isTracking) {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') return;
+
+        subscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 5000,
+            distanceInterval: 10,
+          },
+          (location) => {
+            const { latitude, longitude } = location.coords;
+            setRegion((prev) => ({
+              ...prev,
+              latitude,
+              longitude,
+            }));
+          }
+        );
+        setLocationSubscription(subscription);
+        startTracking();
+      }
+    };
+
+    startGpsTracking();
+
+    return () => {
+      if (subscription) {
+        subscription.remove();
+      }
+    };
+  }, [activeTrip?.status, isTracking, startTracking]);
+
+  // Oxygen countdown management
+  useEffect(() => {
+    if (activeTrip?.status === 'activo') {
+      // Start oxygen countdown - decrease 1 unit per minute (1/60 per second)
+      const oxygenRate = activeTrip.oxygenBudgeted / 60; // Adjust as needed
+      useTripStore.getState().startOxygenCountdown(oxygenRate);
+    } else {
+      useTripStore.getState().stopOxygenCountdown();
+    }
+
+    return () => {
+      useTripStore.getState().stopOxygenCountdown();
+    };
+  }, [activeTrip?.status]);
 
   const onRefresh = () => {
     setPage(1);
@@ -123,7 +181,7 @@ export default function MapScreen() {
             </Text>
 
             {/* Map View with supply markers */}
-            <View style={{ height: 300, marginBottom: 20 }}>
+            <View style={{ height: 300, marginBottom: 20, position: 'relative' }}>
               <MapView
                 provider={PROVIDER_GOOGLE}
                 style={{ flex: 1 }}
@@ -144,6 +202,31 @@ export default function MapScreen() {
                   />
                 ))}
               </MapView>
+
+              {/* Active trip indicator */}
+              {activeTrip?.status === 'activo' && (
+                <View style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 1000 }}>
+                  <View style={{ backgroundColor: tc.success + 'CC', padding: 8, borderRadius: 4 }}>
+                    <Text style={{ color: 'white', fontFamily: 'monospace', fontSize: 10, textAlign: 'center' }}>
+                      🚀 VIAJE ACTIVO - Rastreo GPS activo
+                    </Text>
+                  </View>
+                </View>
+              )}
+
+              {/* Oxygen countdown display */}
+              {activeTrip?.status === 'activo' && (
+                <View style={{ position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 1000 }}>
+                  <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.danger, padding: 12, borderRadius: 8 }}>
+                    <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 24, textAlign: 'center', fontWeight: 'bold' }}>
+                      O₂: {Math.round(oxygenRemaining)} / {activeTrip.oxygenBudgeted}
+                    </Text>
+                    <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 10, textAlign: 'center', marginTop: 4 }}>
+                      Consumo en tiempo real
+                    </Text>
+                  </View>
+                </View>
+              )}
             </View>
 
             {/* Category Legend */}
