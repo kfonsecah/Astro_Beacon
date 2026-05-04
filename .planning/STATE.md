@@ -2,23 +2,23 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
-status: phase-complete
-last_updated: "2026-05-03T01:19:00.000Z"
+status: executing
+last_updated: "2026-05-04T03:46:18.963Z"
 progress:
   total_phases: 6
   completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
+  total_plans: 16
+  completed_plans: 16
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 17 (maps-trips-polish) — COMPLETED
-Plan: 4 of 4 (COMPLETED)
+Phase: 17 (maps-trips-polish) — EXECUTING
+Plan: 2 of 5
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Phase 17 Complete
+**Status:** Ready to execute
 
 ## Project Reference
 
@@ -34,9 +34,9 @@ Plan: 4 of 4 (COMPLETED)
 **Milestone Progress**: 31/45 requirements completed
 
 ## Performance Metrics
-   
+    
 - Phases Completed: 5
-- Plans Executed: 15
+- Plans Executed: 16
 - Requirements Met: 31
 - Token Usage: TBD
 
@@ -121,6 +121,19 @@ Plan: 4 of 4 (COMPLETED)
 - Decision: Oxygen countdown uses setInterval at 1s intervals, decreasing ratePerMinute/60 per tick
 - Decision: Combined Task 1 and Task 2 into single commit due to interdependent file modifications
 
+### Key Decisions (Phase 17 - Plan 05)
+
+- 17-05: Restructured map.tsx layout - extracted MapView to fixed header (200px) above FlatList for independent panning
+- 17-05: Added floating "Request Supply" button (bottom-right of map) with package icon (📦)
+- 17-05: Implemented handleRequestSupply() - gets GPS location, generates random nearby position (±0.01°)
+- 17-05: Supply creation includes randomized: name, description, contents (1-3 items from resource types)
+- 17-05: Sets status="pendiente", expiresAt=24-72h from now, userId from auth store
+- 17-05: Added create() method to SupplyService and useCreateSupply() mutation hook
+- 17-05: Mutation invalidates 'supplies' query key to refresh list automatically
+- Decision: Map height set to 200px for optimal balance between visibility and list space
+- Decision: Random location uses ±0.01° offset (approximately ±1km from user)
+- Decision: Floating button shows loading state (⏳) during mutation pending
+
 ### Todos
 
 - Phase 18: Error Handling & Offline (next phase)
@@ -131,9 +144,9 @@ Plan: 4 of 4 (COMPLETED)
 
 ## Session Continuity
         
-- Last action: Completed Phase 17 Plan 04 (implement real-time GPS tracking and oxygen countdown)
-- Stopped At: Phase 17 Plan 04 completed - GPS tracking with watchPositionAsync, oxygen countdown timer in TripStore, HUD-style oxygen display on map
-- Phase 17 context: Complete trip execution implemented with real-time GPS tracking, oxygen countdown with interval management, active trip indicator on map
+- Last action: Completed Phase 17 Plan 05 (fix map panning + add Request Supply floating button)
+- Stopped At: Phase 17 Plan 05 completed - MapView extracted to fixed header for independent panning, floating "Request Supply" button with GPS-based random supply creation, supply service/hook updated with create() method and useCreateSupply() mutation
+- Phase 17 context: All 5 plans complete (17-01 to 17-05) - Maps & Trips Polish fully implemented with map panning fix, trip execution with GPS tracking, oxygen countdown, and supply request feature
 - Next step: Phase 18 (Error Handling & Offline) or next milestone phase
 
 ### Roadmap Evolution

@@ -11,7 +11,7 @@
 - [x] **Phase 14: API Client Setup** - Configurar TanStack Query y detección de red (completed 2026-04-30)
 - [x] **Phase 15: Domain Services + Hooks** - Capa de servicios y hooks para todos los dominios (completed 2026-04-30)
 - [ ] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API (6/6 plans done)
-- [x] **Phase 17: Maps & Trips Polish** - Fix map crash, implement trip start, complete map view, implement trip execution (4/4 plans done)
+- [x] **Phase 17: Maps & Trips Polish** - Fix map crash, implement trip start, complete map view, implement trip execution, fix map panning, add supply request feature (5/5 plans done)
 - [ ] **Phase 18: Error Handling & Offline** - Error boundaries y soporte offline
 - [x] **Phase 13: Auth Integration** - Conectar login con API (registro diferido) (completed 2026-04-30)
 
@@ -122,7 +122,7 @@ Plans:
 | 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
 | 15. Domain Services + Hooks | 2/2 | Complete    | 2026-04-30 |
 | 16. Screen Integration | 6/6 | Complete    |  |
-| 17. Maps & Trips Polish | 4/4 | Complete    | 2026-05-03 |
+| 17. Maps & Trips Polish | 5/5 | Complete    | 2026-05-03 |
 | 18. Error Handling & Offline | 0/X | Not started | - |
 
 ---
