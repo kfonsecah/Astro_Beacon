@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
@@ -28,14 +28,29 @@ export default function BestiaryScreen() {
   const limit = 20;
 
   const { data, isLoading, isError, refetch, isFetching } = useSpecies(page, limit);
+  const [allSpecies, setAllSpecies] = useState<Especie[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    if (data?.items) {
+      setAllSpecies((prev) => {
+        const newData = [...prev, ...data.items];
+        const uniqueData = Array.from(new Set(newData.map(a => a.id)))
+          .map(id => newData.find(a => a.id === id)!);
+        return uniqueData;
+      });
+      setHasMore(page < data.totalPages);
+    }
+  }, [data, page]);
 
   const onRefresh = useCallback(() => {
+    setAllSpecies([]);
     setPage(1);
     refetch();
   }, [refetch]);
 
   const loadMore = () => {
-    if (data && page < data.totalPages) {
+    if (!isFetching && hasMore) {
       setPage(prev => prev + 1);
     }
   };
@@ -60,12 +75,11 @@ export default function BestiaryScreen() {
     );
   }
 
-  const species = (data?.items || []) as Especie[];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
-        data={species}
+        data={allSpecies}
         keyExtractor={(item, index) => item.id ?? `${item.name ?? 'specie'}-${index}`}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
