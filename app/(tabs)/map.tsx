@@ -166,75 +166,76 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+      {/* Fixed header section with map - outside FlatList for independent panning */}
+      <View style={{ padding: 16, paddingBottom: 0 }}>
+        <HudHeader title="MAPA DE EXPLORACIÓN" subtitle="SUMINISTROS DISPONIBLES" />
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
+          {data?.total || 0} SUMINISTROS
+        </Text>
+
+        {/* Map View with supply markers - fixed section */}
+        <View style={{ height: 200, marginBottom: 20, position: 'relative' }}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={{ flex: 1 }}
+            region={region}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+          >
+            {supplies.map((supply) => (
+              <Marker
+                key={supply.id}
+                coordinate={{
+                  latitude: supply.location.lat,
+                  longitude: supply.location.lng,
+                }}
+                pinColor={statusColorMap[supply.status] || "#666"}
+                title={`Supply ${supply.id.slice(-4)}`}
+                description={`Status: ${supply.status}`}
+              />
+            ))}
+          </MapView>
+
+          {/* Active trip indicator */}
+          {activeTrip?.status === 'activo' && (
+            <View style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 1000 }}>
+              <View style={{ backgroundColor: tc.success + 'CC', padding: 8, borderRadius: 4 }}>
+                <Text style={{ color: 'white', fontFamily: 'monospace', fontSize: 10, textAlign: 'center' }}>
+                  🚀 VIAJE ACTIVO - Rastreo GPS activo
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {/* Oxygen countdown display */}
+          {activeTrip?.status === 'activo' && (
+            <View style={{ position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 1000 }}>
+              <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.danger, padding: 12, borderRadius: 8 }}>
+                <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 24, textAlign: 'center', fontWeight: 'bold' }}>
+                  O₂: {Math.round(oxygenRemaining)} / {activeTrip.oxygenBudgeted}
+                </Text>
+                <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 10, textAlign: 'center', marginTop: 4 }}>
+                  Consumo en tiempo real
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+        {/* Category Legend */}
+        <CategoryLegend />
+
+        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12, marginTop: 12 }}>LISTA DE SUMINISTROS</Text>
+      </View>
+
+      {/* Scrollable FlatList for supply list only */}
       <FlatList
         data={supplies}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
         }
-        ListHeaderComponent={() => (
-          <>
-            <HudHeader title="MAPA DE EXPLORACIÓN" subtitle="SUMINISTROS DISPONIBLES" />
-            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
-              {data?.total || 0} SUMINISTROS
-            </Text>
-
-            {/* Map View with supply markers */}
-            <View style={{ height: 300, marginBottom: 20, position: 'relative' }}>
-              <MapView
-                provider={PROVIDER_GOOGLE}
-                style={{ flex: 1 }}
-                region={region}
-                showsUserLocation={true}
-                showsMyLocationButton={true}
-              >
-                {supplies.map((supply) => (
-                  <Marker
-                    key={supply.id}
-                    coordinate={{
-                      latitude: supply.location.lat,
-                      longitude: supply.location.lng,
-                    }}
-                    pinColor={statusColorMap[supply.status] || "#666"}
-                    title={`Supply ${supply.id.slice(-4)}`}
-                    description={`Status: ${supply.status}`}
-                  />
-                ))}
-              </MapView>
-
-              {/* Active trip indicator */}
-              {activeTrip?.status === 'activo' && (
-                <View style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 1000 }}>
-                  <View style={{ backgroundColor: tc.success + 'CC', padding: 8, borderRadius: 4 }}>
-                    <Text style={{ color: 'white', fontFamily: 'monospace', fontSize: 10, textAlign: 'center' }}>
-                      🚀 VIAJE ACTIVO - Rastreo GPS activo
-                    </Text>
-                  </View>
-                </View>
-              )}
-
-              {/* Oxygen countdown display */}
-              {activeTrip?.status === 'activo' && (
-                <View style={{ position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 1000 }}>
-                  <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.danger, padding: 12, borderRadius: 8 }}>
-                    <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 24, textAlign: 'center', fontWeight: 'bold' }}>
-                      O₂: {Math.round(oxygenRemaining)} / {activeTrip.oxygenBudgeted}
-                    </Text>
-                    <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 10, textAlign: 'center', marginTop: 4 }}>
-                      Consumo en tiempo real
-                    </Text>
-                  </View>
-                </View>
-              )}
-            </View>
-
-            {/* Category Legend */}
-            <CategoryLegend />
-
-            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12, marginTop: 12 }}>LISTA DE SUMINISTROS</Text>
-          </>
-        )}
         renderItem={({ item }) => (
           <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 12, marginBottom: 8 }}>
             <View style={{ paddingHorizontal: 8, paddingVertical: 4, marginRight: 12, backgroundColor: getStatusColor(item.status) + "33" }}>
