@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
 status: executing
-last_updated: "2026-05-03T23:22:26Z"
+last_updated: "2026-05-04T01:07:21.799Z"
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 16
-  completed_plans: 12
+  total_plans: 15
+  completed_plans: 14
 ---
 
 # State: Astro_Beacon
@@ -16,7 +16,7 @@ progress:
 ## Current Position
 
 Phase: 17 (maps-trips-polish) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 **Milestone:** v1.2 Integración API-Frontend
 **Status:** Executing Phase 17
 
@@ -101,6 +101,15 @@ Plan: 3 of 4
 - Decision: Use Google Maps provider for consistent map rendering across platforms
 - Decision: Center map on user GPS location when permission granted, fallback to Lima, Peru coordinates
 
+### Key Decisions (Phase 17 - Plan 03)
+
+- 17-03: Implemented trip start flow with confirmation dialog using Alert.alert
+- 17-03: Wired INICIAR VIAJE button to useStartTrip() mutation
+- 17-03: Added loading state with startTripMutation.isPending (shows "INICIANDO...")
+- 17-03: Confirmation dialog shows oxygen warning with trip.oxygenBudgeted
+- Decision: Used Alert.alert from react-native (built-in, no extra dependencies)
+- Decision: Mutation invalidates trip list queries on success for automatic refresh
+
 ### Todos
 
 - Phase 17: Maps & Trips Polish (next phase)
@@ -110,11 +119,11 @@ Plan: 3 of 4
 - None
 
 ## Session Continuity
-       
-- Last action: Completed Phase 17 Plan 02 (implement MapView with supply markers and user location)
-- Stopped At: Phase 17 Plan 02 completed - MapView implemented with react-native-maps, supply markers with status colors, user GPS location, CategoryLegend integrated
-- Phase 17 context: Full navigation mode with react-native-maps, real GPS routes, supply markers with category symbols, trip start with oxygen warning, real-time GPS tracking during trip, oxygen countdown, resource recording on return
-- Next step: Execute Phase 17 Plan 03 (Implement trip start flow with confirmation dialog)
+        
+- Last action: Completed Phase 17 Plan 03 (implement trip start flow with confirmation dialog)
+- Stopped At: Phase 17 Plan 03 completed - Trip start flow implemented with Alert.confirm dialog showing oxygen warning, useStartTrip mutation wired, loading state added
+- Phase 17 context: Full navigation mode with react-native-maps, real GPS routes, supply markers with category symbols, trip start with oxygen warning confirmed working, next: real-time GPS tracking during trip, oxygen countdown, resource recording on return
+- Next step: Execute Phase 17 Plan 04 (Implement trip execution with real-time GPS tracking and oxygen countdown)
 
 ### Roadmap Evolution
 
