@@ -1,13 +1,14 @@
 import { CategoryLegend } from "@/components/map/CategoryLegend";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useTheme } from "@/hooks/use-theme";
-import { useCreateSupply, useSupplies } from "@/hooks/useSupplies";
+import { useCollectSupply, useCreateSupply, useSupplies } from "@/hooks/useSupplies";
 import { useAuthStore } from "@/stores/auth.store";
 import { useTripStore } from "@/stores/trip.store";
 import type { CreateSuministroDTO, Suministro } from "@/types-dtos";
+import { useQueryClient } from "@tanstack/react-query";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -52,12 +53,18 @@ function getSupplyCategory(contents: string[]): SupplyCategory {
 export default function MapScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const limit = 20;
 
   const { data, isLoading, isError, refetch, isFetching } = useSupplies(page, limit);
   const createSupplyMutation = useCreateSupply();
+  const collectSupplyMutation = useCollectSupply();
   const [suppliesList, setSuppliesList] = useState<Suministro[]>([]);
+  const [selectedSupplyId, setSelectedSupplyId] = useState<string | null>(null);
+  const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [supplyDistances, setSupplyDistances] = useState<Record<string, number>>({});
+  const [collectibleSupplies, setCollectibleSupplies] = useState<Set<string>>(new Set());
 
   const [region, setRegion] = useState<Region>({
     latitude: -12.0464, // Default to Lima, Peru
@@ -67,7 +74,7 @@ export default function MapScreen() {
   });
 
   // Trip store integration
-  const { activeTrip, isTracking, startTracking, oxygenRemaining } = useTripStore();
+  const { activeTrip, isTracking, startTracking, oxygenRemaining, setActiveTrip } = useTripStore();
 
   useEffect(() => {
     (async () => {
@@ -161,6 +168,37 @@ export default function MapScreen() {
     });
   }, [data?.items, page]);
 
+  // Calcular distancias y detectar proximidad (100m)
+  useEffect(() => {
+    const distances: Record<string, number> = {};
+    const collectible = new Set<string>();
+
+    const isTripActive = activeTrip?.status === 'activo';
+
+    suppliesList.forEach((supply) => {
+      const distKm = calculateDistanceKm(
+        region.latitude,
+        region.longitude,
+        supply.location.lat,
+        supply.location.lng,
+      );
+      const distMeters = distKm * 1000;
+      distances[String(supply.id)] = distKm;
+
+      const isInRange = distMeters < 1000;
+      const isPendiente = supply.status === 'pendiente';
+      
+      // DEBUG: Sin requisito viaje activo temporalmente para probar
+      if (isInRange && isPendiente) {
+        collectible.add(String(supply.id));
+      }
+    });
+
+
+    setSupplyDistances(distances);
+    setCollectibleSupplies(collectible);
+  }, [region, suppliesList, activeTrip]);
+
   const onRefresh = () => {
     setPage(1);
     setSuppliesList([]);
@@ -196,8 +234,6 @@ export default function MapScreen() {
     );
   }
 
-  const supplies = suppliesList;
-
   const getEta = (status: string) => {
     if (status === "pendiente") return "ETA: 2d 14h";
     if (status === "entregido") return "Recogido";
@@ -208,6 +244,83 @@ export default function MapScreen() {
     if (!contents || contents.length === 0) return "Vacío";
     return contents.join(" + ");
   }
+
+  // Auto-sort por distancia cuando trip activo
+  const sortedSupplies = activeTrip?.status === 'activo'
+    ? [...suppliesList].sort((a, b) => {
+        const distA = supplyDistances[String(a.id)] ?? Infinity;
+        const distB = supplyDistances[String(b.id)] ?? Infinity;
+        return distA - distB;
+      })
+    : suppliesList;
+
+  const supplies = sortedSupplies;
+  const selectedSupply = supplies.find((s) => String(s.id) === String(selectedSupplyId));
+
+  const calculateDistanceKm = (fromLat: number, fromLng: number, toLat: number, toLng: number): number => {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const dLat = toRad(toLat - fromLat);
+    const dLng = toRad(toLng - fromLng);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthRadiusKm * c;
+  };
+
+  const estimateOxygenBudget = (supply: Suministro): number => {
+    const distanceKm = calculateDistanceKm(
+      region.latitude,
+      region.longitude,
+      supply.location.lat,
+      supply.location.lng,
+    );
+
+    const roundTripKm = distanceKm * 2;
+    const movementCost = roundTripKm * 18;
+    const operationReserve = 40;
+    return Math.max(60, Math.ceil(movementCost + operationReserve));
+  };
+
+  const handleStartTripFromSupply = () => {
+    if (!selectedSupply) return;
+
+    const oxygenBudget = estimateOxygenBudget(selectedSupply);
+    const distanceKm = calculateDistanceKm(
+      region.latitude,
+      region.longitude,
+      selectedSupply.location.lat,
+      selectedSupply.location.lng,
+    );
+
+    Alert.alert(
+      "INICIAR VIAJE",
+      `Destino: ${selectedSupply.name}\nDistancia estimada: ${distanceKm.toFixed(2)} km\nCosto O₂ estimado: ${oxygenBudget} unidades\n\n¿Deseas iniciar este viaje?`,
+      [
+        { text: "CANCELAR", style: "cancel" },
+        {
+          text: "INICIAR",
+          onPress: () => {
+            const localTrip = {
+              id: `local-${Date.now()}`,
+              astronautId: useAuthStore.getState().user?.id || "",
+              destination: selectedSupply.location,
+              status: "activo" as const,
+              startedAt: new Date(),
+              oxygenBudgeted: oxygenBudget,
+              oxygenConsumed: 0,
+              resourcesCollected: 0,
+              notes: `Viaje iniciado hacia suministro ${selectedSupply.name}`,
+            };
+
+            setActiveTrip(localTrip);
+            startTracking();
+          },
+        },
+      ],
+    );
+  };
 
   const handleRequestSupply = async () => {
     try {
@@ -273,6 +386,63 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+      <Modal visible={isMapFullscreen} animationType="slide" onRequestClose={() => setIsMapFullscreen(false)}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderBottomWidth: 1, borderBottomColor: tc.border }}>
+            <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 11, letterSpacing: 1 }}>
+              MAPA EN PANTALLA COMPLETA
+            </Text>
+            <TouchableOpacity onPress={() => setIsMapFullscreen(false)}>
+              <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 12 }}>✕ CERRAR</Text>
+            </TouchableOpacity>
+          </View>
+
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={{ flex: 1 }}
+            region={region}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+          >
+            {supplies.map((supply) => {
+              const isSelected = String(selectedSupplyId) === String(supply.id);
+              return (
+                <Marker
+                  key={`fullscreen-${String(supply.id)}`}
+                  coordinate={{
+                    latitude: supply.location.lat,
+                    longitude: supply.location.lng,
+                  }}
+                  pinColor={categoryConfig[getSupplyCategory(supply.contents)].color}
+                  title={`Supply ${String(supply.id || '').slice(-4)}`}
+                  description={`${categoryConfig[getSupplyCategory(supply.contents)].symbol} ${supply.contents.join(", ")}`}
+                  onPress={() => setSelectedSupplyId(String(supply.id))}
+                >
+                  <View
+                    style={{
+                      backgroundColor: tc.surface,
+                      borderColor: isSelected
+                        ? tc.primary
+                        : categoryConfig[getSupplyCategory(supply.contents)].color,
+                      borderWidth: isSelected ? 3 : 2,
+                      borderRadius: 16,
+                      width: 30,
+                      height: 30,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 16 }}>
+                      {categoryConfig[getSupplyCategory(supply.contents)].symbol}
+                    </Text>
+                  </View>
+                </Marker>
+              );
+            })}
+          </MapView>
+        </SafeAreaView>
+      </Modal>
+
       {/* Fixed header section with map - outside FlatList for independent panning */}
       <View style={{ padding: 16, paddingBottom: 0 }}>
         <HudHeader title="MAPA DE EXPLORACIÓN" subtitle="SUMINISTROS DISPONIBLES" />
@@ -281,7 +451,7 @@ export default function MapScreen() {
         </Text>
 
         {/* Map View with supply markers - fixed section */}
-        <View style={{ height: 200, marginBottom: 20, position: 'relative' }}>
+        <View style={{ height: 200, marginBottom: 12, position: 'relative' }}>
           <MapView
             provider={PROVIDER_GOOGLE}
             style={{ flex: 1 }}
@@ -289,40 +459,66 @@ export default function MapScreen() {
             showsUserLocation={true}
             showsMyLocationButton={true}
           >
-            {supplies.map((supply) => (
-              <Marker
-                key={String(supply.id)}
-                coordinate={{
-                  latitude: supply.location.lat,
-                  longitude: supply.location.lng,
-                }}
-                pinColor={categoryConfig[getSupplyCategory(supply.contents)].color}
-                title={`Supply ${String(supply.id || '').slice(-4)}`}
-                description={`${categoryConfig[getSupplyCategory(supply.contents)].symbol} ${supply.contents.join(", ")}`}
-              >
-                <View
-                  style={{
-                    backgroundColor: tc.surface,
-                    borderColor: categoryConfig[getSupplyCategory(supply.contents)].color,
-                    borderWidth: 2,
-                    borderRadius: 16,
-                    width: 30,
-                    height: 30,
-                    alignItems: "center",
-                    justifyContent: "center",
+            {supplies.map((supply) => {
+              const isSelected = String(selectedSupplyId) === String(supply.id);
+              return (
+                <Marker
+                  key={String(supply.id)}
+                  coordinate={{
+                    latitude: supply.location.lat,
+                    longitude: supply.location.lng,
                   }}
+                  pinColor={categoryConfig[getSupplyCategory(supply.contents)].color}
+                  title={`Supply ${String(supply.id || '').slice(-4)}`}
+                  description={`${categoryConfig[getSupplyCategory(supply.contents)].symbol} ${supply.contents.join(", ")}`}
+                  onPress={() => setSelectedSupplyId(String(supply.id))}
                 >
-                  <Text style={{ fontSize: 16 }}>
-                    {categoryConfig[getSupplyCategory(supply.contents)].symbol}
-                  </Text>
-                </View>
-              </Marker>
-            ))}
+                  <View
+                    style={{
+                      backgroundColor: tc.surface,
+                      borderColor: isSelected
+                        ? tc.primary
+                        : categoryConfig[getSupplyCategory(supply.contents)].color,
+                      borderWidth: isSelected ? 3 : 2,
+                      borderRadius: 16,
+                      width: 30,
+                      height: 30,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text style={{ fontSize: 16 }}>
+                      {categoryConfig[getSupplyCategory(supply.contents)].symbol}
+                    </Text>
+                  </View>
+                </Marker>
+              );
+            })}
           </MapView>
+
+          <TouchableOpacity
+            onPress={() => setIsMapFullscreen(true)}
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              backgroundColor: tc.surface,
+              borderWidth: 1,
+              borderColor: tc.primary,
+              borderRadius: 6,
+              paddingHorizontal: 10,
+              paddingVertical: 6,
+              zIndex: 1001,
+            }}
+          >
+            <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 10 }}>
+              ⛶ PANTALLA COMPLETA
+            </Text>
+          </TouchableOpacity>
 
           {/* Active trip indicator */}
           {activeTrip?.status === 'activo' && (
-            <View style={{ position: 'absolute', top: 10, left: 10, right: 10, zIndex: 1000 }}>
+            <View style={{ position: 'absolute', top: 10, left: 10, right: 170, zIndex: 1000 }}>
               <View style={{ backgroundColor: tc.success + 'CC', padding: 8, borderRadius: 4 }}>
                 <Text style={{ color: 'white', fontFamily: 'monospace', fontSize: 10, textAlign: 'center' }}>
                   🚀 VIAJE ACTIVO - Rastreo GPS activo
@@ -333,42 +529,53 @@ export default function MapScreen() {
 
           {/* Oxygen countdown display */}
           {activeTrip?.status === 'activo' && (
-            <View style={{ position: 'absolute', bottom: 20, left: 20, right: 20, zIndex: 1000 }}>
-              <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.danger, padding: 12, borderRadius: 8 }}>
-                <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 24, textAlign: 'center', fontWeight: 'bold' }}>
+            <View style={{ position: 'absolute', bottom: 14, left: 14, right: 14, zIndex: 1000 }}>
+              <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.danger, padding: 10, borderRadius: 8 }}>
+                <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 18, textAlign: 'center', fontWeight: 'bold' }}>
                   O₂: {Math.round(oxygenRemaining)} / {activeTrip.oxygenBudgeted}
                 </Text>
-                <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 10, textAlign: 'center', marginTop: 4 }}>
+                <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, textAlign: 'center', marginTop: 2 }}>
                   Consumo en tiempo real
                 </Text>
               </View>
             </View>
           )}
+        </View>
 
-          {/* Floating "Request Supply" button */}
+        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
           <TouchableOpacity
             onPress={handleRequestSupply}
             disabled={createSupplyMutation.isPending}
             style={{
-              position: 'absolute',
-              bottom: 16,
-              right: 16,
-              width: 56,
-              height: 56,
-              borderRadius: 28,
+              flex: 1,
               backgroundColor: createSupplyMutation.isPending ? tc.textMuted : tc.primary,
-              justifyContent: 'center',
+              borderRadius: 6,
+              paddingVertical: 10,
               alignItems: 'center',
-              elevation: 8,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              zIndex: 1001,
             }}
           >
-            <Text style={{ fontSize: 24, color: tc.background }}>
-              {createSupplyMutation.isPending ? '⏳' : '📦'}
+            <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
+              {createSupplyMutation.isPending ? '⏳ SOLICITANDO...' : '📦 SOLICITAR SUMINISTRO'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={handleStartTripFromSupply}
+            disabled={!selectedSupply || activeTrip?.status === 'activo'}
+            style={{
+              flex: 1,
+              backgroundColor: !selectedSupply || activeTrip?.status === 'activo' ? tc.textMuted : tc.success,
+              borderRadius: 6,
+              paddingVertical: 10,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
+              {activeTrip?.status === 'activo'
+                ? '🚀 VIAJE ACTIVO'
+                : selectedSupply
+                  ? '🚀 INICIAR VIAJE'
+                  : 'SELECCIONA SUMINISTRO'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -387,24 +594,80 @@ export default function MapScreen() {
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
         }
-        renderItem={({ item }) => (
-          <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 12, marginBottom: 8 }}>
-            <View style={{ paddingHorizontal: 8, paddingVertical: 4, marginRight: 12, backgroundColor: getStatusColor(item.status) + "33" }}>
-              <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: getStatusColor(item.status) }}>
-                {getStatusLabel(item.status)}
-              </Text>
+        renderItem={({ item }) => {
+          const isSelected = String(selectedSupplyId) === String(item.id);
+          const isCollectible = collectibleSupplies.has(String(item.id));
+          const distKm = supplyDistances[String(item.id)] ?? 0;
+          const distMeters = Math.round(distKm * 1000);
+
+
+
+          return (
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: isCollectible ? tc.success + "22" : tc.surface,
+                borderWidth: isCollectible ? 2 : (isSelected ? 2 : 1),
+                borderColor: isCollectible ? tc.success : (isSelected ? tc.primary : tc.border),
+                padding: 12,
+                marginBottom: 8,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setSelectedSupplyId(String(item.id))}
+                style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+              >
+                <View style={{ paddingHorizontal: 8, paddingVertical: 4, marginRight: 12, backgroundColor: isCollectible ? tc.success + "44" : getStatusColor(item.status) + "33" }}>
+                  <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: isCollectible ? tc.success : getStatusColor(item.status) }}>
+                    {isCollectible ? "✓ RECOGIBLE" : getStatusLabel(item.status)}
+                  </Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
+                    {categoryConfig[getSupplyCategory(item.contents)].symbol} {formatContents(item.contents)}
+                  </Text>
+                  <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 2 }}>
+                    📍 {distMeters}m {activeTrip?.status === 'activo' ? `(${distKm.toFixed(2)} km)` : ""}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* Botón Recoger */}
+              {isCollectible && (
+                <TouchableOpacity
+                  onPress={() => {
+                    collectSupplyMutation.mutate(
+                      { id: String(item.id) },
+                      {
+                        onSuccess: () => {
+                          Alert.alert("✓ ÉXITO", `Suministro ${item.name} recogido!`);
+                          // Invalidate all affected queries
+                          queryClient.invalidateQueries({ queryKey: ['supplies'] });
+                          queryClient.invalidateQueries({ queryKey: ['astronaut', 'dashboard'] });
+                          queryClient.invalidateQueries({ queryKey: ['resources'] });
+                          queryClient.invalidateQueries({ queryKey: ['resource-alerts'] });
+                        },
+                      }
+                    );
+                  }}
+                  disabled={collectSupplyMutation.isPending}
+                  style={{
+                    marginLeft: 8,
+                    paddingHorizontal: 10,
+                    paddingVertical: 8,
+                    backgroundColor: collectSupplyMutation.isPending ? tc.textMuted : tc.success,
+                    borderRadius: 4,
+                  }}
+                >
+                  <Text style={{ color: "white", fontFamily: "monospace", fontSize: 9, fontWeight: "bold" }}>
+                    {collectSupplyMutation.isPending ? "..." : "🎒 RECOGER"}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
-                {categoryConfig[getSupplyCategory(item.contents)].symbol} {formatContents(item.contents)}
-              </Text>
-              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 2 }}>
-                📍 {item.location.lat.toFixed(2)}, {item.location.lng.toFixed(2)}
-                {getEta(item.status)}
-              </Text>
-            </View>
-          </View>
-        )}
+          );
+        }}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={() =>
