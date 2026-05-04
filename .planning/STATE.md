@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
 status: planning
-last_updated: "2026-05-04T04:01:58.214Z"
+last_updated: "2026-05-04T18:00:00.000Z"
 progress:
-  total_phases: 6
+  total_phases: 9
   completed_phases: 5
-  total_plans: 16
+  total_plans: 22
   completed_plans: 16
 ---
 
@@ -26,12 +26,18 @@ Plan: Not started
 **Current Focus**: Milestone v1.2 Integración API-Frontend — All screens connected to API
 
 ## Current Position
-   
+
 **Current Milestone**: v1.2 Integración API-Frontend
-**Current Phase**: 17-maps-trips-polish (COMPLETED)
-**Phase Status**: 4 of 4 plans complete (17-01 to 17-04 done)
-**Progress**: 5/6 phases completed (83%)
-**Milestone Progress**: 31/45 requirements completed
+**Current Phase**: 19-critical-bug-fixes (READY TO START)
+**Phase Status**: 0 of 2 plans complete
+**Progress**: 5/9 phases completed (56%)
+**Milestone Progress**: 31/45 requirements completed (fases 19-22 son deuda técnica + ERR requirements)
+
+**Phases added post-audit (2026-05-04):**
+- Phase 19: Critical Bug Fixes (trip activation, pagination, double setAuth)
+- Phase 20: Design System Compliance (hex hardcodeados post-fase-07)
+- Phase 21: Error Handling & Offline (era Phase 18, renumerada)
+- Phase 22: Code Cleanup (dead code + docs sync)
 
 ## Performance Metrics
     
@@ -136,7 +142,10 @@ Plan: Not started
 
 ### Todos
 
-- Phase 18: Error Handling & Offline (next phase)
+- Phase 19: Critical Bug Fixes (NEXT — trip activation + pagination + double setAuth)
+- Phase 20: Design System Compliance (hex hardcodeados en map/trips)
+- Phase 21: Error Handling & Offline (ErrorBoundary + OfflineBanner + onlineManager)
+- Phase 22: Code Cleanup (dead code + docs)
 
 ### Blockers
 
