@@ -1,10 +1,11 @@
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useTheme } from "@/hooks/use-theme";
-import { useSupplies } from "@/hooks/useSupplies";
+import { useSupplies, useCreateSupply } from "@/hooks/useSupplies";
 import { useTripStore } from "@/stores/trip.store";
-import type { ResourceItem, Suministro } from "@/types-dtos";
+import { useAuthStore } from "@/stores/auth.store";
+import type { ResourceItem, Suministro, CreateSuministroDTO } from "@/types-dtos";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View, TouchableOpacity } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 import * as Location from "expo-location";
 import { CategoryLegend } from "@/components/map/CategoryLegend";
@@ -30,6 +31,7 @@ export default function MapScreen() {
   const limit = 20;
 
   const { data, isLoading, isError, refetch, isFetching } = useSupplies(page, limit);
+  const createSupplyMutation = useCreateSupply();
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [region, setRegion] = useState<Region>({
@@ -164,6 +166,66 @@ export default function MapScreen() {
     return contents.map(item => `📦 x${item.cantidad}`).join(" + ");
   }
 
+  const handleRequestSupply = async () => {
+    try {
+      // Get current GPS location
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.warn("Location permission denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      const userLat = location.coords.latitude;
+      const userLng = location.coords.longitude;
+
+      // Generate random location near user (±0.01° lat/lng)
+      const randomLat = userLat + (Math.random() - 0.5) * 0.02;
+      const randomLng = userLng + (Math.random() - 0.5) * 0.02;
+
+      // Randomize supply data
+      const supplyNames = ["Suministro de emergencia", "Reserva de recursos", "Caché de suministros", "Paquete de ayuda", "Contenedor de supervivencia"];
+      const supplyDescriptions = ["Suministro urgente para supervivencia", "Recursos esenciales para exploración", "Equipo de emergencia", "Reserva de campaña", "Caché de supervivencia"];
+      const resourceTypes = ["oxigeno", "agua", "comida", "medicinas", "herramientas"];
+
+      const randomName = supplyNames[Math.floor(Math.random() * supplyNames.length)];
+      const randomDesc = supplyDescriptions[Math.floor(Math.random() * supplyDescriptions.length)];
+      const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items
+      const selectedResources = [...resourceTypes].sort(() => Math.random() - 0.5).slice(0, numItems);
+
+      const contents = selectedResources.map(resourceId => ({
+        resourceId,
+        cantidad: Math.floor(Math.random() * 5) + 1,
+      }));
+
+      // Set expiresAt to random 24-72 hours from now
+      const expiresInHours = Math.floor(Math.random() * 48) + 24; // 24-72 hours
+      const expiresAt = new Date(Date.now() + expiresInHours * 3600000);
+
+      // Get userId from auth store
+      const user = useAuthStore.getState().user;
+      if (!user) {
+        console.warn("User not authenticated");
+        return;
+      }
+
+      // Create supply object
+      const newSupply: CreateSuministroDTO = {
+        location: {
+          lat: randomLat,
+          lng: randomLng,
+        },
+        contents,
+        expiresAt,
+      };
+
+      // Call mutation
+      await createSupplyMutation.mutateAsync(newSupply);
+    } catch (error) {
+      console.error("Error requesting supply:", error);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       {/* Fixed header section with map - outside FlatList for independent panning */}
@@ -220,6 +282,33 @@ export default function MapScreen() {
               </View>
             </View>
           )}
+
+          {/* Floating "Request Supply" button */}
+          <TouchableOpacity
+            onPress={handleRequestSupply}
+            disabled={createSupplyMutation.isPending}
+            style={{
+              position: 'absolute',
+              bottom: 16,
+              right: 16,
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              backgroundColor: createSupplyMutation.isPending ? tc.textMuted : tc.primary,
+              justifyContent: 'center',
+              alignItems: 'center',
+              elevation: 8,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+              zIndex: 1001,
+            }}
+          >
+            <Text style={{ fontSize: 24, color: tc.background }}>
+              {createSupplyMutation.isPending ? '⏳' : '📦'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* Category Legend */}
