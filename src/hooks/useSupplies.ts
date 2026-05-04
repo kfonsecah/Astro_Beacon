@@ -37,6 +37,16 @@ export function useCollectSupply() {
   });
 }
 
+export function useCreateSupply() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: CreateSuministroDTO) => supplyService.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['supplies'] });
+    },
+  });
+}
+
 export function useNearbySupplies(lat: number, lng: number, radius = 1000, status?: string) {
   return useQuery({
     queryKey: QUERY_KEYS.nearby(lat, lng, radius),

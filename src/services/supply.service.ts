@@ -19,6 +19,7 @@ export interface PaginatedSupplies {
 export interface SupplyService {
   getAll(page?: number, limit?: number, status?: string): Promise<PaginatedSupplies>;
   getById(supplyId: string): Promise<Suministro | null>;
+  create(data: CreateSuministroDTO): Promise<Suministro>;
   collect(supplyId: string, data?: { notes?: string }): Promise<Suministro>;
   getNearby(lat: number, lng: number, radius?: number, status?: string): Promise<SuministroConDistancia[]>;
 }
@@ -33,6 +34,11 @@ export const supplyService: SupplyService = {
 
   async getById(supplyId: string): Promise<Suministro | null> {
     const response = await api.get<{ success: boolean; data: Suministro | null }>(`/supplies/${supplyId}`);
+    return response.data.data;
+  },
+
+  async create(data: CreateSuministroDTO): Promise<Suministro> {
+    const response = await api.post<{ success: boolean; data: Suministro }>('/supplies', data);
     return response.data.data;
   },
 
