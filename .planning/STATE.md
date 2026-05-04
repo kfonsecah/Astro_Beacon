@@ -2,23 +2,23 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
-status: executing
-last_updated: "2026-05-04T01:07:21.799Z"
+status: phase-complete
+last_updated: "2026-05-03T01:19:00.000Z"
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 17 (maps-trips-polish) — EXECUTING
-Plan: 4 of 4
+Phase: 17 (maps-trips-polish) — COMPLETED
+Plan: 4 of 4 (COMPLETED)
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Executing Phase 17
+**Status:** Phase 17 Complete
 
 ## Project Reference
 
@@ -26,18 +26,18 @@ Plan: 4 of 4
 **Current Focus**: Milestone v1.2 Integración API-Frontend — All screens connected to API
 
 ## Current Position
-  
+   
 **Current Milestone**: v1.2 Integración API-Frontend
-**Current Phase**: 16-screen-integration (COMPLETED)
-**Phase Status**: 6 of 6 plans complete (16-01 to 16-06 done)
-**Progress**: 4/6 phases completed (67%)
-**Milestone Progress**: 30/45 requirements completed
+**Current Phase**: 17-maps-trips-polish (COMPLETED)
+**Phase Status**: 4 of 4 plans complete (17-01 to 17-04 done)
+**Progress**: 5/6 phases completed (83%)
+**Milestone Progress**: 31/45 requirements completed
 
 ## Performance Metrics
-  
-- Phases Completed: 4
-- Plans Executed: 12
-- Requirements Met: 30
+   
+- Phases Completed: 5
+- Plans Executed: 15
+- Requirements Met: 31
 - Token Usage: TBD
 
 ## Accumulated Context
@@ -110,9 +110,20 @@ Plan: 4 of 4
 - Decision: Used Alert.alert from react-native (built-in, no extra dependencies)
 - Decision: Mutation invalidates trip list queries on success for automatic refresh
 
+### Key Decisions (Phase 17 - Plan 04)
+
+- 17-04: Implemented real-time GPS tracking using expo-location watchPositionAsync (5s interval, 10m distance)
+- 17-04: Added active trip indicator on map ("🚀 VIAJE ACTIVO - Rastreo GPS activo")
+- 17-04: Implemented oxygen countdown timer in TripStore with startOxygenCountdown/stopOxygenCountdown
+- 17-04: Added oxygen level display with HUD-style monospace font (O₂: X / Y format)
+- 17-04: Wired oxygen countdown to start/stop based on trip status changes
+- Decision: Use watchPositionAsync with High accuracy for balanced real-time updates
+- Decision: Oxygen countdown uses setInterval at 1s intervals, decreasing ratePerMinute/60 per tick
+- Decision: Combined Task 1 and Task 2 into single commit due to interdependent file modifications
+
 ### Todos
 
-- Phase 17: Maps & Trips Polish (next phase)
+- Phase 18: Error Handling & Offline (next phase)
 
 ### Blockers
 
@@ -120,12 +131,13 @@ Plan: 4 of 4
 
 ## Session Continuity
         
-- Last action: Completed Phase 17 Plan 03 (implement trip start flow with confirmation dialog)
-- Stopped At: Phase 17 Plan 03 completed - Trip start flow implemented with Alert.confirm dialog showing oxygen warning, useStartTrip mutation wired, loading state added
-- Phase 17 context: Full navigation mode with react-native-maps, real GPS routes, supply markers with category symbols, trip start with oxygen warning confirmed working, next: real-time GPS tracking during trip, oxygen countdown, resource recording on return
-- Next step: Execute Phase 17 Plan 04 (Implement trip execution with real-time GPS tracking and oxygen countdown)
+- Last action: Completed Phase 17 Plan 04 (implement real-time GPS tracking and oxygen countdown)
+- Stopped At: Phase 17 Plan 04 completed - GPS tracking with watchPositionAsync, oxygen countdown timer in TripStore, HUD-style oxygen display on map
+- Phase 17 context: Complete trip execution implemented with real-time GPS tracking, oxygen countdown with interval management, active trip indicator on map
+- Next step: Phase 18 (Error Handling & Offline) or next milestone phase
 
 ### Roadmap Evolution
 
 - Phase 17 added: Maps & Trips Polish (pushed Error Handling & Offline to Phase 18)
 - Phase 17 scope expanded: includes full trip execution (real-time GPS, oxygen countdown, resource recording)
+- Phase 17 COMPLETED: All 4 plans done (17-01 to 17-04)
