@@ -122,7 +122,7 @@ Plans:
 | 14. API Client Setup | 1/1 | Complete    | 2026-04-30 |
 | 15. Domain Services + Hooks | 2/2 | Complete    | 2026-04-30 |
 | 16. Screen Integration | 6/6 | Complete    |  |
-| 17. Maps & Trips Polish | 5/5 | Complete    | 2026-05-03 |
+| 17. Maps & Trips Polish | 5/5 | Complete    | 2026-05-04 |
 | 18. Error Handling & Offline | 0/X | Not started | - |
 
 ---

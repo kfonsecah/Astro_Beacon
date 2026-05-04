@@ -42,7 +42,9 @@ export function useCreateSupply() {
   return useMutation({
     mutationFn: (data: CreateSuministroDTO) => supplyService.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['supplies'] });
+      // Invalidate and refetch all supply list queries
+      queryClient.invalidateQueries({ queryKey: ['supplies', 'list'] });
+      queryClient.refetchQueries({ queryKey: ['supplies', 'list'] });
     },
   });
 }

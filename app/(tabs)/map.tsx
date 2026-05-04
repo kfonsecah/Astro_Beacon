@@ -1,14 +1,15 @@
+import { CategoryLegend } from "@/components/map/CategoryLegend";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useTheme } from "@/hooks/use-theme";
-import { useSupplies, useCreateSupply } from "@/hooks/useSupplies";
-import { useTripStore } from "@/stores/trip.store";
+import { useCreateSupply, useSupplies } from "@/hooks/useSupplies";
 import { useAuthStore } from "@/stores/auth.store";
-import type { ResourceItem, Suministro, CreateSuministroDTO } from "@/types-dtos";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View, TouchableOpacity } from "react-native";
-import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
+import { useTripStore } from "@/stores/trip.store";
+import type { CreateSuministroDTO, Suministro } from "@/types-dtos";
 import * as Location from "expo-location";
-import { CategoryLegend } from "@/components/map/CategoryLegend";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const statusColorMap: Record<string, string> = {
   pendiente: "#FFC107",
@@ -24,6 +25,30 @@ const statusLabelMap: Record<string, string> = {
   expirado: "EXPIRADO",
 };
 
+const categoryConfig = {
+  oxigeno: { symbol: "🧪", color: "#00BCD4" },
+  agua: { symbol: "💧", color: "#2196F3" },
+  comida: { symbol: "🍎", color: "#8BC34A" },
+  medico: { symbol: "💊", color: "#E91E63" },
+  equipo: { symbol: "🔧", color: "#FF9800" },
+  otro: { symbol: "📦", color: "#9E9E9E" },
+} as const;
+
+type SupplyCategory = keyof typeof categoryConfig;
+
+function normalizeCategory(raw: string): SupplyCategory {
+  if (raw === "medicinas") return "medico";
+  if (raw === "herramientas") return "equipo";
+  if (raw in categoryConfig) return raw as SupplyCategory;
+  return "otro";
+}
+
+function getSupplyCategory(contents: string[]): SupplyCategory {
+  if (!contents || contents.length === 0) return "otro";
+  const firstKnown = contents.find((item) => normalizeCategory(item) !== "otro");
+  return normalizeCategory(firstKnown || contents[0]);
+}
+
 export default function MapScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
@@ -32,8 +57,8 @@ export default function MapScreen() {
 
   const { data, isLoading, isError, refetch, isFetching } = useSupplies(page, limit);
   const createSupplyMutation = useCreateSupply();
+  const [suppliesList, setSuppliesList] = useState<Suministro[]>([]);
 
-  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [region, setRegion] = useState<Region>({
     latitude: -12.0464, // Default to Lima, Peru
     longitude: -77.0428,
@@ -42,8 +67,7 @@ export default function MapScreen() {
   });
 
   // Trip store integration
-  const { activeTrip, isTracking, startTracking, stopTracking, oxygenRemaining } = useTripStore();
-  const [locationSubscription, setLocationSubscription] = useState<Location.LocationSubscription | null>(null);
+  const { activeTrip, isTracking, startTracking, oxygenRemaining } = useTripStore();
 
   useEffect(() => {
     (async () => {
@@ -56,7 +80,6 @@ export default function MapScreen() {
       let location = await Location.getCurrentPositionAsync({});
       const lat = location.coords.latitude;
       const lng = location.coords.longitude;
-      setUserLocation({ lat, lng });
       setRegion({
         latitude: lat,
         longitude: lng,
@@ -90,7 +113,6 @@ export default function MapScreen() {
             }));
           }
         );
-        setLocationSubscription(subscription);
         startTracking();
       }
     };
@@ -119,13 +141,34 @@ export default function MapScreen() {
     };
   }, [activeTrip?.status]);
 
+  useEffect(() => {
+    if (!data?.items) return;
+
+    setSuppliesList((prev) => {
+      if (page === 1) {
+        return data.items;
+      }
+
+      const merged = [...prev];
+      const existingIds = new Set(prev.map((item) => String(item.id)));
+      for (const item of data.items) {
+        const itemId = String(item.id);
+        if (!existingIds.has(itemId)) {
+          merged.push(item);
+        }
+      }
+      return merged;
+    });
+  }, [data?.items, page]);
+
   const onRefresh = () => {
     setPage(1);
+    setSuppliesList([]);
     refetch();
   };
 
   const loadMore = () => {
-    if (data && page < data.totalPages) {
+    if (!isFetching && data && page < data.totalPages) {
       setPage(prev => prev + 1);
     }
   };
@@ -153,7 +196,7 @@ export default function MapScreen() {
     );
   }
 
-  const supplies = (data?.items || []) as Suministro[];
+  const supplies = suppliesList;
 
   const getEta = (status: string) => {
     if (status === "pendiente") return "ETA: 2d 14h";
@@ -161,9 +204,9 @@ export default function MapScreen() {
     return "";
   };
 
-  function formatContents(contents: ResourceItem[]): string {
+  function formatContents(contents: string[]): string {
     if (!contents || contents.length === 0) return "Vacío";
-    return contents.map(item => `📦 x${item.cantidad}`).join(" + ");
+    return contents.join(" + ");
   }
 
   const handleRequestSupply = async () => {
@@ -193,10 +236,7 @@ export default function MapScreen() {
       const numItems = Math.floor(Math.random() * 3) + 1; // 1-3 items
       const selectedResources = [...resourceTypes].sort(() => Math.random() - 0.5).slice(0, numItems);
 
-      const contents = selectedResources.map(resourceId => ({
-        resourceId,
-        cantidad: Math.floor(Math.random() * 5) + 1,
-      }));
+      const contents: string[] = selectedResources;
 
       // Set expiresAt to random 24-72 hours from now
       const expiresInHours = Math.floor(Math.random() * 48) + 24; // 24-72 hours
@@ -211,6 +251,8 @@ export default function MapScreen() {
 
       // Create supply object
       const newSupply: CreateSuministroDTO = {
+        name: randomName,
+        description: randomDesc,
         location: {
           lat: randomLat,
           lng: randomLng,
@@ -221,6 +263,9 @@ export default function MapScreen() {
 
       // Call mutation
       await createSupplyMutation.mutateAsync(newSupply);
+      setPage(1);
+      setSuppliesList([]);
+      await refetch();
     } catch (error) {
       console.error("Error requesting supply:", error);
     }
@@ -246,15 +291,32 @@ export default function MapScreen() {
           >
             {supplies.map((supply) => (
               <Marker
-                key={supply.id}
+                key={String(supply.id)}
                 coordinate={{
                   latitude: supply.location.lat,
                   longitude: supply.location.lng,
                 }}
-                pinColor={statusColorMap[supply.status] || "#666"}
-                title={`Supply ${supply.id.slice(-4)}`}
-                description={`Status: ${supply.status}`}
-              />
+                pinColor={categoryConfig[getSupplyCategory(supply.contents)].color}
+                title={`Supply ${String(supply.id || '').slice(-4)}`}
+                description={`${categoryConfig[getSupplyCategory(supply.contents)].symbol} ${supply.contents.join(", ")}`}
+              >
+                <View
+                  style={{
+                    backgroundColor: tc.surface,
+                    borderColor: categoryConfig[getSupplyCategory(supply.contents)].color,
+                    borderWidth: 2,
+                    borderRadius: 16,
+                    width: 30,
+                    height: 30,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ fontSize: 16 }}>
+                    {categoryConfig[getSupplyCategory(supply.contents)].symbol}
+                  </Text>
+                </View>
+              </Marker>
             ))}
           </MapView>
 
@@ -334,7 +396,7 @@ export default function MapScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
-                {formatContents(item.contents)}
+                {categoryConfig[getSupplyCategory(item.contents)].symbol} {formatContents(item.contents)}
               </Text>
               <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginTop: 2 }}>
                 📍 {item.location.lat.toFixed(2)}, {item.location.lng.toFixed(2)}
