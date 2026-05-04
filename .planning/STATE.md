@@ -16,7 +16,7 @@ progress:
 ## Current Position
 
 Phase: 17 (maps-trips-polish) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 **Milestone:** v1.2 Integración API-Frontend
 **Status:** Executing Phase 17
 
@@ -91,6 +91,16 @@ Plan: 2 of 4
 - Decision: formatContents() uses generic package symbol (📦) instead of category-specific symbols due to ResourceItem type limitation (only has resourceId + cantidad, no category field)
 - Decision: TripStore initializes oxygenRemaining from trip.oxygenBudgeted when setting active trip
 
+### Key Decisions (Phase 17 - Plan 02)
+
+- 17-02: Installed react-native-maps@1.20.1 and expo-location@19.0.8 for map functionality
+- 17-02: Implemented MapView with Google Maps provider (PROVIDER_GOOGLE)
+- 17-02: Added user GPS location with expo-location (permissions + getCurrentPositionAsync)
+- 17-02: Supply markers displayed with status-based colors (pendiente=amber, entregado=green, recogido=blue, expirado=red)
+- 17-02: CategoryLegend component integrated below map in the FlatList header
+- Decision: Use Google Maps provider for consistent map rendering across platforms
+- Decision: Center map on user GPS location when permission granted, fallback to Lima, Peru coordinates
+
 ### Todos
 
 - Phase 17: Maps & Trips Polish (next phase)
@@ -100,11 +110,11 @@ Plan: 2 of 4
 - None
 
 ## Session Continuity
-      
-- Last action: Completed Phase 17 Plan 01 (fix formatContents, create CategoryLegend, create TripStore)
-- Stopped At: Phase 17 Plan 01 completed - formatContents fixed, CategoryLegend created, TripStore created
+       
+- Last action: Completed Phase 17 Plan 02 (implement MapView with supply markers and user location)
+- Stopped At: Phase 17 Plan 02 completed - MapView implemented with react-native-maps, supply markers with status colors, user GPS location, CategoryLegend integrated
 - Phase 17 context: Full navigation mode with react-native-maps, real GPS routes, supply markers with category symbols, trip start with oxygen warning, real-time GPS tracking during trip, oxygen countdown, resource recording on return
-- Next step: Execute Phase 17 Plan 02 (Implement MapView with supply markers and user location)
+- Next step: Execute Phase 17 Plan 03 (Implement trip start flow with confirmation dialog)
 
 ### Roadmap Evolution
 
