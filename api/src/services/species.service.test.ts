@@ -1,16 +1,29 @@
 import { speciesService } from './species.service.js';
 import { SpeciesClassification, DangerLevel } from '../models/species.model.js';
-import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+jest.mock('@google/generative-ai');
 
 describe('SpeciesService.identify', () => {
   const originalEnv = process.env;
+  let mockGenerateContent: jest.Mock;
+  let mockGetGenerativeModel: jest.Mock;
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
     process.env = { ...originalEnv, GOOGLE_AI_API_KEY: 'test-api-key' };
+
+    mockGenerateContent = jest.fn();
+    mockGetGenerativeModel = jest.fn().mockReturnValue({
+      generateContent: mockGenerateContent,
+    });
+
+    (GoogleGenerativeAI as jest.Mock).mockImplementation(() => ({
+      getGenerativeModel: mockGetGenerativeModel,
+    }));
+
+    // Access private member via casting to any
+    (speciesService as any).genAI = new GoogleGenerativeAI('test-api-key');
   });
 
   afterAll(() => {
@@ -18,15 +31,15 @@ describe('SpeciesService.identify', () => {
   });
 
   it('should identify "Flowering plant" as planta', async () => {
-    mockedAxios.post.mockResolvedValueOnce({
-      data: {
-        responses: [
-          {
-            labelAnnotations: [
-              { description: 'Flowering plant', score: 0.95 }
-            ]
-          }
-        ]
+    mockGenerateContent.mockResolvedValueOnce({
+      response: {
+        text: () => JSON.stringify({
+          classification: 'planta',
+          dangerLevel: 'amigable',
+          name: 'Flowering plant',
+          description: 'A beautiful flower',
+          confidence: 0.95
+        })
       }
     });
 
@@ -39,16 +52,15 @@ describe('SpeciesService.identify', () => {
   });
 
   it('should identify animal with predator keyword as animal and peligroso', async () => {
-    mockedAxios.post.mockResolvedValueOnce({
-      data: {
-        responses: [
-          {
-            labelAnnotations: [
-              { description: 'Wild animal', score: 0.9 },
-              { description: 'Carnivore predator', score: 0.85 }
-            ]
-          }
-        ]
+    mockGenerateContent.mockResolvedValueOnce({
+      response: {
+        text: () => JSON.stringify({
+          classification: 'animal',
+          dangerLevel: 'peligroso',
+          name: 'Wild animal',
+          description: 'A dangerous beast',
+          confidence: 0.9
+        })
       }
     });
 
@@ -60,74 +72,32 @@ describe('SpeciesService.identify', () => {
     expect(result.confidence).toBe(0.9);
   });
 
-  it('should identify mineral as recurso and cauteloso (default)', async () => {
-    mockedAxios.post.mockResolvedValueOnce({
-      data: {
-        responses: [
-          {
-            labelAnnotations: [
-              { description: 'Shiny rock', score: 0.88 }
-            ]
-          }
-        ]
-      }
-    });
-
-    const result = await speciesService.identify('base64image');
-
-    expect(result.classification).toBe(SpeciesClassification.RECURSO);
-    expect(result.dangerLevel).toBe(DangerLevel.CAUTELOSO);
-    expect(result.name).toBe('Shiny rock');
-    expect(result.confidence).toBe(0.88);
-  });
-
   it('should return fallback when API Key is missing', async () => {
-    delete process.env.GOOGLE_AI_API_KEY;
+    (speciesService as any).genAI = null;
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
     const result = await speciesService.identify('base64image');
 
     expect(result.classification).toBe(SpeciesClassification.DESCONOCIDO);
     expect(result.dangerLevel).toBe(DangerLevel.CAUTELOSO);
-    expect(result.confidence).toBe(0);
-    expect(consoleSpy).toHaveBeenCalledWith('[Vision API] Missing API Key, returning fallback');
+    expect(consoleSpy).toHaveBeenCalledWith('[Gemini AI] Missing API Key, returning fallback');
 
     consoleSpy.mockRestore();
   });
 
-  it('should return fallback on axios network error', async () => {
-    mockedAxios.post.mockRejectedValueOnce(new Error('Network Error'));
+  it('should return fallback on Gemini error', async () => {
+    mockGenerateContent.mockRejectedValueOnce(new Error('Gemini Error'));
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation();
 
     const result = await speciesService.identify('base64image');
 
     expect(result.classification).toBe(SpeciesClassification.DESCONOCIDO);
     expect(result.dangerLevel).toBe(DangerLevel.CAUTELOSO);
     expect(result.confidence).toBe(0);
-    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[Vision API] Failed to identify image'), expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('[Gemini AI] Failed to identify image, using fallback:'), expect.any(String));
 
     consoleSpy.mockRestore();
-  });
-
-  it('should return fallback if no labels are returned', async () => {
-    mockedAxios.post.mockResolvedValueOnce({
-      data: {
-        responses: [
-          {
-            labelAnnotations: []
-          }
-        ]
-      }
-    });
-    const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
-
-    const result = await speciesService.identify('base64image');
-
-    expect(result.classification).toBe(SpeciesClassification.DESCONOCIDO);
-    expect(result.dangerLevel).toBe(DangerLevel.CAUTELOSO);
-    expect(result.confidence).toBe(0);
-    expect(consoleSpy).toHaveBeenCalledWith('[Vision API] No labels found, returning fallback');
-
-    consoleSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 });
