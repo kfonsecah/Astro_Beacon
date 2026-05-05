@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
-status: planning
-last_updated: "2026-05-05T22:30:00.000Z"
+status: executing
+last_updated: "2026-05-05T23:41:29Z"
 progress:
   total_phases: 13
   completed_phases: 10
   total_plans: 27
-  completed_plans: 24
-  percent: 88
+  completed_plans: 27
+  percent: 96
 ---
 
 # State: Astro_Beacon
@@ -29,12 +29,13 @@ Plan: Not started
 ## Current Position
 
 **Current Milestone**: v1.2 Integración API-Frontend
-**Current Phase**: 24-species-detail-camera (READY TO EXECUTE)
-**Phase Status**: 0 of 3 plans complete
+**Current Phase**: 24-species-detail-camera (IN PROGRESS)
+**Phase Status**: 2 of 3 plans complete
 **Progress**: 10/13 phases completed (77%)
 **Milestone Progress**: 36/57 requirements completed (including new AI/Gesture requirements)
 
 **Phases added 2026-05-05 (AI + Missing Screens):**
+
 - Phase 23: Backend AI Identify Endpoint - COMPLETED
 - Phase 24: Species Detail Screen + Camera Setup (NEXT)
 - Phase 25: AI Flow + Audio Narration
@@ -59,6 +60,9 @@ Plan: Not started
 - Standardize response envelope to { success: true, data: { ... } } (Phase 23)
 - identifySpeciesSchema enforces ~400KB limit with string length validation (D-03/Phase 23)
 - Zod schema relaxed to allow base64 strings in imageUrl (D-13/Phase 23)
+- Use tc.* theme tokens exclusively in detail screen — no hardcoded hex values (24-02)
+- NARRAR button disabled as placeholder in species detail; wired in Phase 25 (24-02)
+- id normalization via Array.isArray check handles expo-router param edge cases (24-02)
 - Use TanStack Query v5 for server state management (research confirmed industry standard 2026)
 - Use expo-secure-store for JWT storage (never AsyncStorage)
 
