@@ -15,7 +15,7 @@
 - [x] **Phase 17: Maps & Trips Polish** - Fix map crash, implement trip start, complete map view, implement trip execution, fix map panning, add supply request feature (5/5 plans done)
 - [ ] **Phase 19: Critical Bug Fixes** - Fix trip activation (TripStore desconectado), paginación sin acumulación, double setAuth en login
 - [/] **Phase 20: Design System Compliance** - Eliminar hex hardcodeados en map.tsx y trips.tsx introducidos en fases 16-17
-- [x] **Phase 21: Error Handling & Offline** - Error boundaries y soporte offline (era Phase 18, reposicionada post-bugfixes) (completed 2026-05-05)
+- [x] **Phase 21: Error Handling & Offline** - Error boundaries y soporte offline (era Phase 18, reposicionada post-bugfixes) (completed 2026-05-05)
 - [ ] **Phase 22: Code Cleanup** - Eliminar código muerto, artefactos de dev, actualizar documentación
 
 ---
@@ -197,7 +197,7 @@ Plans:
 
 Plans:
 - [ ] 24-01-PLAN.md — Instalar expo-image-picker, configurar permisos en app.json, crear hook `useImagePicker` con compresión
-- [ ] 24-02-PLAN.md — Crear `app/species/[id].tsx` (species detail screen: foto, clasificación, peligro, descripción, confianza)
+- [ ] 24-02-PLAN.md — Registrar ruta en layout + crear `app/species/[id].tsx` (detalle: foto, clasificación, peligro, descripción, notas, confianza)
 - [ ] 24-03-PLAN.md — Crear `app/species/identify.tsx` (modal cámara: image picker + formulario nueva especie) + FAB en bestiary.tsx
 
 ### Phase 25: AI Identification Flow + Audio Narration
@@ -251,7 +251,7 @@ Plans:
 | 20. Design System Compliance | 0/1 | Complete    | 2026-05-05 |
 | 21. Error Handling & Offline | 2/2 | Complete    | 2026-05-05 |
 | 22. Code Cleanup | 0/1 | Not started | - |
-| 23. Backend AI Identify Endpoint | 0/2 | Not started | - |
+| 23. Backend AI Identify Endpoint | 2/2 | Complete | 2026-05-05 |
 | 24. Species Detail + Camera Setup | 0/3 | Not started | - |
 | 25. AI Flow + Audio Narration | 0/2 | Not started | - |
 | 26. Gestures + Log Resource Screen | 0/2 | Not started | - |
