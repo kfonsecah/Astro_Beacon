@@ -1,14 +1,21 @@
+import { RouteErrorFallback } from '@/components/common';
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/use-theme";
+import { View } from "react-native";
+import { OfflineBanner } from "@/components/common";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 export default function TabLayout() {
   const theme = useTheme();
   const { colors: tc } = theme;
+  const { isConnected } = useNetworkStatus();
 
   return (
-    <Tabs
-      screenOptions={{
+    <View style={{ flex: 1 }}>
+      {!isConnected && <OfflineBanner />}
+      <Tabs
+        screenOptions={{
         tabBarActiveTintColor: tc.primary,
         tabBarInactiveTintColor: tc.textMuted,
         tabBarStyle: {
@@ -77,5 +84,6 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+    </View>
   );
 }
