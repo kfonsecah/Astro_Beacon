@@ -252,7 +252,7 @@ Plans:
 | 21. Error Handling & Offline | 2/2 | Complete    | 2026-05-05 |
 | 22. Code Cleanup | 0/1 | Not started | - |
 | 23. Backend AI Identify Endpoint | 2/2 | Complete | 2026-05-05 |
-| 24. Species Detail + Camera Setup | 0/3 | Not started | - |
+| 24. Species Detail + Camera Setup | 0/3 | Planned | - |
 | 25. AI Flow + Audio Narration | 0/2 | Not started | - |
 | 26. Gestures + Log Resource Screen | 0/2 | Not started | - |
 

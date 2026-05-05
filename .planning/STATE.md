@@ -2,24 +2,24 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
-status: execution
-last_updated: "2026-05-05T22:00:00.000Z"
+status: planning
+last_updated: "2026-05-05T22:30:00.000Z"
 progress:
   total_phases: 13
   completed_phases: 10
-  total_plans: 24
+  total_plans: 27
   completed_plans: 24
-  percent: 100
+  percent: 88
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 23 — COMPLETE (Human UAT Pending)
-Plan: 2 of 2
+Phase: 24
+Plan: Not started
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Phase 23 complete, ready for Phase 24
+**Status:** Phase 24 PLANNED, ready to execute
 
 ## Project Reference
 
@@ -29,7 +29,7 @@ Plan: 2 of 2
 ## Current Position
 
 **Current Milestone**: v1.2 Integración API-Frontend
-**Current Phase**: 24-species-detail-camera (READY TO PLAN)
+**Current Phase**: 24-species-detail-camera (READY TO EXECUTE)
 **Phase Status**: 0 of 3 plans complete
 **Progress**: 10/13 phases completed (77%)
 **Milestone Progress**: 36/57 requirements completed (including new AI/Gesture requirements)
@@ -51,7 +51,10 @@ Plan: 2 of 2
 
 ### Key Decisions
 
-- Use axios for REST calls to Google Cloud Vision API instead of SDK (D-05/Phase 23)
+- Use expo-image-manipulator for resizing (800px) and compression (0.4) to maintain Base64 payload under 400KB.
+- Register species routes (detail and identify) in the protected stack of app/_layout.tsx.
+- Detail screen app/species/[id].tsx must include 'notes' and 'confidence' fields.
+- Use axios for REST calls to Google Cloud Vision API (deprecated/switched to Gemini in implementation).
 - Fallback for AI identification defaults to dangerLevel: 'cauteloso' and classification: 'desconocido' (D-11/Phase 23)
 - Standardize response envelope to { success: true, data: { ... } } (Phase 23)
 - identifySpeciesSchema enforces ~400KB limit with string length validation (D-03/Phase 23)
@@ -63,7 +66,7 @@ Plan: 2 of 2
 
 ### Key Decisions (Phase 23)
 
-- Implemented POST /api/v1/species/identify using axios for direct REST communication with Google Vision.
+- Implemented POST /api/v1/species/identify using axios for direct REST communication with Google Vision (migrated to Gemini SDK).
 - Created robust keyword-based mapping logic with separate passes for Classification and DangerLevel.
 - Ensured deterministic fallback (non-throwing) for missing API keys or external failures.
 - Added comprehensive unit and controller tests (9 cases) covering success, fallback, and validation scenarios.
