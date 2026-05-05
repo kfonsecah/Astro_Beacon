@@ -386,6 +386,10 @@ export default function MapScreen() {
       await refetch();
     } catch (error) {
       console.error("Error requesting supply:", error);
+      Alert.alert(
+        "ERROR",
+        error instanceof Error ? error.message : "No se pudo solicitar el suministro. Intente de nuevo."
+      );
     }
   };
 
