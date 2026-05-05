@@ -60,12 +60,12 @@ Requirements for API-Frontend integration milestone. Scope estricto: integrar pa
 
 ### Error Handling & Offline (ERR)
 
-- [ ] **ERR-01**: ErrorBoundary export in all route files for graceful error recovery
-- [ ] **ERR-02**: Root layout (app/_layout.tsx) has catch-all ErrorBoundary
-- [ ] **ERR-03**: Offline detection shows OfflineBanner component when network unavailable
-- [ ] **ERR-04**: Network errors (no response) display user-friendly "Check connection" message
+- [x] **ERR-01**: ErrorBoundary export in all route files for graceful error recovery
+- [x] **ERR-02**: Root layout (app/_layout.tsx) has catch-all ErrorBoundary
+- [x] **ERR-03**: Offline detection shows OfflineBanner component when network unavailable
+- [x] **ERR-04**: Network errors (no response) display user-friendly "Check connection" message
 - [ ] **ERR-05**: Form validation errors display per-field with clear messaging
-- [ ] **ERR-06**: TanStack Query onlineManager pauses queries when offline, retries when online
+- [x] **ERR-06**: TanStack Query onlineManager pauses queries when offline, retries when online
 
 ## v2 Requirements (Deferred)
 
@@ -148,12 +148,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-14 | Phase 16 | Complete |
 | UI-15 | Phase 16 | Complete |
 | UI-16 | Phase 16 | Complete |
-| ERR-01 | Phase 17 | Pending |
-| ERR-02 | Phase 17 | Pending |
-| ERR-03 | Phase 17 | Pending |
-| ERR-04 | Phase 17 | Pending |
+| ERR-01 | Phase 17 | Complete |
+| ERR-02 | Phase 17 | Complete |
+| ERR-03 | Phase 17 | Complete |
+| ERR-04 | Phase 17 | Complete |
 | ERR-05 | Phase 17 | Pending |
-| ERR-06 | Phase 17 | Pending |
+| ERR-06 | Phase 17 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 45 total

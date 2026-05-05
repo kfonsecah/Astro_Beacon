@@ -2,20 +2,21 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
-status: planning
-last_updated: "2026-05-05T02:16:35.596Z"
+status: ready_to_plan
+last_updated: "2026-05-05T06:26:30.391Z"
 progress:
   total_phases: 9
-  completed_phases: 7
-  total_plans: 19
+  completed_phases: 8
+  total_plans: 21
   completed_plans: 19
+  percent: 89
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 21
+Phase: 22
 Plan: Not started
 **Milestone:** v1.2 Integración API-Frontend
 **Status:** Ready to plan
@@ -61,7 +62,7 @@ Plan: Not started
 - Login screen uses useLogin() mutation from TanStack Query
 - Navigation after login uses router.replace('/(tabs)/dashboard') to prevent back navigation
 
-**Current focus:** Phase 20 — design-system-compliance
+**Current focus:** Phase 21 — error-handling-offline
 
 ### Key Decisions (Phase 19)
 

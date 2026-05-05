@@ -15,7 +15,7 @@
 - [x] **Phase 17: Maps & Trips Polish** - Fix map crash, implement trip start, complete map view, implement trip execution, fix map panning, add supply request feature (5/5 plans done)
 - [ ] **Phase 19: Critical Bug Fixes** - Fix trip activation (TripStore desconectado), paginación sin acumulación, double setAuth en login
 - [/] **Phase 20: Design System Compliance** - Eliminar hex hardcodeados en map.tsx y trips.tsx introducidos en fases 16-17
-- [ ] **Phase 21: Error Handling & Offline** - Error boundaries y soporte offline (era Phase 18, reposicionada post-bugfixes)
+- [x] **Phase 21: Error Handling & Offline** - Error boundaries y soporte offline (era Phase 18, reposicionada post-bugfixes) (completed 2026-05-05)
 - [ ] **Phase 22: Code Cleanup** - Eliminar código muerto, artefactos de dev, actualizar documentación
 
 ---
@@ -145,8 +145,8 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 21-01-PLAN.md — ErrorBoundary en todos los route files + RouteErrorFallback component
-- [ ] 21-02-PLAN.md — OfflineBanner en tabs layout + onlineManager en queryClient
+- [x] 21-01-PLAN.md — ErrorBoundary en todos los route files + RouteErrorFallback component
+- [x] 21-02-PLAN.md — OfflineBanner en tabs layout + onlineManager en queryClient
 
 ### Phase 22: Code Cleanup
 **Goal**: Eliminar código muerto, artefactos de desarrollo expuestos, y sincronizar documentación con el estado real.
@@ -176,7 +176,7 @@ Plans:
 | 17. Maps & Trips Polish | 5/5 | Complete | 2026-05-04 |
 | 19. Critical Bug Fixes | 0/2 | Not started | - |
 | 20. Design System Compliance | 0/1 | Complete    | 2026-05-05 |
-| 21. Error Handling & Offline | 0/2 | Not started | - |
+| 21. Error Handling & Offline | 2/2 | Complete    | 2026-05-05 |
 | 22. Code Cleanup | 0/1 | Not started | - |
 
 ---
