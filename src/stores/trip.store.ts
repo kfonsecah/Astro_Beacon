@@ -40,15 +40,17 @@ export const useTripStore = create<TripState>((set) => ({
   })),
 
   startOxygenCountdown: (ratePerMinute: number) => set((state) => {
-    if (state.intervalId) return state; // Already running
+    if (state.intervalId !== null) {
+      clearInterval(state.intervalId); // Clean up any stale interval first
+    }
 
     const intervalId = setInterval(() => {
-      set((state) => ({
-        oxygenRemaining: Math.max(0, state.oxygenRemaining - ratePerMinute / 60), // Per second
+      set((s) => ({
+        oxygenRemaining: Math.max(0, s.oxygenRemaining - ratePerMinute / 60),
       }));
     }, 1000);
 
-    return { intervalId, isTracking: true };
+    return { intervalId: intervalId as unknown as number, isTracking: true };
   }),
 
   stopOxygenCountdown: () => set((state) => {

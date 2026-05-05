@@ -107,9 +107,6 @@ export class SupplyService {
     input?: CollectSupplyInput,
   ): Promise<ISupply> {
     const supply = await this.findOne(userId, supplyId);
-    console.log(
-      `[COLLECT] Supply found: ${supply._id}, contents: ${JSON.stringify(supply.contents)}`,
-    );
 
     if (
       supply.status !== SupplyDropStatus.PENDIENTE &&
@@ -142,17 +139,11 @@ export class SupplyService {
     // Process contents - create/update resources for astronaut
     const userObjectId = new mongoose.Types.ObjectId(userId);
     if (supply.contents && supply.contents.length > 0) {
-      console.log(
-        `[COLLECT] Processing ${supply.contents.length} contents for user ${userId}`,
-      );
       for (const content of supply.contents) {
         try {
           const category = this.mapContentToCategory(content);
           const resourceName =
             category.charAt(0).toUpperCase() + category.slice(1);
-          console.log(
-            `[COLLECT] Content: ${content} → Category: ${category}, ResourceName: ${resourceName}`,
-          );
 
           // Find or create resource
           const existingResource = await Resource.findOne({
@@ -161,11 +152,8 @@ export class SupplyService {
           });
 
           if (existingResource) {
-            console.log(
-              `[COLLECT] Found existing resource: ${existingResource._id}, amount: ${existingResource.currentAmount} → ${existingResource.currentAmount + 1}`,
-            );
             // Increment existing resource
-            const updated = await Resource.findByIdAndUpdate(
+            await Resource.findByIdAndUpdate(
               existingResource._id,
               {
                 currentAmount: existingResource.currentAmount + 1,
@@ -183,15 +171,9 @@ export class SupplyService {
               },
               { new: true },
             );
-            console.log(
-              `[COLLECT] Updated resource: ${JSON.stringify(updated?.currentAmount)}`,
-            );
           } else {
-            console.log(
-              `[COLLECT] Creating new resource: ${resourceName} (${category})`,
-            );
             // Create new resource
-            const created = await Resource.create({
+            await Resource.create({
               name: resourceName,
               category: category,
               currentAmount: 1,
@@ -209,7 +191,6 @@ export class SupplyService {
                 },
               ],
             });
-            console.log(`[COLLECT] Created resource: ${created._id}`);
           }
         } catch (err) {
           console.error(`[COLLECT] Error processing content ${content}:`, err);

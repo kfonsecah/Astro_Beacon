@@ -27,9 +27,10 @@ export default function ResourcesScreen() {
         setAllResources(prev => {
           const existingIds = new Set(prev.map(r => r.id));
           const filtered = newItems.filter(r => !existingIds.has(r.id));
-          return filtered.length > 0 ? [...prev, ...filtered] : prev;
+          const next = filtered.length > 0 ? [...prev, ...filtered] : prev;
+          setHasMore((data?.total ?? 0) > next.length);
+          return next;
         });
-        setHasMore((data?.total ?? 0) > allResources.length + newItems.length);
       }
     }, [data]);
 

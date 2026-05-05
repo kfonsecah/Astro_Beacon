@@ -75,18 +75,17 @@ export class SpeciesService {
   }
 
   /**
-   * Update a species
+   * Update a species.
+   * Species are globally shared — any authenticated user may update any species.
+   * userId is accepted for API consistency but is not used for ownership filtering.
    */
   async update(
     userId: string,
     speciesId: string,
     input: UpdateSpeciesInput
   ): Promise<ISpecies> {
-    // Verify species exists (species are global, no userId filter)
-    const existing = await this.findOne(speciesId);
-    if (!existing) {
-      throw new AppError('Species not found', 404);
-    }
+    // findOne throws AppError('Species not found', 404) if not found
+    await this.findOne(speciesId);
 
     const species = await Species.findByIdAndUpdate(
       new mongoose.Types.ObjectId(speciesId),
@@ -105,14 +104,13 @@ export class SpeciesService {
   }
 
   /**
-   * Delete a species
+   * Delete a species.
+   * Species are globally shared — any authenticated user may delete any species.
+   * userId is accepted for API consistency but is not used for ownership filtering.
    */
   async delete(userId: string, speciesId: string): Promise<void> {
-    // Verify species exists (species are global, no userId filter)
-    const existing = await this.findOne(speciesId);
-    if (!existing) {
-      throw new AppError('Species not found', 404);
-    }
+    // findOne throws AppError('Species not found', 404) if not found
+    await this.findOne(speciesId);
 
     await Species.findByIdAndDelete(new mongoose.Types.ObjectId(speciesId));
   }

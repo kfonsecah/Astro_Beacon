@@ -5,7 +5,6 @@ export interface Astronauta {
   id: string;
   name: string;
   email: string;
-  passwordHash: string;
   rol: UserRole;
   status: AstronautStatus;
   baseCampLocation: GeoPoint;

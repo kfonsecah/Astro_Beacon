@@ -28,10 +28,17 @@ export interface TripService {
 }
 
 function mapTrip(t: any): Viaje {
+  // Backend may store destination as a { lat, lng } GeoJSON object or a label string.
+  // Normalise defensively to always return a valid GeoPoint.
+  const destination =
+    t.destination && typeof t.destination === 'object' && 'lat' in t.destination
+      ? t.destination
+      : { lat: 0, lng: 0 };
+
   return {
     id: t._id?.toString() ?? t.id ?? '',
     astronautId: t.userId?.toString() ?? '',
-    destination: t.destination ?? '',
+    destination,
     status: t.status,
     startedAt: t.startDate,
     completedAt: t.endDate,

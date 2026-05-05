@@ -170,6 +170,18 @@ export default function MapScreen() {
     });
   }, [data?.items, page]);
 
+  const calculateDistanceKm = (fromLat: number, fromLng: number, toLat: number, toLng: number): number => {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const dLat = toRad(toLat - fromLat);
+    const dLng = toRad(toLng - fromLng);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthRadiusKm * c;
+  };
+
   // Calcular distancias y detectar proximidad (100m)
   useEffect(() => {
     const distances: Record<string, number> = {};
@@ -189,9 +201,8 @@ export default function MapScreen() {
 
       const isInRange = distMeters < 1000;
       const isPendiente = supply.status === 'pendiente';
-      
-      // DEBUG: Sin requisito viaje activo temporalmente para probar
-      if (isInRange && isPendiente) {
+
+      if (isInRange && isPendiente && isTripActive) {
         collectible.add(String(supply.id));
       }
     });
@@ -238,7 +249,7 @@ export default function MapScreen() {
 
   const getEta = (status: string) => {
     if (status === "pendiente") return "ETA: 2d 14h";
-    if (status === "entregido") return "Recogido";
+    if (status === "entregado") return "Recogido";
     return "";
   };
 
@@ -258,18 +269,6 @@ export default function MapScreen() {
 
   const supplies = sortedSupplies;
   const selectedSupply = supplies.find((s) => String(s.id) === String(selectedSupplyId));
-
-  const calculateDistanceKm = (fromLat: number, fromLng: number, toLat: number, toLng: number): number => {
-    const toRad = (deg: number) => (deg * Math.PI) / 180;
-    const earthRadiusKm = 6371;
-    const dLat = toRad(toLat - fromLat);
-    const dLng = toRad(toLng - fromLng);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return earthRadiusKm * c;
-  };
 
   const estimateOxygenBudget = (supply: Suministro): number => {
     const distanceKm = calculateDistanceKm(
