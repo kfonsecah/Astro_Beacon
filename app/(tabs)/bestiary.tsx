@@ -3,7 +3,8 @@ import { useTheme } from "@/hooks/use-theme";
 import { useSpecies } from "@/hooks/useSpecies";
 import type { Especie } from "@/types-dtos";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import { useRouter } from "expo-router";
 import { RouteErrorFallback } from '@/components/common';
 
 const classificationColorMap: Record<string, string> = {
@@ -25,6 +26,7 @@ const dangerColorMap: Record<string, string> = {
 export default function BestiaryScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -99,7 +101,10 @@ export default function BestiaryScreen() {
           const dngColor = dangerColorMap[item.dangerLevel] || tc.textMuted;
 
           return (
-            <View style={{ flexDirection: "row", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 12, padding: 12 }}>
+            <TouchableOpacity
+              onPress={() => router.push('/species/' + item.id)}
+              style={{ flexDirection: "row", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 12, padding: 12 }}
+            >
               <View style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12 }} />
               <View style={{ flex: 1, justifyContent: "center" }}>
                 <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1, marginBottom: 8 }}>
@@ -119,7 +124,7 @@ export default function BestiaryScreen() {
                   </Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         }}
         onEndReached={loadMore}
