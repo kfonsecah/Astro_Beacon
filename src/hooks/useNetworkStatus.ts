@@ -8,11 +8,19 @@ interface NetworkStatus {
 
 export function useNetworkStatus() {
   const [status, setStatus] = useState<NetworkStatus>({
-    isConnected: true,
-    isInternetReachable: true,
+    isConnected: false,
+    isInternetReachable: false,
   });
 
   useEffect(() => {
+    // Get current state immediately on mount
+    NetInfo.fetch().then((state: NetInfoState) => {
+      setStatus({
+        isConnected: state.isConnected ?? false,
+        isInternetReachable: state.isInternetReachable ?? false,
+      });
+    });
+
     const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
       setStatus({
         isConnected: state.isConnected ?? false,
