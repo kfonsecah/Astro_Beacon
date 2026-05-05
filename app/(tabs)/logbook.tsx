@@ -4,6 +4,7 @@ import { useLogbookEntries } from "@/hooks/useLogbook";
 import type { BitacoraEntradaResponse } from "@/types-dtos";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
+import { RouteErrorFallback } from '@/components/common';
 
 export default function LogbookScreen() {
   const theme = useTheme();
@@ -109,4 +110,8 @@ export default function LogbookScreen() {
       />
     </SafeAreaView>
   );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return <RouteErrorFallback error={error} retry={retry} />;
 }

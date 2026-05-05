@@ -7,6 +7,7 @@ import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { RouteErrorFallback } from '@/components/common';
 
 const statusColorMap: Record<string, string> = {
   planificado: colors.tripPlanificado,
@@ -188,4 +189,8 @@ export default function TripsScreen() {
       />
     </View>
   );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return <RouteErrorFallback error={error} retry={retry} />;
 }

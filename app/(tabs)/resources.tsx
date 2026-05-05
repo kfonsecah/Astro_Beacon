@@ -6,6 +6,7 @@ import { HudHeader } from "@/components/ui/HudHeader";
 import { useResources, useResourceAlerts } from "@/hooks/useResources";
 import { useState, useEffect } from "react";
 import type { Recurso } from "@/types-dtos";
+import { RouteErrorFallback } from '@/components/common';
 
 export default function ResourcesScreen() {
   const theme = useTheme();
@@ -177,4 +178,8 @@ export default function ResourcesScreen() {
       })}
     </View>
   );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return <RouteErrorFallback error={error} retry={retry} />;
 }

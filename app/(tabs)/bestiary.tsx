@@ -4,6 +4,7 @@ import { useSpecies } from "@/hooks/useSpecies";
 import type { Especie } from "@/types-dtos";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
+import { RouteErrorFallback } from '@/components/common';
 
 const classificationColorMap: Record<string, string> = {
   planta: "#4CAF50",
@@ -131,4 +132,8 @@ export default function BestiaryScreen() {
       />
     </SafeAreaView>
   );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return <RouteErrorFallback error={error} retry={retry} />;
 }

@@ -7,6 +7,7 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useResourceAlerts, useResources } from "@/hooks/useResources";
 import { useRouter } from "expo-router";
 import { ActivityIndicator, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { RouteErrorFallback } from '@/components/common';
 
 export default function DashboardScreen() {
   const theme = useTheme();
@@ -161,4 +162,8 @@ export default function DashboardScreen() {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return <RouteErrorFallback error={error} retry={retry} />;
 }

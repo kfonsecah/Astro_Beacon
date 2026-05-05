@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { RouteErrorFallback } from '@/components/common';
 
 const statusColorMap: Record<string, string> = {
   pendiente: colors.supplyPendiente,
@@ -686,4 +687,8 @@ export default function MapScreen() {
       />
     </SafeAreaView>
   );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return <RouteErrorFallback error={error} retry={retry} />;
 }

@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import Animated, {
+import { RouteErrorFallback } from '@/components/common';
   Easing,
   FadeIn,
   SlideInDown,
@@ -339,4 +340,8 @@ export default function LoginScreen() {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return <RouteErrorFallback error={error} retry={retry} />;
 }
