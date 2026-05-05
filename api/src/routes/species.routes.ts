@@ -4,7 +4,8 @@ import {
   getSpeciesById,
   createSpecies,
   updateSpecies,
-  deleteSpecies
+  deleteSpecies,
+  identifySpecies
 } from '../controllers/species.controller.js';
 import { authenticate } from '../middlewares/auth.middleware.js';
 
@@ -12,6 +13,10 @@ const router = Router();
 
 // All routes require authentication (for create/update/delete), but species are global
 router.use(authenticate);
+
+// POST /api/v1/species/identify - Identify new species (requires auth)
+// CRITICAL: Must be defined before GET /:id
+router.post('/identify', identifySpecies);
 
 // GET /api/v1/species - List all species (global, no userId filter)
 router.get('/', getSpecies);

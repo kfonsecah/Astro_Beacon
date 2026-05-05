@@ -15,6 +15,7 @@ export const dangerLevelEnum = z.enum([
   'cauteloso',
   'peligroso',
   'letal',
+  'desconocido',
 ]);
 
 export type SpeciesClassification = z.infer<typeof speciesClassificationEnum>;
@@ -26,8 +27,13 @@ export const createSpeciesSchema = z.object({
   classification: speciesClassificationEnum,
   dangerLevel: dangerLevelEnum.optional().default('amigable'),
   description: z.string().optional().default(''),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().optional().or(z.literal('')),
   notes: z.string().optional().default(''),
+});
+
+// Identify species schema
+export const identifySpeciesSchema = z.object({
+  imageBase64: z.string().min(1, 'Base64 image string is required').max(533333, 'Image too large (max ~400KB)'),
 });
 
 // Update species schema (partial of create)

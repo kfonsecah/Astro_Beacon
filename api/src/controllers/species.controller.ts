@@ -3,7 +3,8 @@ import { speciesService } from '../services/species.service.js';
 import {
   createSpeciesSchema,
   updateSpeciesSchema,
-  speciesQuerySchema
+  speciesQuerySchema,
+  identifySpeciesSchema
 } from '../schemas/species.schema.js';
 
 /**
@@ -167,6 +168,38 @@ export async function deleteSpecies(
     res.status(200).json({
       success: true,
       data: { message: 'Species deleted successfully' }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+/**
+ * POST /api/v1/species/identify
+ * Identify a species using AI
+ */
+export async function identifySpecies(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const { imageBase64 } = identifySpeciesSchema.parse(req.body);
+    const userId = (req as any).user?.sub;
+
+    if (!userId) {
+      res.status(401).json({
+        success: false,
+        error: 'Unauthorized'
+      });
+      return;
+    }
+
+    const result = await speciesService.identify(imageBase64);
+
+    res.status(200).json({
+      success: true,
+      data: result
     });
   } catch (error) {
     next(error);

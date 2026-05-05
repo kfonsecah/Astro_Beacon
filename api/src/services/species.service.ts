@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import axios from 'axios';
 import { Species, ISpecies, SpeciesClassification, DangerLevel } from '../models/species.model.js';
 import { AppError } from '../middlewares/error.middleware.js';
 import { calculatePagination } from '../utils/pagination.js';
@@ -6,6 +7,14 @@ import type {
   CreateSpeciesInput,
   UpdateSpeciesInput
 } from '../schemas/species.schema.js';
+
+export interface IdentifyResult {
+  classification: SpeciesClassification;
+  dangerLevel: DangerLevel;
+  name: string;
+  description: string;
+  confidence: number;
+}
 
 export class SpeciesService {
   /**
@@ -122,6 +131,63 @@ export class SpeciesService {
     classification: SpeciesClassification
   ) {
     return this.findAll(1, 100, classification);
+  }
+
+  /**
+   * Identify a species using Google Cloud Vision API
+   */
+  async identify(imageBase64: string): Promise<IdentifyResult> {
+    const fallback: IdentifyResult = {
+      classification: SpeciesClassification.DESCONOCIDO,
+      dangerLevel: DangerLevel.CAUTELOSO,
+      name: 'Especie Desconocida',
+      description: 'La identificación automática no está disponible en este momento.',
+      confidence: 0,
+    };
+
+    try {
+      const apiKey = process.env.GOOGLE_VISION_API_KEY;
+      if (!apiKey) {
+        console.warn('[Vision API] Missing API Key, returning fallback');
+        return fallback;
+      }
+
+      // Clean prefix if it exists
+      const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+
+      const response = await axios.post(
+        `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+        {
+          requests: [
+            {
+              image: { content: cleanBase64 },
+              features: [{ type: 'LABEL_DETECTION', maxResults: 10 }],
+            },
+          ],
+        },
+        { timeout: 5000 }
+      );
+
+      const labels = response.data.responses[0]?.labelAnnotations || [];
+      if (labels.length === 0) {
+        console.warn('[Vision API] No labels found, returning fallback');
+        return fallback;
+      }
+
+      // Basic mapping placeholder for plan 1, will be refined in plan 2
+      // At this stage, just returning unknown with the first label name and confidence
+      return {
+        classification: SpeciesClassification.DESCONOCIDO,
+        dangerLevel: DangerLevel.CAUTELOSO,
+        name: 'Especie Desconocida',
+        description: `Label detectado: ${labels[0].description}`,
+        confidence: labels[0].score || 0,
+      };
+
+    } catch (error) {
+      console.warn('[Vision API] Failed to identify image, using fallback', error);
+      return fallback;
+    }
   }
 }
 
