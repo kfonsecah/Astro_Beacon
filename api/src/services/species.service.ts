@@ -81,6 +81,10 @@ export class SpeciesService {
    * Find a single species by ID
    */
   async findOne(speciesId: string): Promise<ISpecies> {
+    if (!mongoose.Types.ObjectId.isValid(speciesId)) {
+      throw new AppError('Invalid ID format', 400);
+    }
+
     const species = await Species.findOne({
       _id: new mongoose.Types.ObjectId(speciesId),
     });
@@ -160,7 +164,9 @@ export class SpeciesService {
         return fallback;
       }
 
-      // Clean prefix if it exists
+      // Detect MIME type and clean prefix
+      const mimeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
+      const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
       const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
       
       const model = this.genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
@@ -186,7 +192,7 @@ export class SpeciesService {
         {
           inlineData: {
             data: cleanBase64,
-            mimeType: 'image/jpeg' // Expo ImagePicker usually sends jpeg
+            mimeType
           }
         }
       ]);
@@ -194,25 +200,41 @@ export class SpeciesService {
       const response = await result.response;
       const text = response.text();
       
-      // Extract JSON from response (handling potential markdown blocks)
+      // Extract JSON from response (handling potential markdown blocks or extra text)
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
-        throw new Error('No se pudo parsear la respuesta JSON de Gemini');
+        throw new Error('No se pudo encontrar un bloque JSON en la respuesta de Gemini');
       }
 
-      const aiResult = JSON.parse(jsonMatch[0]);
+      let aiResult;
+      try {
+        aiResult = JSON.parse(jsonMatch[0]);
+      } catch (parseError) {
+        console.error('[Gemini AI] JSON Parse Error:', parseError, 'Text:', text);
+        throw new Error('La respuesta de Gemini no es un JSON válido');
+      }
+
+      // Normalize and validate enums
+      const classification = Object.values(SpeciesClassification).includes(aiResult.classification?.toLowerCase() as SpeciesClassification)
+        ? (aiResult.classification.toLowerCase() as SpeciesClassification)
+        : SpeciesClassification.DESCONOCIDO;
+
+      const dangerLevel = Object.values(DangerLevel).includes(aiResult.dangerLevel?.toLowerCase() as DangerLevel)
+        ? (aiResult.dangerLevel.toLowerCase() as DangerLevel)
+        : DangerLevel.CAUTELOSO;
 
       return {
-        classification: aiResult.classification || SpeciesClassification.DESCONOCIDO,
-        dangerLevel: aiResult.dangerLevel || DangerLevel.CAUTELOSO,
+        classification,
+        dangerLevel,
         name: aiResult.name || 'Especie No Identificada',
         description: aiResult.description || 'No se pudo generar una descripción.',
-        confidence: aiResult.confidence || 0.5,
+        confidence: typeof aiResult.confidence === 'number' ? aiResult.confidence : 0.5,
       };
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('[Gemini AI] Full Error:', error);
-      console.warn('[Gemini AI] Failed to identify image, using fallback', error.message);
+      console.warn('[Gemini AI] Failed to identify image, using fallback:', errorMessage);
       return fallback;
     }
   }
