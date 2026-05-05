@@ -16,6 +16,7 @@ export default function ResourcesScreen() {
   const [page, setPage] = useState(1);
   const [allResources, setAllResources] = useState<Recurso[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const { data, isLoading, error, refetch } = useResources(page, 10);
   const { data: alerts } = useResourceAlerts();
@@ -35,16 +36,18 @@ export default function ResourcesScreen() {
     }, [data]);
 
   const loadMore = () => {
-    if (hasMore && !isLoading && allResources.length < (data?.total ?? 0)) {
+    if (hasMore && !isLoading && !isRefreshing && !error && allResources.length < (data?.total ?? 0)) {
       setPage(p => p + 1);
     }
   };
 
   const onRefresh = async () => {
+    setIsRefreshing(true);
     setPage(1);
     setAllResources([]);
     setHasMore(true);
     await refetch();
+    setIsRefreshing(false);
   };
 
   if (isLoading && page === 1) {
