@@ -180,42 +180,61 @@ Plans:
 - [ ] 23-01-PLAN.md — Crear ruta `/identify`, controlador, y servicio con Google Cloud Vision API + fallback
 - [ ] 23-02-PLAN.md — Mapeo de labels Vision → enums del dominio + tests del endpoint
 
-### Phase 24: Frontend — Cámara + Formulario de Creación de Especie
-**Goal**: Integrar expo-image-picker (cámara + galería) con compresión, crear pantalla de nueva especie con formulario completo, y añadir FAB en Bestiary para iniciar el flujo.
+### Phase 24: Species Detail Screen + Camera Setup
+**Goal**: Construir `app/species/[id].tsx` (pantalla de detalle completa), instalar expo-image-picker con compresión, y crear el modal de cámara `app/species/identify.tsx` con el formulario de nueva especie.
 **Depends on**: Phase 22 (código limpio); Phase 23 puede ejecutarse en paralelo
-**Requirements**: AI-04, AI-05, AI-06
+**Requirements**: AI-04, AI-05, AI-06, UI-09
 **Success Criteria** (what must be TRUE):
-  1. expo-image-picker instalado con permisos declarados en app.json (iOS + Android)
-  2. FAB en `bestiary.tsx` navega a `app/(app)/species/new.tsx`
-  3. La pantalla de nueva especie tiene formulario: nombre, clasificación, nivel de peligro, notas
-  4. El usuario puede adjuntar imagen desde cámara o galería; la imagen se comprime a quality: 0.4, maxWidth: 800 antes de convertir a base64
-  5. Preview de la imagen capturada visible en el formulario
-  6. Formulario conectado a `useCreateSpecies` hook existente; crea especie en la API con `imageUrl` (base64)
+  1. `app/species/[id].tsx` muestra: foto de la especie, nombre, clasificación, nivel de peligro, descripción, notas, confianza IA — consume `useSpeciesById` hook existente
+  2. FAB en `bestiary.tsx` navega a `app/species/identify.tsx` (ruta correcta per MOCKUPS.md)
+  3. `app/species/identify.tsx` tiene: vista cámara/galería + formulario de nueva especie (nombre, clasificación, peligro, notas)
+  4. expo-image-picker instalado con permisos declarados en app.json (cámara + galería, iOS + Android)
+  5. Imagen comprimida a quality: 0.4, maxWidth: 800 antes de convertir a base64; preview visible en formulario
+  6. Formulario conectado a `useCreateSpecies` hook existente; guarda especie en la API con `imageUrl` (base64)
   7. Cero hex hardcodeados en pantallas nuevas (design system compliance)
-**Plans**: 2 plans
+**Plans**: 3 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 24-01-PLAN.md — Instalar expo-image-picker, configurar permisos, crear hook `useImagePicker` con compresión
-- [ ] 24-02-PLAN.md — Crear `app/(app)/species/new.tsx` con formulario + image picker + FAB en bestiary.tsx
+- [ ] 24-01-PLAN.md — Instalar expo-image-picker, configurar permisos en app.json, crear hook `useImagePicker` con compresión
+- [ ] 24-02-PLAN.md — Crear `app/species/[id].tsx` (species detail screen: foto, clasificación, peligro, descripción, confianza)
+- [ ] 24-03-PLAN.md — Crear `app/species/identify.tsx` (modal cámara: image picker + formulario nueva especie) + FAB en bestiary.tsx
 
 ### Phase 25: AI Identification Flow + Audio Narration
 **Goal**: Conectar la foto capturada con el endpoint de identificación IA para pre-llenar el formulario automáticamente; añadir narración por audio con expo-speech en el detalle de especie.
-**Depends on**: Phase 23 (endpoint identify listo) + Phase 24 (cámara + formulario listos)
+**Depends on**: Phase 23 (endpoint identify listo) + Phase 24 (cámara + formulario + detail listos)
 **Requirements**: AI-07, AI-08, AI-09
 **Success Criteria** (what must be TRUE):
-  1. Botón "IDENTIFICAR CON IA" en el formulario de nueva especie envía la imagen al endpoint y pre-llena clasificación, nivel de peligro y descripción
-  2. Durante el análisis se muestra animación de "escaneando..." (Reanimated 4) con estado de carga visual
+  1. Botón "IDENTIFICAR CON IA" en `species/identify.tsx` envía la imagen al endpoint y pre-llena clasificación, nivel de peligro y descripción automáticamente
+  2. Durante el análisis se muestra animación de "escaneando..." (Reanimated 4) con overlay HUD
   3. Los campos pre-llenados por la IA son editables por el usuario antes de guardar
-  4. Chip de confianza visible (ej. "CONFIANZA: 87%") con color según nivel
-  5. expo-speech instalado; botón de audio en `app/(app)/species/[id].tsx` lee nombre, clasificación y descripción en voz alta
+  4. Chip de confianza visible (ej. "CONFIANZA: 87%") con color según nivel (success/warning/danger)
+  5. expo-speech instalado; botón de audio en `app/species/[id].tsx` lee nombre, clasificación y descripción en voz alta
   6. Design system compliance: cero hex hardcodeados en pantallas modificadas
 **Plans**: 2 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 25-01-PLAN.md — Hook `useIdentifySpecies` → `POST /api/v1/species/identify`; integrar en formulario con animación de escaneo
-- [ ] 25-02-PLAN.md — Instalar expo-speech; añadir narración en species detail screen
+- [ ] 25-01-PLAN.md — Hook `useIdentifySpecies` → `POST /api/v1/species/identify`; integrar en `species/identify.tsx` con animación de escaneo Reanimated 4
+- [ ] 25-02-PLAN.md — Instalar expo-speech; añadir botón de narración en `species/[id].tsx`
+
+### Phase 26: Gestures + Log Resource Screen
+**Goal**: Implementar mínimo 2 gestos requeridos por el curso (react-native-gesture-handler) para procesos clave, y construir la pantalla `app/log-resource/index.tsx` de registro de movimientos de recursos.
+**Depends on**: Phase 25 (todas las pantallas listas antes de añadir gestos)
+**Requirements**: GEST-01, GEST-02, LOGR-01
+**Success Criteria** (what must be TRUE):
+  1. Swipe-to-delete (o swipe para acción contextual) en al menos una lista (bestiary o resources) usando `react-native-gesture-handler` Swipeable
+  2. Segundo gesto: long-press en species cards para ver preview rápido, O pinch-to-zoom en foto de especie en `species/[id].tsx`
+  3. `app/log-resource/index.tsx` implementada: selector de recurso, tipo (ingreso/egreso), cantidad, razón, vinculación opcional a viaje
+  4. Botón "Registrar" en `resources.tsx` navega a `/log-resource`
+  5. Al guardar, llama a `useConsumeResource` o `useCreateResource` hook existente y retorna a resources con datos actualizados
+  6. Design system compliance en pantalla nueva
+**Plans**: 2 plans
+**UI hint**: yes
+
+Plans:
+- [ ] 26-01-PLAN.md — Implementar 2 gestos con react-native-gesture-handler: swipe en lista + long-press/pinch en species
+- [ ] 26-02-PLAN.md — Crear `app/log-resource/index.tsx` (formulario de movimiento de recurso) + botón en resources.tsx
 
 ---
 
@@ -233,16 +252,19 @@ Plans:
 | 21. Error Handling & Offline | 2/2 | Complete    | 2026-05-05 |
 | 22. Code Cleanup | 0/1 | Not started | - |
 | 23. Backend AI Identify Endpoint | 0/2 | Not started | - |
-| 24. Camera + Species Creation Form | 0/2 | Not started | - |
+| 24. Species Detail + Camera Setup | 0/3 | Not started | - |
 | 25. AI Flow + Audio Narration | 0/2 | Not started | - |
+| 26. Gestures + Log Resource Screen | 0/2 | Not started | - |
 
 ---
 
-**Coverage**: 45/45 v1.2 requirements mapped ✓ + 9 AI requirements (AI-01 → AI-09) added
-**Note**: Phase 18 renumbered to Phase 21. Phases 19, 20, 22 agregadas post-auditoría (2026-05-04). Phases 23-25 AI camera detection agregadas 2026-05-05.
-**Tech decisions (Phases 23-25)**:
+**Coverage**: 45/45 v1.2 requirements mapped ✓ + 12 new requirements (AI-01→AI-09, GEST-01→GEST-02, LOGR-01)
+**Note**: Phase 18 renumbered to Phase 21. Phases 19, 20, 22 agregadas post-auditoría (2026-05-04). Phases 23-26 agregadas 2026-05-05 (AI + gestos + pantallas faltantes).
+**Tech decisions (Phases 23-26)**:
 - Image capture: expo-image-picker, quality: 0.4, maxWidth: 800, base64: true
 - AI backend: Google Cloud Vision API (free tier 1,000/month) + fallback determinístico
 - Image storage: base64 en MongoDB Atlas M0 (imágenes comprimidas ~100 KB c/u)
 - Audio: expo-speech para narración de especies
+- Gestos: react-native-gesture-handler (Swipeable + long-press/pinch)
+- Pantallas faltantes per MOCKUPS.md: species/[id].tsx, species/identify.tsx, log-resource/index.tsx
 **Last updated**: 2026-05-05

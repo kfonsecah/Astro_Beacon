@@ -63,14 +63,18 @@ Track what shipped in each milestone.
 - Phase 19: Critical Bug Fixes (trip activation, pagination)
 - Phase 22: Code Cleanup (dead code, dev artifacts)
 - Phase 23: Backend AI Identify Endpoint (Google Cloud Vision)
-- Phase 24: Camera + Species Creation Form (expo-image-picker)
+- Phase 24: Species Detail Screen + Camera Setup (expo-image-picker)
 - Phase 25: AI Flow + Audio Narration (expo-speech)
+- Phase 26: Gestures + Log Resource Screen
 
 **Key Deliverables:**
+- `species/[id].tsx` — Pantalla de detalle de especie con foto, clasificación, audio
+- `species/identify.tsx` — Modal de identificación IA con cámara (per MOCKUPS.md)
+- `log-resource/index.tsx` — Formulario de movimiento de recursos (per MOCKUPS.md)
 - Clasificación automática de especies por IA (Google Cloud Vision)
 - Captura de foto con compresión (expo-image-picker, quality: 0.4)
-- Formulario de nueva especie con pre-llenado automático por IA
 - Narración por audio de especies descubiertas (expo-speech)
+- Mínimo 2 gestos con react-native-gesture-handler (requisito del curso)
 - Base64 de imágenes almacenadas en MongoDB Atlas M0
 
-**Status:** Phases 23-25 planned 2026-05-05
+**Status:** Phases 23-26 planned 2026-05-05

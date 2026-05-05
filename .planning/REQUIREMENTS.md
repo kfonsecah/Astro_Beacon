@@ -89,6 +89,21 @@ Requirements for AI species identification with camera. Added 2026-05-05.
 - [ ] **AI-08**: Animación de "escaneando..." (Reanimated 4) visible durante el análisis; chip de confianza con color según nivel
 - [ ] **AI-09**: expo-speech instalado; botón de audio en species detail lee nombre, clasificación y descripción en voz alta
 
+### Missing Screens (SCREEN)
+
+- [ ] **SCREEN-01**: `app/species/[id].tsx` — Pantalla de detalle de especie: foto, nombre, clasificación, nivel de peligro, descripción, notas, confianza IA, botón de audio (documentada en MOCKUPS.md §3.7, UI-09 pending)
+- [ ] **SCREEN-02**: `app/species/identify.tsx` — Modal de identificación IA: vista de cámara, overlay de escaneo, resultado de clasificación, opción confirmar/corregir (documentada en MOCKUPS.md §3.8)
+- [ ] **SCREEN-03**: `app/log-resource/index.tsx` — Formulario de movimiento de recurso: selector de recurso, tipo ingreso/egreso, cantidad, razón, vinculación a viaje (documentada en MOCKUPS.md §3.10)
+
+### Gestures (GEST)
+
+- [ ] **GEST-01**: Gesto 1 — Swipe en lista (bestiary o resources) para acción contextual usando react-native-gesture-handler Swipeable (requerimiento del curso: mínimo 2 gestos)
+- [ ] **GEST-02**: Gesto 2 — Long-press en species card para preview rápido, O pinch-to-zoom en foto de especie en detalle (requerimiento del curso: mínimo 2 gestos)
+
+### Log Resource (LOGR)
+
+- [ ] **LOGR-01**: `log-resource/index.tsx` conectada a `useConsumeResource`/`useCreateResource`; botón en resources.tsx navega a esta pantalla; retorna con datos actualizados tras guardar
+
 ## v2 Requirements (Deferred)
 
 Features acknowledged but deferred to future milestones.

@@ -27,42 +27,67 @@ export interface TripService {
   delete(tripId: string): Promise<void>;
 }
 
+function mapTrip(t: any): Viaje {
+  return {
+    id: t._id?.toString() ?? t.id ?? '',
+    astronautId: t.userId?.toString() ?? '',
+    destination: t.destination ?? '',
+    status: t.status,
+    startedAt: t.startDate,
+    completedAt: t.endDate,
+    oxygenBudgeted: t.plannedDuration != null && t.O2Config?.baseRate != null
+      ? t.O2Config.baseRate * t.plannedDuration
+      : (t.O2Config?.baseRate ?? 0),
+    oxygenConsumed: t.O2Consumed ?? 0,
+    resourcesCollected: t.resourcesCollected ?? 0,
+    notes: t.name ?? '',
+  };
+}
+
 export const tripService: TripService = {
   async getAll(page = 1, limit = 20, status?: string): Promise<PaginatedTrips> {
-    const response = await api.get<{ success: boolean; data: PaginatedTrips }>(`/trips`, { 
-      params: { page, limit, status } 
-    });
-    return response.data.data;
+    const response = await api.get<{
+      success: boolean;
+      data: any[];
+      pagination: { page: number; limit: number; total: number; totalPages: number };
+    }>(`/trips`, { params: { page, limit, status } });
+    return {
+      items: response.data.data.map(mapTrip),
+      page: response.data.pagination.page,
+      limit: response.data.pagination.limit,
+      total: response.data.pagination.total,
+      totalPages: response.data.pagination.totalPages,
+    };
   },
 
   async getById(tripId: string): Promise<Viaje | null> {
-    const response = await api.get<{ success: boolean; data: Viaje | null }>(`/trips/${tripId}`);
-    return response.data.data;
+    const response = await api.get<{ success: boolean; data: any }>(`/trips/${tripId}`);
+    return response.data.data ? mapTrip(response.data.data) : null;
   },
 
   async create(data: CreateViajeDTO): Promise<Viaje> {
-    const response = await api.post<{ success: boolean; data: Viaje }>(`/trips`, data);
-    return response.data.data;
+    const response = await api.post<{ success: boolean; data: any }>(`/trips`, data);
+    return mapTrip(response.data.data);
   },
 
   async update(tripId: string, data: UpdateViajeDTO): Promise<Viaje> {
-    const response = await api.put<{ success: boolean; data: Viaje }>(`/trips/${tripId}`, data);
-    return response.data.data;
+    const response = await api.put<{ success: boolean; data: any }>(`/trips/${tripId}`, data);
+    return mapTrip(response.data.data);
   },
 
   async start(tripId: string, data?: { notes?: string }): Promise<Viaje> {
-    const response = await api.post<{ success: boolean; data: Viaje }>(`/trips/${tripId}/start`, data);
-    return response.data.data;
+    const response = await api.post<{ success: boolean; data: any }>(`/trips/${tripId}/start`, data);
+    return mapTrip(response.data.data);
   },
 
   async complete(tripId: string, data?: { notes?: string; resourcesUsed?: string[] }): Promise<Viaje> {
-    const response = await api.post<{ success: boolean; data: Viaje }>(`/trips/${tripId}/complete`, data);
-    return response.data.data;
+    const response = await api.post<{ success: boolean; data: any }>(`/trips/${tripId}/complete`, data);
+    return mapTrip(response.data.data);
   },
 
   async abort(tripId: string, data?: { notes?: string }): Promise<Viaje> {
-    const response = await api.post<{ success: boolean; data: Viaje }>(`/trips/${tripId}/abort`, data);
-    return response.data.data;
+    const response = await api.post<{ success: boolean; data: any }>(`/trips/${tripId}/abort`, data);
+    return mapTrip(response.data.data);
   },
 
   async delete(tripId: string): Promise<void> {
