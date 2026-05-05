@@ -53,6 +53,10 @@ export function useStartTrip() {
     mutationFn: ({ id, data }: { id: string; data?: { notes?: string } }) =>
       tripService.start(id, data),
     onSuccess: (updatedTrip, { id }) => {
+      const currentActive = useTripStore.getState().activeTrip;
+      if (currentActive && currentActive.id !== id) {
+        console.error('Starting trip while another trip is active:', currentActive.id);
+      }
       useTripStore.getState().setActiveTrip(updatedTrip);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
