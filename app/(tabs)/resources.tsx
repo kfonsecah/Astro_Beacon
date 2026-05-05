@@ -75,7 +75,7 @@ export default function ResourcesScreen() {
     <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
       <FlatList
         data={allResources}
-        keyExtractor={(item: Recurso) => item.id || (item as any)._id || Math.random().toString()}
+        keyExtractor={(item: Recurso) => item.id ?? (item as any)._id ?? item.name ?? `resource-fallback`}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl
