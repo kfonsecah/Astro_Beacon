@@ -5,7 +5,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useCollectSupply, useCreateSupply, useSupplies } from "@/hooks/useSupplies";
 import { useAuthStore } from "@/stores/auth.store";
 import { useTripStore } from "@/stores/trip.store";
-import type { CreateSuministroDTO, Suministro } from "@/types-dtos";
+import type { CreateSuministroDTO, Suministro, Viaje } from "@/types-dtos";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
@@ -302,9 +302,14 @@ export default function MapScreen() {
         {
           text: "INICIAR",
           onPress: () => {
-            const localTrip = {
+            const userId = useAuthStore.getState().user?.id;
+            if (!userId) {
+              Alert.alert("ERROR", "No se pudo obtener el ID de usuario.");
+              return;
+            }
+            const localTrip: Viaje = {
               id: `local-${Date.now()}`,
-              astronautId: useAuthStore.getState().user?.id || "",
+              astronautId: userId,
               destination: selectedSupply.location,
               status: "activo" as const,
               startedAt: new Date(),
