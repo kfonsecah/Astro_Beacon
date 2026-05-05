@@ -224,7 +224,6 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
   const loginMutation = useLogin();
   const theme = useTheme();
@@ -232,16 +231,14 @@ export default function LoginScreen() {
   const router = useRouter();
 
   const handleLogin = useCallback(async () => {
-    if (!email.trim() || isAuthenticating) return;
-    setIsAuthenticating(true);
+    if (!email.trim() || !password || loginMutation.isPending) return;
     try {
       await loginMutation.mutateAsync({ email, password });
       router.replace('/(tabs)/dashboard');
     } catch (error) {
       console.error('Login failed:', error);
-      setIsAuthenticating(false);
     }
-  }, [email, password, isAuthenticating, loginMutation]);
+  }, [email, password, loginMutation, router]);
 
   const btnScale = useSharedValue(1);
   const animatedBtnStyle = useAnimatedStyle(() => ({ transform: [{ scale: btnScale.value }] }));
@@ -316,12 +313,12 @@ export default function LoginScreen() {
               <Animated.View style={animatedBtnStyle}>
                 <Pressable
                   onPress={handleLogin}
-                  disabled={!email.trim() || isAuthenticating}
-                  style={({ pressed }) => [{ borderWidth: 1, borderColor: tc.primaryBorder, paddingVertical: 14, alignItems: "center", justifyContent: "center", minHeight: 48, opacity: !email.trim() || isAuthenticating ? 0.3 : 1 }, pressed && { backgroundColor: tc.primaryMuted }]}
+                  disabled={!email.trim() || loginMutation.isPending}
+                  style={({ pressed }) => [{ borderWidth: 1, borderColor: tc.primaryBorder, paddingVertical: 14, alignItems: "center", justifyContent: "center", minHeight: 48, opacity: !email.trim() || loginMutation.isPending ? 0.3 : 1 }, pressed && { backgroundColor: tc.primaryMuted }]}
                   onPressIn={() => { btnScale.value = withTiming(0.98, { duration: 100 }); }}
                   onPressOut={() => { btnScale.value = withTiming(1, { duration: 150 }); }}
                 >
-                  {isAuthenticating ? (
+                  {loginMutation.isPending ? (
                     <Text style={{ fontFamily: "monospace", fontSize: 11, letterSpacing: 3, color: tc.primary }}>AUTENTICANDO...</Text>
                   ) : (
                     <Text style={{ fontFamily: "monospace", fontSize: 11, letterSpacing: 3, color: tc.primary }}>[ AUTENTICAR ]</Text>
