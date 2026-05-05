@@ -137,18 +137,17 @@ export default function MapScreen() {
 
   // Oxygen countdown management
   useEffect(() => {
-    if (activeTrip?.status === 'activo') {
-      // Start oxygen countdown - decrease 1 unit per minute (1/60 per second)
-      const oxygenRate = activeTrip.oxygenBudgeted / 60; // Adjust as needed
-      useTripStore.getState().startOxygenCountdown(oxygenRate);
-    } else {
+    if (activeTrip?.status !== 'activo') {
       useTripStore.getState().stopOxygenCountdown();
+      return;
     }
+    const oxygenRate = activeTrip.oxygenBudgeted / 60;
+    useTripStore.getState().startOxygenCountdown(oxygenRate);
 
     return () => {
       useTripStore.getState().stopOxygenCountdown();
     };
-  }, [activeTrip?.status]);
+  }, [activeTrip?.status, activeTrip?.oxygenBudgeted]);
 
   useEffect(() => {
     if (!data?.items) return;
