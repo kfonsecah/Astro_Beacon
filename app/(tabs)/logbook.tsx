@@ -22,9 +22,10 @@ export default function LogbookScreen() {
       setAllEntries(prev => {
         const existingIds = new Set(prev.map(e => e.id));
         const filtered = newItems.filter(e => !existingIds.has(e.id));
-        return filtered.length > 0 ? [...prev, ...filtered] : prev;
+        const next = filtered.length > 0 ? [...prev, ...filtered] : prev;
+        setHasMore((data?.total ?? 0) > next.length);
+        return next;
       });
-      setHasMore((data?.total ?? 0) > allEntries.length + newItems.length);
     }
   }, [data]);
 
@@ -65,7 +66,7 @@ export default function LogbookScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={allEntries}
-        keyExtractor={(item) => item.id || Math.random().toString()}
+        keyExtractor={(item, index) => item.id ?? `entry-fallback-${index}`}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
@@ -84,12 +85,9 @@ export default function LogbookScreen() {
               <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
                 {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
               </Text>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
-                <Text style={{ fontSize: 10 }}>{item.updatedAt ? "✅" : "⏳"}</Text>
-                <Text style={{ fontFamily: "monospace", fontSize: 8, color: item.updatedAt ? tc.success : tc.warning }}>
-                  {item.updatedAt ? "Sincronizado" : "Pendiente"}
-                </Text>
-              </View>
+              <Text style={{ fontFamily: "monospace", fontSize: 8, color: tc.textMuted }}>
+                {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : ""}
+              </Text>
             </View>
             <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18, marginBottom: 6 }}>{item.description}</Text>
             {item.title && (
