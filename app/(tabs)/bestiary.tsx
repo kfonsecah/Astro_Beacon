@@ -135,6 +135,12 @@ export default function BestiaryScreen() {
           ) : null
         )}
       />
+      <TouchableOpacity
+        onPress={() => router.push('/species/identify')}
+        style={{ position: 'absolute', right: 20, bottom: 30, width: 52, height: 52, backgroundColor: tc.primary, justifyContent: 'center', alignItems: 'center' }}
+      >
+        <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 24, lineHeight: 26 }}>+</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
