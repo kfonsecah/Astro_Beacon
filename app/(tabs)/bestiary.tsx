@@ -33,12 +33,11 @@ export default function BestiaryScreen() {
   const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
-    if (data?.items) {
-      setAllSpecies((prev) => {
-        const newData = [...prev, ...data.items];
-        const uniqueData = Array.from(new Set(newData.map(a => a.id)))
-          .map(id => newData.find(a => a.id === id)!);
-        return uniqueData;
+    if (data?.items && data.page === page) {
+      setAllSpecies(prev => {
+        const uniqueMap = new Map(prev.map(a => [a.id, a]));
+        data.items.forEach(a => uniqueMap.set(a.id, a));
+        return Array.from(uniqueMap.values());
       });
       setHasMore(page < data.totalPages);
     }
@@ -47,6 +46,7 @@ export default function BestiaryScreen() {
   const onRefresh = useCallback(() => {
     setAllSpecies([]);
     setPage(1);
+    setHasMore(true);
     refetch();
   }, [refetch]);
 
