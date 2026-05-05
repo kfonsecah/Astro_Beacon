@@ -54,15 +54,23 @@ Track what shipped in each milestone.
 
 ---
 
-## v1.2 Defensa Final — PLANNED 📋
+## v1.2 Defensa Final — IN PROGRESS 🚧
 
 **Date:** 2026-06-03
-**Goal:** Revisión final, pruebas de estrés, cumplimiento de requerimientos, y presentación del proyecto.
+**Goal:** Completar todas las funcionalidades del proyecto incluyendo detección de especies por IA con cámara, narración por audio, bugfixes críticos, y limpieza de código.
 
-**Target:**
-- Funcionalidad completa de la aplicación
-- API robusta y bien estructurada
-- Pruebas de estrés y de integración
-- Documentación final
+**Target Phases:**
+- Phase 19: Critical Bug Fixes (trip activation, pagination)
+- Phase 22: Code Cleanup (dead code, dev artifacts)
+- Phase 23: Backend AI Identify Endpoint (Google Cloud Vision)
+- Phase 24: Camera + Species Creation Form (expo-image-picker)
+- Phase 25: AI Flow + Audio Narration (expo-speech)
 
-**Status:** Not started
+**Key Deliverables:**
+- Clasificación automática de especies por IA (Google Cloud Vision)
+- Captura de foto con compresión (expo-image-picker, quality: 0.4)
+- Formulario de nueva especie con pre-llenado automático por IA
+- Narración por audio de especies descubiertas (expo-speech)
+- Base64 de imágenes almacenadas en MongoDB Atlas M0
+
+**Status:** Phases 23-25 planned 2026-05-05

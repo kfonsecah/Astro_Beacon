@@ -151,14 +151,6 @@ export default function DashboardScreen() {
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
           </TouchableOpacity>
         </View>
-
-        {/* UAT: Reanimated Test */}
-        <TouchableOpacity
-          style={{ borderWidth: 1, borderColor: tc.danger, paddingVertical: 14, alignItems: "center", marginTop: 8 }}
-          onPress={() => router.push("/reanimated-test")}
-        >
-          <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>🧪 UAT: REANIMATED TEST</Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

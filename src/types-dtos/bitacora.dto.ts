@@ -10,7 +10,7 @@ export interface BitacoraEntrada {
   location: GeoPoint;
   lastModified: Date;
   createdAt: Date;
-  updatedAt: Date;
+  updatedAt?: Date;
 }
 
 export interface CreateBitacoraEntradaDTO {

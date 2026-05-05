@@ -163,6 +163,60 @@ Plans:
 Plans:
 - [ ] 22-01-PLAN.md — Delete dead code + remove dev button + update REQUIREMENTS.md + STATE.md
 
+### Phase 23: Backend — AI Species Identification Endpoint
+**Goal**: Implementar `POST /api/v1/species/identify` que recibe una imagen en base64 y devuelve clasificación automática usando Google Cloud Vision API, con fallback determinístico si la API no está disponible.
+**Depends on**: Phase 22 (código limpio antes de añadir nuevo feature)
+**Requirements**: AI-01, AI-02, AI-03
+**Success Criteria** (what must be TRUE):
+  1. `POST /api/v1/species/identify` acepta `{ imageBase64: string }` y retorna `{ classification, dangerLevel, name, description, confidence }` con status 200
+  2. Google Cloud Vision API analiza la imagen y mapea sus labels a los enums `SpeciesClassification` y `DangerLevel` existentes
+  3. Si Vision API falla o no hay API key, el fallback retorna `{ classification: "desconocido", dangerLevel: "cauteloso", confidence: 0 }` sin lanzar excepción
+  4. El endpoint está protegido con `authenticate` middleware
+  5. El tamaño de base64 aceptado cubre imágenes comprimidas (≤300 KB base64)
+**Plans**: 2 plans
+**UI hint**: no
+
+Plans:
+- [ ] 23-01-PLAN.md — Crear ruta `/identify`, controlador, y servicio con Google Cloud Vision API + fallback
+- [ ] 23-02-PLAN.md — Mapeo de labels Vision → enums del dominio + tests del endpoint
+
+### Phase 24: Frontend — Cámara + Formulario de Creación de Especie
+**Goal**: Integrar expo-image-picker (cámara + galería) con compresión, crear pantalla de nueva especie con formulario completo, y añadir FAB en Bestiary para iniciar el flujo.
+**Depends on**: Phase 22 (código limpio); Phase 23 puede ejecutarse en paralelo
+**Requirements**: AI-04, AI-05, AI-06
+**Success Criteria** (what must be TRUE):
+  1. expo-image-picker instalado con permisos declarados en app.json (iOS + Android)
+  2. FAB en `bestiary.tsx` navega a `app/(app)/species/new.tsx`
+  3. La pantalla de nueva especie tiene formulario: nombre, clasificación, nivel de peligro, notas
+  4. El usuario puede adjuntar imagen desde cámara o galería; la imagen se comprime a quality: 0.4, maxWidth: 800 antes de convertir a base64
+  5. Preview de la imagen capturada visible en el formulario
+  6. Formulario conectado a `useCreateSpecies` hook existente; crea especie en la API con `imageUrl` (base64)
+  7. Cero hex hardcodeados en pantallas nuevas (design system compliance)
+**Plans**: 2 plans
+**UI hint**: yes
+
+Plans:
+- [ ] 24-01-PLAN.md — Instalar expo-image-picker, configurar permisos, crear hook `useImagePicker` con compresión
+- [ ] 24-02-PLAN.md — Crear `app/(app)/species/new.tsx` con formulario + image picker + FAB en bestiary.tsx
+
+### Phase 25: AI Identification Flow + Audio Narration
+**Goal**: Conectar la foto capturada con el endpoint de identificación IA para pre-llenar el formulario automáticamente; añadir narración por audio con expo-speech en el detalle de especie.
+**Depends on**: Phase 23 (endpoint identify listo) + Phase 24 (cámara + formulario listos)
+**Requirements**: AI-07, AI-08, AI-09
+**Success Criteria** (what must be TRUE):
+  1. Botón "IDENTIFICAR CON IA" en el formulario de nueva especie envía la imagen al endpoint y pre-llena clasificación, nivel de peligro y descripción
+  2. Durante el análisis se muestra animación de "escaneando..." (Reanimated 4) con estado de carga visual
+  3. Los campos pre-llenados por la IA son editables por el usuario antes de guardar
+  4. Chip de confianza visible (ej. "CONFIANZA: 87%") con color según nivel
+  5. expo-speech instalado; botón de audio en `app/(app)/species/[id].tsx` lee nombre, clasificación y descripción en voz alta
+  6. Design system compliance: cero hex hardcodeados en pantallas modificadas
+**Plans**: 2 plans
+**UI hint**: yes
+
+Plans:
+- [ ] 25-01-PLAN.md — Hook `useIdentifySpecies` → `POST /api/v1/species/identify`; integrar en formulario con animación de escaneo
+- [ ] 25-02-PLAN.md — Instalar expo-speech; añadir narración en species detail screen
+
 ---
 
 ## Progress
@@ -178,9 +232,17 @@ Plans:
 | 20. Design System Compliance | 0/1 | Complete    | 2026-05-05 |
 | 21. Error Handling & Offline | 2/2 | Complete    | 2026-05-05 |
 | 22. Code Cleanup | 0/1 | Not started | - |
+| 23. Backend AI Identify Endpoint | 0/2 | Not started | - |
+| 24. Camera + Species Creation Form | 0/2 | Not started | - |
+| 25. AI Flow + Audio Narration | 0/2 | Not started | - |
 
 ---
 
-**Coverage**: 45/45 v1.2 requirements mapped ✓
-**Note**: Phase 18 renumbered to Phase 21. Phases 19, 20, 22 agregadas post-auditoría (2026-05-04).
-**Last updated**: 2026-05-04
+**Coverage**: 45/45 v1.2 requirements mapped ✓ + 9 AI requirements (AI-01 → AI-09) added
+**Note**: Phase 18 renumbered to Phase 21. Phases 19, 20, 22 agregadas post-auditoría (2026-05-04). Phases 23-25 AI camera detection agregadas 2026-05-05.
+**Tech decisions (Phases 23-25)**:
+- Image capture: expo-image-picker, quality: 0.4, maxWidth: 800, base64: true
+- AI backend: Google Cloud Vision API (free tier 1,000/month) + fallback determinístico
+- Image storage: base64 en MongoDB Atlas M0 (imágenes comprimidas ~100 KB c/u)
+- Audio: expo-speech para narración de especies
+**Last updated**: 2026-05-05
