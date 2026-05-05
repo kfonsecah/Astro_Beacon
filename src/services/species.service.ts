@@ -31,8 +31,12 @@ export const speciesService: SpeciesService = {
     }>(`/species`, {
       params: { page, limit }
     });
+    const items = response.data.data.map((s: any) => ({
+      ...s,
+      id: s.id ?? s._id?.toString() ?? s._id,
+    })) as Especie[];
     return {
-      items: response.data.data,
+      items,
       page: response.data.pagination.page,
       limit: response.data.pagination.limit,
       total: response.data.pagination.total,
