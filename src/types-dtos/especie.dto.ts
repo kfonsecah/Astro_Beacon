@@ -13,8 +13,12 @@ export interface Especie {
 }
 
 export interface CreateEspecieDTO {
+  name: string;
+  classification: SpeciesClassification;
+  dangerLevel: DangerLevel;
+  description?: string;
+  notes?: string;
   imageUrl?: string;
-  description: string;
   location?: { lat: number; lng: number };
 }
 
