@@ -35,6 +35,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" />
           <Stack.Screen name="trips" />
           <Stack.Screen name="reanimated-test" />
+          <Stack.Screen name="species/[id]" options={{ headerShown: false }} />
         </Stack.Protected>
       </Stack>
     </QueryClientProvider>
