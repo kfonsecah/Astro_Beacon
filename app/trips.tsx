@@ -35,6 +35,7 @@ export default function TripsScreen() {
   const startTripMutation = useStartTrip();
   const [allTrips, setAllTrips] = useState<Viaje[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [startingTripId, setStartingTripId] = useState<string | null>(null);
 
   useEffect(() => {
     const newItems = data?.items ?? [];
@@ -42,9 +43,10 @@ export default function TripsScreen() {
       setAllTrips(prev => {
         const existingIds = new Set(prev.map(t => t.id));
         const filtered = newItems.filter(t => !existingIds.has(t.id));
-        return filtered.length > 0 ? [...prev, ...filtered] : prev;
+        const next = filtered.length > 0 ? [...prev, ...filtered] : prev;
+        setHasMore((data?.total ?? 0) > next.length);
+        return next;
       });
-      setHasMore((data?.total ?? 0) > allTrips.length + newItems.length);
     }
   }, [data]);
 
@@ -57,13 +59,15 @@ export default function TripsScreen() {
         {
           text: 'INICIAR',
           onPress: () => {
+            setStartingTripId(trip.id);
             startTripMutation.mutate(
               { id: trip.id },
               {
                 onSuccess: () => {
-                  // Trip list will refresh automatically via query invalidation
+                  setStartingTripId(null);
                 },
-                onError: (error) => {
+                onError: () => {
+                  setStartingTripId(null);
                   Alert.alert('ERROR', 'No se pudo iniciar el viaje');
                 },
               }
@@ -163,10 +167,10 @@ export default function TripsScreen() {
               <TouchableOpacity
                 style={{ backgroundColor: tc.primary, padding: 8, alignItems: "center", marginTop: 8 }}
                 onPress={() => handleStartTrip(item)}
-                disabled={startTripMutation.isPending}
+                disabled={startingTripId === item.id}
               >
                 <Text style={{ color: tc.background, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>
-                  {startTripMutation.isPending ? 'INICIANDO...' : 'INICIAR VIAJE'}
+                  {startingTripId === item.id ? 'INICIANDO...' : 'INICIAR VIAJE'}
                 </Text>
               </TouchableOpacity>
             )}
