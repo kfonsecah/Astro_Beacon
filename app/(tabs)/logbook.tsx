@@ -37,7 +37,7 @@ export default function LogbookScreen() {
   }, [refetch]);
 
   const loadMore = () => {
-    if (hasMore && !isFetching && allEntries.length < (data?.total ?? 0)) {
+    if (hasMore && !isFetching && !isError && allEntries.length < (data?.total ?? 0)) {
       setPage(p => p + 1);
     }
   };
