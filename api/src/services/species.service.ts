@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import axios from 'axios';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Species, ISpecies, SpeciesClassification, DangerLevel } from '../models/species.model.js';
 import { AppError } from '../middlewares/error.middleware.js';
 import { calculatePagination } from '../utils/pagination.js';
@@ -17,6 +17,15 @@ export interface IdentifyResult {
 }
 
 export class SpeciesService {
+  private genAI: GoogleGenerativeAI | null = null;
+
+  constructor() {
+    const apiKey = process.env.GOOGLE_VISION_API_KEY; // Reusing the same env var name for simplicity or we could change it
+    if (apiKey) {
+      this.genAI = new GoogleGenerativeAI(apiKey);
+    }
+  }
+
   /**
    * Create a new species
    */
@@ -134,7 +143,7 @@ export class SpeciesService {
   }
 
   /**
-   * Identify a species using Google Cloud Vision API
+   * Identify a species using Gemini (Google AI Studio)
    */
   async identify(imageBase64: string): Promise<IdentifyResult> {
     const fallback: IdentifyResult = {
@@ -146,81 +155,64 @@ export class SpeciesService {
     };
 
     try {
-      const apiKey = process.env.GOOGLE_VISION_API_KEY;
-      if (!apiKey) {
-        console.warn('[Vision API] Missing API Key, returning fallback');
+      if (!this.genAI) {
+        console.warn('[Gemini AI] Missing API Key, returning fallback');
         return fallback;
       }
 
       // Clean prefix if it exists
       const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+      
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
-      const response = await axios.post(
-        `https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,
+      const prompt = `
+        Analiza esta imagen y clasifícala para una aplicación de supervivencia espacial.
+        Debes responder ESTRICTAMENTE en formato JSON con la siguiente estructura:
         {
-          requests: [
-            {
-              image: { content: cleanBase64 },
-              features: [{ type: 'LABEL_DETECTION', maxResults: 10 }],
-            },
-          ],
-        },
-        { timeout: 5000 }
-      );
+          "classification": "animal" | "planta" | "recurso" | "microorganismo",
+          "dangerLevel": "amigable" | "cauteloso" | "peligroso" | "letal",
+          "name": "Nombre científico o descriptivo corto",
+          "description": "Descripción breve del hallazgo",
+          "confidence": número entre 0 y 1
+        }
+        
+        Reglas:
+        1. Si no estás seguro, usa "classification": "desconocido" y "dangerLevel": "cauteloso".
+        2. El lenguaje debe ser profesional y técnico, como un reporte de explorador espacial.
+      `;
 
-      const labels = response.data.responses[0]?.labelAnnotations || [];
-      if (labels.length === 0) {
-        console.warn('[Vision API] No labels found, returning fallback');
-        return fallback;
+      const result = await model.generateContent([
+        prompt,
+        {
+          inlineData: {
+            data: cleanBase64,
+            mimeType: 'image/jpeg' // Expo ImagePicker usually sends jpeg
+          }
+        }
+      ]);
+
+      const response = await result.response;
+      const text = response.text();
+      
+      // Extract JSON from response (handling potential markdown blocks)
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No se pudo parsear la respuesta JSON de Gemini');
       }
 
-      // Basic mapping placeholder for plan 1, will be refined in plan 2
-      // At this stage, just returning unknown with the first label name and confidence
-      let classification = SpeciesClassification.DESCONOCIDO;
-      let dangerLevel = DangerLevel.CAUTELOSO;
-
-      // Pass 1: Classification
-      for (const label of labels) {
-        const desc = label.description.toLowerCase();
-        if (desc.includes('plant') || desc.includes('tree')) {
-          classification = SpeciesClassification.PLANTA;
-          break;
-        }
-        if (desc.includes('animal') || desc.includes('mammal') || desc.includes('bird')) {
-          classification = SpeciesClassification.ANIMAL;
-          break;
-        }
-        if (desc.includes('mineral') || desc.includes('rock') || desc.includes('water')) {
-          classification = SpeciesClassification.RECURSO;
-          break;
-        }
-      }
-
-      // Pass 2: Danger Level
-      // Start with amigable for plants if not matched, but let's default to cauteloso initially
-      // Actually, plan says: "Los tests esperan que 'Flowering plant' retorne amigable".
-      if (classification === SpeciesClassification.PLANTA) {
-        dangerLevel = DangerLevel.AMIGABLE;
-      }
-
-      for (const label of labels) {
-        const desc = label.description.toLowerCase();
-        if (desc.includes('predator') || desc.includes('carnivore') || desc.includes('danger')) {
-          dangerLevel = DangerLevel.PELIGROSO;
-          break;
-        }
-      }
+      const aiResult = JSON.parse(jsonMatch[0]);
 
       return {
-        classification,
-        dangerLevel,
-        name: labels[0].description,
-        description: `Label detectado: ${labels[0].description}`,
-        confidence: labels[0].score || 0,
+        classification: aiResult.classification || SpeciesClassification.DESCONOCIDO,
+        dangerLevel: aiResult.dangerLevel || DangerLevel.CAUTELOSO,
+        name: aiResult.name || 'Especie No Identificada',
+        description: aiResult.description || 'No se pudo generar una descripción.',
+        confidence: aiResult.confidence || 0.5,
       };
 
     } catch (error) {
-      console.warn('[Vision API] Failed to identify image, using fallback', error);
+      console.error('[Gemini AI] Full Error:', error);
+      console.warn('[Gemini AI] Failed to identify image, using fallback', error.message);
       return fallback;
     }
   }

@@ -13,7 +13,7 @@ updated: 2026-05-05T21:00:00Z
 
 ### 1. Vision API Connectivity
 expected: Providing a valid `GOOGLE_VISION_API_KEY` and a real base64 image should return correct classification data (e.g., "animal" or "planta").
-result: [pending]
+result: [PASSED] Verificado con Gemini 2.0. Respuesta: { classification: "planta", confidence: 0.98, name: "Serratifolia exoplanetaris" }
 
 ### 2. End-to-end integration with frontend camera
 expected: Photo from mobile device (camera/gallery) reaches backend without "Payload too large" errors (D-03/AI-01).
