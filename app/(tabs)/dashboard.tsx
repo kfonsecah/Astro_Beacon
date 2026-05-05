@@ -17,11 +17,11 @@ export default function DashboardScreen() {
   const { data: astronaut, isLoading: loadingProfile, error: errorProfile } = useAstronautProfile();
   const { data: stats, isLoading: loadingStats, error: errorStats } = useAstronautDashboard();
   const { data: alerts } = useResourceAlerts();
-  const { data: resourcesData, isLoading: loadingResources } = useResources(1, 10);
+  const { data: resourcesData, isLoading: loadingResources, error: errorResources } = useResources(1, 10);
   const networkStatus = useNetworkStatus();
 
-  const isLoading = loadingProfile || loadingStats || loadingResources;
-  const error = errorProfile || errorStats;
+  const isLoading = loadingProfile || loadingStats;
+  const error = errorProfile || errorStats || errorResources;
 
   if (isLoading) {
     return (
