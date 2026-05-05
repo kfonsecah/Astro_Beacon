@@ -1,4 +1,5 @@
 import { HudHeader } from "@/components/ui/HudHeader";
+import { colors } from "@/constants/colors";
 import { useTheme } from "@/hooks/use-theme";
 import { useStartTrip, useTrips } from "@/hooks/useTrips";
 import type { Viaje } from "@/types-dtos";
@@ -8,10 +9,10 @@ import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpac
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const statusColorMap: Record<string, string> = {
-  planificado: "#FFC107",
-  activo: "#4CAF50",
-  completado: "#2196F3",
-  abortado: "#F44336",
+  planificado: colors.tripPlanificado,
+  activo: colors.tripActivo,
+  completado: colors.tripCompletado,
+  abortado: colors.tripAbortado,
 };
 
 const statusLabelMap: Record<string, string> = {

@@ -3,19 +3,19 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
 status: planning
-last_updated: "2026-05-04T18:00:00.000Z"
+last_updated: "2026-05-05T02:16:35.596Z"
 progress:
   total_phases: 9
-  completed_phases: 5
-  total_plans: 22
-  completed_plans: 16
+  completed_phases: 7
+  total_plans: 19
+  completed_plans: 19
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 18
+Phase: 21
 Plan: Not started
 **Milestone:** v1.2 Integración API-Frontend
 **Status:** Ready to plan
@@ -28,22 +28,23 @@ Plan: Not started
 ## Current Position
 
 **Current Milestone**: v1.2 Integración API-Frontend
-**Current Phase**: 19-critical-bug-fixes (READY TO START)
-**Phase Status**: 0 of 2 plans complete
-**Progress**: 5/9 phases completed (56%)
-**Milestone Progress**: 31/45 requirements completed (fases 19-22 son deuda técnica + ERR requirements)
+**Current Phase**: 20-design-system-compliance (READY TO EXECUTE)
+**Phase Status**: 1 of 1 plans complete (planned)
+**Progress**: 7/9 phases completed (77%)
+**Milestone Progress**: 33/45 requirements completed (fases 19-22 son deuda técnica + ERR requirements)
 
 **Phases added post-audit (2026-05-04):**
-- Phase 19: Critical Bug Fixes (trip activation, pagination, double setAuth)
-- Phase 20: Design System Compliance (hex hardcodeados post-fase-07)
+
+- Phase 19: Critical Bug Fixes (trip activation, pagination, double setAuth) - COMPLETED
+- Phase 20: Design System Compliance (hex hardcodeados post-fase-07) - PLANNED
 - Phase 21: Error Handling & Offline (era Phase 18, renumerada)
 - Phase 22: Code Cleanup (dead code + docs sync)
 
 ## Performance Metrics
     
-- Phases Completed: 5
-- Plans Executed: 16
-- Requirements Met: 31
+- Phases Completed: 7
+- Plans Executed: 18
+- Requirements Met: 33
 - Token Usage: TBD
 
 ## Accumulated Context
@@ -60,7 +61,20 @@ Plan: Not started
 - Login screen uses useLogin() mutation from TanStack Query
 - Navigation after login uses router.replace('/(tabs)/dashboard') to prevent back navigation
 
-**Current focus:** Phase 17 — maps-trips-polish
+**Current focus:** Phase 20 — design-system-compliance
+
+### Key Decisions (Phase 19)
+
+- Fix trip activation: useStartTrip hook now calls setActiveTrip(updatedTrip) in onSuccess. useCompleteTrip/useAbortTrip call setActiveTrip(null).
+- Fix double setAuth: Removed manual useAuthStore.getState().setAuth() call in login.tsx as useLogin hook already handles it.
+- Fix pagination: Implemented accumulation pattern in bestiary.tsx, logbook.tsx, and trips.tsx using useEffect and deduplication with Set.
+
+### Key Decisions (Phase 20 - Plan 01)
+
+- Extended colors.ts with domain-specific sections for Trip status and Supply category.
+- Values for trip status: tripPlanificado (warning), tripActivo (success), tripCompletado (info), tripAbortado (danger).
+- Values for supply categories: cyan for O2, blue for Water, lime for Food, pink for Meds, orange for Tools, gray for Other.
+- Replacement of all hardcoded hex values in map.tsx and trips.tsx with references to colors.* constants.
 
 ### Key Decisions (Phase 14)
  

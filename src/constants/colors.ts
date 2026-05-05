@@ -56,4 +56,21 @@ export const colors = {
   // Transparent overlays
   overlayDark: 'rgba(11, 17, 32, 0.8)',
   overlayLight: 'rgba(11, 17, 32, 0.5)',
+
+  // Trip status
+  tripPlanificado: '#F59E0B',
+  tripActivo: '#22C55E',
+  tripCompletado: '#3B82F6',
+  tripAbortado: '#EF4444',
+
+  // Supply category
+  categoryOxigeno: '#22D3EE',
+  categoryAgua: '#3B82F6',
+  categoryComida: '#84CC16',
+  categoryMedico: '#EC4899',
+  categoryEquipo: '#FB923C',
+  categoryOtro: '#6B7280',
+
+  // UI Support
+  shadowBlack: '#000000',
 };

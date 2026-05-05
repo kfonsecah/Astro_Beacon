@@ -14,7 +14,7 @@
 - [x] **Phase 16: Screen Integration** - Conectar todas las pantallas a datos reales de la API (6/6 plans done)
 - [x] **Phase 17: Maps & Trips Polish** - Fix map crash, implement trip start, complete map view, implement trip execution, fix map panning, add supply request feature (5/5 plans done)
 - [ ] **Phase 19: Critical Bug Fixes** - Fix trip activation (TripStore desconectado), paginación sin acumulación, double setAuth en login
-- [ ] **Phase 20: Design System Compliance** - Eliminar hex hardcodeados en map.tsx y trips.tsx introducidos en fases 16-17
+- [/] **Phase 20: Design System Compliance** - Eliminar hex hardcodeados en map.tsx y trips.tsx introducidos en fases 16-17
 - [ ] **Phase 21: Error Handling & Offline** - Error boundaries y soporte offline (era Phase 18, reposicionada post-bugfixes)
 - [ ] **Phase 22: Code Cleanup** - Eliminar código muerto, artefactos de dev, actualizar documentación
 
@@ -175,7 +175,7 @@ Plans:
 | 16. Screen Integration | 6/6 | Complete | 2026-05-01 |
 | 17. Maps & Trips Polish | 5/5 | Complete | 2026-05-04 |
 | 19. Critical Bug Fixes | 0/2 | Not started | - |
-| 20. Design System Compliance | 0/1 | Not started | - |
+| 20. Design System Compliance | 0/1 | Complete    | 2026-05-05 |
 | 21. Error Handling & Offline | 0/2 | Not started | - |
 | 22. Code Cleanup | 0/1 | Not started | - |
 

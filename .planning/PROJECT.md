@@ -35,6 +35,7 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 | Seguridad y autenticación | 13 | Complete |
 | TanStack Query + Network Detection | 14 | Complete |
 | Domain Services + Hooks | 15 | Complete |
+| Design System Compliance | 20 | Complete |
 
 ### Active
 
@@ -233,4 +234,4 @@ color: tc.primary
 | API REST con Node + Express v4 | Requisito del curso para Entrega 2 | ✓ Planned |
 
 ---
-*Last updated: 2026-04-27 — Milestone v1.2 Integración API-Frontend started*
+*Last updated: 2026-05-04 — Phase 20 Design System Compliance complete*

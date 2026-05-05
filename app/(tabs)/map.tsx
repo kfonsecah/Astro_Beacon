@@ -1,5 +1,6 @@
 import { CategoryLegend } from "@/components/map/CategoryLegend";
 import { HudHeader } from "@/components/ui/HudHeader";
+import { colors } from "@/constants/colors";
 import { useTheme } from "@/hooks/use-theme";
 import { useCollectSupply, useCreateSupply, useSupplies } from "@/hooks/useSupplies";
 import { useAuthStore } from "@/stores/auth.store";
@@ -13,10 +14,10 @@ import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const statusColorMap: Record<string, string> = {
-  pendiente: "#FFC107",
-  entregado: "#4CAF50",
-  recogido: "#2196F3",
-  expirado: "#F44336",
+  pendiente: colors.supplyPendiente,
+  entregado: colors.supplyEntregado,
+  recogido: colors.supplyRecogido,
+  expirado: colors.supplyExpirado,
 };
 
 const statusLabelMap: Record<string, string> = {
@@ -27,12 +28,12 @@ const statusLabelMap: Record<string, string> = {
 };
 
 const categoryConfig = {
-  oxigeno: { symbol: "🧪", color: "#00BCD4" },
-  agua: { symbol: "💧", color: "#2196F3" },
-  comida: { symbol: "🍎", color: "#8BC34A" },
-  medico: { symbol: "💊", color: "#E91E63" },
-  equipo: { symbol: "🔧", color: "#FF9800" },
-  otro: { symbol: "📦", color: "#9E9E9E" },
+  oxigeno: { symbol: "🧪", color: colors.categoryOxigeno },
+  agua: { symbol: "💧", color: colors.categoryAgua },
+  comida: { symbol: "🍎", color: colors.categoryComida },
+  medico: { symbol: "💊", color: colors.categoryMedico },
+  equipo: { symbol: "🔧", color: colors.categoryEquipo },
+  otro: { symbol: "📦", color: colors.categoryOtro },
 } as const;
 
 type SupplyCategory = keyof typeof categoryConfig;
