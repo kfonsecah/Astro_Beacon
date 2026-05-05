@@ -14,7 +14,6 @@ import {
   View,
 } from "react-native";
 import Animated, {
-import { RouteErrorFallback } from '@/components/common';
   Easing,
   FadeIn,
   SlideInDown,
@@ -25,6 +24,7 @@ import { RouteErrorFallback } from '@/components/common';
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { RouteErrorFallback } from '@/components/common';
 
 
 const STARS = Array.from({ length: 120 }, (_, i) => ({
