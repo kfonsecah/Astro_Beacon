@@ -3,7 +3,6 @@ import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { useLogin } from "@/hooks/useAuth";
 import {
-  Dimensions,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -11,6 +10,7 @@ import {
   ScrollView,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import Animated, {
@@ -26,8 +26,6 @@ import { RouteErrorFallback } from '@/components/common';
   withTiming,
 } from "react-native-reanimated";
 
-const SCREEN_HEIGHT = Dimensions.get("window").height;
-const SCREEN_WIDTH = Dimensions.get("window").width;
 
 const STARS = Array.from({ length: 120 }, (_, i) => ({
   id: i,
@@ -38,7 +36,6 @@ const STARS = Array.from({ length: 120 }, (_, i) => ({
   size: Math.random() > 0.7 ? (Math.random() > 0.5 ? 3 : 2) : 1,
 }));
 
-//animaciones estrellas
 const SHOOTING_STARS = [
   { id: 0, startX: 60, startY: 15, endX: 20, endY: 65, delay: 2, duration: 1.5 },
   { id: 1, startX: 75, startY: 20, endX: 30, endY: 75, delay: 6, duration: 1.2 },
@@ -120,13 +117,14 @@ function Star({ left, top, duration, delay, size, primaryColor }: { left: number
 }
 
 function ShootingStar({ startX, startY, endX, endY, delay, duration, primaryColor }: { startX: number; startY: number; endX: number; endY: number; delay: number; duration: number; primaryColor: string }) {
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0);
 
   useEffect(() => {
-    const dx = (endX - startX) / 100 * SCREEN_WIDTH;
-    const dy = (endY - startY) / 100 * SCREEN_HEIGHT;
+    const dx = (endX - startX) / 100 * screenWidth;
+    const dy = (endY - startY) / 100 * screenHeight;
 
     opacity.value = withDelay(
       delay * 1000,
@@ -178,7 +176,8 @@ function ShootingStar({ startX, startY, endX, endY, delay, duration, primaryColo
 }
 
 function Scanlines({ primaryColor }: { primaryColor: string }) {
-  const lineCount = Math.ceil(SCREEN_HEIGHT / 6) + 20;
+  const { height: screenHeight } = useWindowDimensions();
+  const lineCount = Math.ceil(screenHeight / 6) + 20;
   const lines = Array.from({ length: lineCount }, (_, i) => i);
 
   return (
