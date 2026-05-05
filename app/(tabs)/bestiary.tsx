@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
-import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
-import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
+import { useTheme } from "@/hooks/use-theme";
 import { useSpecies } from "@/hooks/useSpecies";
 import type { Especie } from "@/types-dtos";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
 
 const classificationColorMap: Record<string, string> = {
   planta: "#4CAF50",
@@ -114,7 +114,7 @@ export default function BestiaryScreen() {
                     <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: dngColor }} />
                   </View>
                   <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>
-                     IA: {Math.round((item.iaConfidence || 0) * 100)}%
+                    IA: {Math.round((item.iaConfidence || 0) * 100)}%
                   </Text>
                 </View>
               </View>

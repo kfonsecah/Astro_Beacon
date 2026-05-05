@@ -1,9 +1,9 @@
-import { useState, useCallback, useEffect } from "react";
-import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
-import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
+import { useTheme } from "@/hooks/use-theme";
 import { useLogbookEntries } from "@/hooks/useLogbook";
 import type { BitacoraEntradaResponse } from "@/types-dtos";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, View } from "react-native";
 
 export default function LogbookScreen() {
   const theme = useTheme();
@@ -80,9 +80,9 @@ export default function LogbookScreen() {
         renderItem={({ item }) => (
           <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: tc.primary }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
-              {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
-            </Text>
+              <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+                {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
+              </Text>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
                 <Text style={{ fontSize: 10 }}>{item.updatedAt ? "✅" : "⏳"}</Text>
                 <Text style={{ fontFamily: "monospace", fontSize: 8, color: item.updatedAt ? tc.success : tc.warning }}>

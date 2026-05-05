@@ -1,11 +1,11 @@
-import { useState, useCallback, useEffect } from "react";
-import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useTheme } from "@/hooks/use-theme";
-import { useRouter } from "expo-router";
 import { HudHeader } from "@/components/ui/HudHeader";
-import { useTrips, useStartTrip } from "@/hooks/useTrips";
+import { useTheme } from "@/hooks/use-theme";
+import { useStartTrip, useTrips } from "@/hooks/useTrips";
 import type { Viaje } from "@/types-dtos";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const statusColorMap: Record<string, string> = {
   planificado: "#FFC107",
