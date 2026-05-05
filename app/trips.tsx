@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
@@ -31,6 +31,20 @@ export default function TripsScreen() {
 
   const { data, isLoading, isError, refetch, isFetching } = useTrips(page, limit);
   const startTripMutation = useStartTrip();
+  const [allTrips, setAllTrips] = useState<Viaje[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    const newItems = data?.items ?? [];
+    if (newItems.length > 0) {
+      setAllTrips(prev => {
+        const existingIds = new Set(prev.map(t => t.id));
+        const filtered = newItems.filter(t => !existingIds.has(t.id));
+        return filtered.length > 0 ? [...prev, ...filtered] : prev;
+      });
+      setHasMore((data?.total ?? 0) > allTrips.length + newItems.length);
+    }
+  }, [data]);
 
   const handleStartTrip = (trip: Viaje) => {
     Alert.alert(
@@ -58,14 +72,16 @@ export default function TripsScreen() {
     );
   };
 
-  const onRefresh = useCallback(() => {
+  const onRefresh = useCallback(async () => {
     setPage(1);
-    refetch();
+    setAllTrips([]);
+    setHasMore(true);
+    await refetch();
   }, [refetch]);
 
   const loadMore = () => {
-    if (data && page < data.totalPages) {
-      setPage(prev => prev + 1);
+    if (hasMore && !isFetching && allTrips.length < (data?.total ?? 0)) {
+      setPage(p => p + 1);
     }
   };
 
@@ -92,8 +108,6 @@ export default function TripsScreen() {
     );
   }
 
-  const trips = (data?.items || []) as Viaje[];
-
   return (
     <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
       <View style={{ flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: tc.border }}>
@@ -103,7 +117,7 @@ export default function TripsScreen() {
         <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, flex: 1 }}>REGISTROS DE VIAJE</Text>
       </View>
       <FlatList
-        data={trips}
+        data={allTrips}
         keyExtractor={(item, index) => item.id || `trip-${index}`}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />}

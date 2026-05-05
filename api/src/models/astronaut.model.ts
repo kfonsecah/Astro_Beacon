@@ -27,7 +27,6 @@ const AstronautSchema = new Schema<IAstronaut>(
       ref: 'User',
       required: true,
       unique: true,
-      index: true,
     },
     name: {
       type: String,
@@ -57,7 +56,6 @@ const AstronautSchema = new Schema<IAstronaut>(
   }
 );
 
-// Index
-AstronautSchema.index({ userId: 1 });
+// unique: true on userId already creates the index
 
 export const Astronaut = mongoose.model<IAstronaut>('Astronaut', AstronautSchema);

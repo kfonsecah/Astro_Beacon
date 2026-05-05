@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { View, Text, FlatList, SafeAreaView, RefreshControl, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { HudHeader } from "@/components/ui/HudHeader";
@@ -12,15 +12,31 @@ export default function LogbookScreen() {
   const limit = 20;
 
   const { data, isLoading, isError, refetch, isFetching } = useLogbookEntries(page, limit);
+  const [allEntries, setAllEntries] = useState<BitacoraEntradaResponse[]>([]);
+  const [hasMore, setHasMore] = useState(true);
 
-  const onRefresh = useCallback(() => {
+  useEffect(() => {
+    const newItems = data?.items ?? [];
+    if (newItems.length > 0) {
+      setAllEntries(prev => {
+        const existingIds = new Set(prev.map(e => e.id));
+        const filtered = newItems.filter(e => !existingIds.has(e.id));
+        return filtered.length > 0 ? [...prev, ...filtered] : prev;
+      });
+      setHasMore((data?.total ?? 0) > allEntries.length + newItems.length);
+    }
+  }, [data]);
+
+  const onRefresh = useCallback(async () => {
     setPage(1);
-    refetch();
+    setAllEntries([]);
+    setHasMore(true);
+    await refetch();
   }, [refetch]);
 
   const loadMore = () => {
-    if (data && page < data.totalPages) {
-      setPage(prev => prev + 1);
+    if (hasMore && !isFetching && allEntries.length < (data?.total ?? 0)) {
+      setPage(p => p + 1);
     }
   };
 
@@ -44,12 +60,10 @@ export default function LogbookScreen() {
     );
   }
 
-  const entries = (data?.items || []) as BitacoraEntradaResponse[];
-
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
-        data={entries}
+        data={allEntries}
         keyExtractor={(item) => item.id || Math.random().toString()}
         contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         refreshControl={

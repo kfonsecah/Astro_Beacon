@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tripService } from '../services/trip.service';
 import type { Viaje, CreateViajeDTO, UpdateViajeDTO } from '@/types-dtos';
+import { useTripStore } from '@/stores/trip.store';
 
 const QUERY_KEYS = {
   list: (page = 1, limit = 20, status?: string) => 
@@ -51,7 +52,8 @@ export function useStartTrip() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data?: { notes?: string } }) => 
       tripService.start(id, data),
-    onSuccess: (_, { id }) => {
+    onSuccess: (updatedTrip, { id }) => {
+      useTripStore.getState().setActiveTrip(updatedTrip);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
     },
@@ -64,6 +66,7 @@ export function useCompleteTrip() {
     mutationFn: ({ id, data }: { id: string; data?: { notes?: string; resourcesUsed?: string[] } }) => 
       tripService.complete(id, data),
     onSuccess: (_, { id }) => {
+      useTripStore.getState().setActiveTrip(null);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
     },
@@ -76,6 +79,7 @@ export function useAbortTrip() {
     mutationFn: ({ id, data }: { id: string; data?: { notes?: string } }) => 
       tripService.abort(id, data),
     onSuccess: (_, { id }) => {
+      useTripStore.getState().setActiveTrip(null);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
     },
