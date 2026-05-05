@@ -36,6 +36,7 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 | TanStack Query + Network Detection | 14 | Complete |
 | Domain Services + Hooks | 15 | Complete |
 | Design System Compliance | 20 | Complete |
+| Error Handling & Offline | 21 | Complete |
 
 ### Active
 
@@ -50,7 +51,6 @@ Ayudar al astronauta a sobrevivir en un planeta desconocido mediante informació
 - [ ] Diseño, animaciones y estilos temáticos
 - [ ] Gestos (mínimo 2) para procesos clave
 - [ ] Uso de IA asistida en desarrollo
-- [ ] Offline con sincronización
 - [ ] Responsive y rendimiento optimizado
 
 ### Out of Scope
@@ -234,4 +234,4 @@ color: tc.primary
 | API REST con Node + Express v4 | Requisito del curso para Entrega 2 | ✓ Planned |
 
 ---
-*Last updated: 2026-05-04 — Phase 20 Design System Compliance complete*
+*Last updated: 2026-05-05 — Phase 21 Error Handling & Offline complete*
