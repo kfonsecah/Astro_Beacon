@@ -235,7 +235,9 @@ export default function LoginScreen() {
       await loginMutation.mutateAsync({ email, password });
       router.replace('/(tabs)/dashboard');
     } catch (error) {
+      // Error is stored in loginMutation.error — let mutation state handle UI feedback
       console.error('Login failed:', error);
+      throw error;
     }
   }, [email, password, loginMutation, router]);
 
@@ -307,6 +309,15 @@ export default function LoginScreen() {
                   </Pressable>
                 </View>
               </View>
+
+              {/* Auth error */}
+              {loginMutation.isError && (
+                <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
+                  {loginMutation.error instanceof Error
+                    ? loginMutation.error.message
+                    : 'Error de autenticación. Intente de nuevo.'}
+                </Text>
+              )}
 
               {/* Auth Button */}
               <Animated.View style={animatedBtnStyle}>
