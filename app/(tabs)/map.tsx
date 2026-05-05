@@ -102,38 +102,34 @@ export default function MapScreen() {
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
 
-    const startGpsTracking = async () => {
-      if (activeTrip?.status === 'activo' && !isTracking) {
-        let { status } = await Location.requestForegroundPermissionsAsync();
-        if (status !== 'granted') return;
+    if (activeTrip?.status !== 'activo') return;
 
-        subscription = await Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.High,
-            timeInterval: 5000,
-            distanceInterval: 10,
-          },
-          (location) => {
-            const { latitude, longitude } = location.coords;
-            setRegion((prev) => ({
-              ...prev,
-              latitude,
-              longitude,
-            }));
-          }
-        );
-        startTracking();
-      }
-    };
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') return;
 
-    startGpsTracking();
+      subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000,
+          distanceInterval: 10,
+        },
+        (location) => {
+          const { latitude, longitude } = location.coords;
+          setRegion((prev) => ({
+            ...prev,
+            latitude,
+            longitude,
+          }));
+        }
+      );
+      startTracking();
+    })();
 
     return () => {
-      if (subscription) {
-        subscription.remove();
-      }
+      subscription?.remove();
     };
-  }, [activeTrip?.status, isTracking, startTracking]);
+  }, [activeTrip?.status]);
 
   // Oxygen countdown management
   useEffect(() => {
