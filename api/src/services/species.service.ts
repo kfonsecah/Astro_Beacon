@@ -20,7 +20,7 @@ export class SpeciesService {
   private genAI: GoogleGenerativeAI | null = null;
 
   constructor() {
-    const apiKey = process.env.GOOGLE_VISION_API_KEY; // Reusing the same env var name for simplicity or we could change it
+    const apiKey = process.env.GOOGLE_AI_API_KEY;
     if (apiKey) {
       this.genAI = new GoogleGenerativeAI(apiKey);
     }

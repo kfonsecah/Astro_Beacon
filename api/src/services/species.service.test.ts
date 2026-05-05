@@ -10,7 +10,7 @@ describe('SpeciesService.identify', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    process.env = { ...originalEnv, GOOGLE_VISION_API_KEY: 'test-api-key' };
+    process.env = { ...originalEnv, GOOGLE_AI_API_KEY: 'test-api-key' };
   });
 
   afterAll(() => {
@@ -82,7 +82,7 @@ describe('SpeciesService.identify', () => {
   });
 
   it('should return fallback when API Key is missing', async () => {
-    delete process.env.GOOGLE_VISION_API_KEY;
+    delete process.env.GOOGLE_AI_API_KEY;
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
     const result = await speciesService.identify('base64image');
