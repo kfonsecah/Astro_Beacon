@@ -176,10 +176,45 @@ export class SpeciesService {
 
       // Basic mapping placeholder for plan 1, will be refined in plan 2
       // At this stage, just returning unknown with the first label name and confidence
+      let classification = SpeciesClassification.DESCONOCIDO;
+      let dangerLevel = DangerLevel.CAUTELOSO;
+
+      // Pass 1: Classification
+      for (const label of labels) {
+        const desc = label.description.toLowerCase();
+        if (desc.includes('plant') || desc.includes('tree')) {
+          classification = SpeciesClassification.PLANTA;
+          break;
+        }
+        if (desc.includes('animal') || desc.includes('mammal') || desc.includes('bird')) {
+          classification = SpeciesClassification.ANIMAL;
+          break;
+        }
+        if (desc.includes('mineral') || desc.includes('rock') || desc.includes('water')) {
+          classification = SpeciesClassification.RECURSO;
+          break;
+        }
+      }
+
+      // Pass 2: Danger Level
+      // Start with amigable for plants if not matched, but let's default to cauteloso initially
+      // Actually, plan says: "Los tests esperan que 'Flowering plant' retorne amigable".
+      if (classification === SpeciesClassification.PLANTA) {
+        dangerLevel = DangerLevel.AMIGABLE;
+      }
+
+      for (const label of labels) {
+        const desc = label.description.toLowerCase();
+        if (desc.includes('predator') || desc.includes('carnivore') || desc.includes('danger')) {
+          dangerLevel = DangerLevel.PELIGROSO;
+          break;
+        }
+      }
+
       return {
-        classification: SpeciesClassification.DESCONOCIDO,
-        dangerLevel: DangerLevel.CAUTELOSO,
-        name: 'Especie Desconocida',
+        classification,
+        dangerLevel,
+        name: labels[0].description,
         description: `Label detectado: ${labels[0].description}`,
         confidence: labels[0].score || 0,
       };
