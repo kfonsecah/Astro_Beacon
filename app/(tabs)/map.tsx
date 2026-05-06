@@ -9,7 +9,7 @@ import { useTripStore } from "@/stores/trip.store";
 import type { CreateSuministroDTO, Recurso, Suministro, Viaje } from "@/types-dtos";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Location from "expo-location";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 import { RouteErrorFallback } from '@/components/common';
@@ -37,8 +37,6 @@ const categoryConfig = {
   otro: { symbol: "📦", color: colors.categoryOtro },
 } as const;
 
-const SIMULATION_TICK_MS = 1000;
-const SIMULATION_SPEED_MPS = 5;
 const SIMULATION_STOP_RADIUS_METERS = 35;
 const OXYGEN_PER_KM = 18;
 const FOOD_PER_KM = 4;
@@ -75,14 +73,8 @@ export default function MapScreen() {
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [supplyDistances, setSupplyDistances] = useState<Record<string, number>>({});
   const [collectibleSupplies, setCollectibleSupplies] = useState<Set<string>>(new Set());
-  const [isSimulating, setIsSimulating] = useState(false);
 
-  const regionRef = useRef<Region | null>(null);
-  const simulationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const consumptionBufferRef = useRef({ oxygen: 0, food: 0 });
-  const consumptionInFlightRef = useRef(false);
-  const consumptionErrorRef = useRef(false);
-
+  // Local region for GPS tracking (not simulation)
   const [region, setRegion] = useState<Region>({
     latitude: -12.0464, // Default to Lima, Peru
     longitude: -77.0428,
@@ -90,12 +82,16 @@ export default function MapScreen() {
     longitudeDelta: 0.0421,
   });
 
-  useEffect(() => {
-    regionRef.current = region;
-  }, [region]);
-
   // Trip store integration
   const { activeTrip, isTracking, startTracking, setActiveTrip, reset } = useTripStore();
+
+  // Simulation state from store (persists across tab switches)
+  const {
+    simulationRegion, isSimulating, startSimulation, stopSimulation,
+  } = useTripStore();
+
+  // Use simulation region from store when simulating, otherwise use local region
+  const effectiveRegion = isSimulating ? simulationRegion || region : region;
 
   const oxygenResource = useMemo(() => {
     const items = resourcesData?.items ?? [];
@@ -183,17 +179,6 @@ export default function MapScreen() {
   }, [activeTrip?.status, activeTrip?.oxygenBudgeted]);
 
   useEffect(() => {
-    if (activeTrip?.status !== 'activo') {
-      setIsSimulating(false);
-    }
-  }, [activeTrip?.status]);
-
-  useEffect(() => {
-    consumptionBufferRef.current = { oxygen: 0, food: 0 };
-    consumptionErrorRef.current = false;
-  }, [activeTrip?.id]);
-
-  useEffect(() => {
     if (!data?.items) return;
 
     setSuppliesList((prev) => {
@@ -204,142 +189,11 @@ export default function MapScreen() {
     });
   }, [data?.items]);
 
-  const calculateDistanceKm = (fromLat: number, fromLng: number, toLat: number, toLng: number): number => {
-    const toRad = (deg: number) => (deg * Math.PI) / 180;
-    const earthRadiusKm = 6371;
-    const dLat = toRad(toLat - fromLat);
-    const dLng = toRad(toLng - fromLng);
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return earthRadiusKm * c;
-  };
-
-  const moveTowards = (from: Region, to: { lat: number; lng: number }, stepMeters: number) => {
-    const distanceKm = calculateDistanceKm(from.latitude, from.longitude, to.lat, to.lng);
-    const distanceMeters = distanceKm * 1000;
-    if (distanceMeters === 0) {
-      return { next: from, movedMeters: 0, reached: true };
-    }
-    if (distanceMeters <= stepMeters) {
-      return {
-        next: { ...from, latitude: to.lat, longitude: to.lng },
-        movedMeters: distanceMeters,
-        reached: true,
-      };
-    }
-    const ratio = stepMeters / distanceMeters;
-    return {
-      next: {
-        ...from,
-        latitude: from.latitude + (to.lat - from.latitude) * ratio,
-        longitude: from.longitude + (to.lng - from.longitude) * ratio,
-      },
-      movedMeters: stepMeters,
-      reached: false,
-    };
-  };
-
-  const flushConsumption = async () => {
-    if (consumptionInFlightRef.current || consumptionErrorRef.current) return;
-    const oxygenAmount = Math.floor(consumptionBufferRef.current.oxygen);
-    const foodAmount = Math.floor(consumptionBufferRef.current.food);
-    if (oxygenAmount <= 0 && foodAmount <= 0) return;
-    if (!oxygenResource || !foodResource) return;
-
-    consumptionInFlightRef.current = true;
-    try {
-      const tasks: Promise<any>[] = [];
-      if (oxygenAmount > 0) {
-        tasks.push(
-          recordMovement.mutateAsync({
-            id: oxygenResource.id,
-            data: {
-              recursoId: oxygenResource.id,
-              tipo: 'egreso',
-              cantidad: oxygenAmount,
-              razon: 'Consumo por caminata',
-            },
-          })
-        );
-      }
-      if (foodAmount > 0) {
-        tasks.push(
-          recordMovement.mutateAsync({
-            id: foodResource.id,
-            data: {
-              recursoId: foodResource.id,
-              tipo: 'egreso',
-              cantidad: foodAmount,
-              razon: 'Consumo por caminata',
-            },
-          })
-        );
-      }
-
-      await Promise.all(tasks);
-      consumptionBufferRef.current.oxygen -= oxygenAmount;
-      consumptionBufferRef.current.food -= foodAmount;
-    } catch (error) {
-      consumptionErrorRef.current = true;
-      setIsSimulating(false);
-      Alert.alert('ERROR', 'No se pudo registrar el consumo de recursos.');
-    } finally {
-      consumptionInFlightRef.current = false;
-    }
-  };
-
+  // Calculate distances and detect proximity (100m) - use effectiveRegion
   useEffect(() => {
-    if (!isSimulating || activeTrip?.status !== 'activo') {
-      if (simulationIntervalRef.current) {
-        clearInterval(simulationIntervalRef.current);
-        simulationIntervalRef.current = null;
-      }
-      return;
-    }
+    const currentRegion = effectiveRegion;
+    if (!currentRegion) return;
 
-    consumptionErrorRef.current = false;
-    const destination = activeTrip.destination;
-
-    simulationIntervalRef.current = setInterval(() => {
-      const current = regionRef.current;
-      if (!current) return;
-
-      const distanceKm = calculateDistanceKm(
-        current.latitude,
-        current.longitude,
-        destination.lat,
-        destination.lng,
-      );
-      const distanceMeters = distanceKm * 1000;
-
-      if (distanceMeters <= SIMULATION_STOP_RADIUS_METERS) {
-        setIsSimulating(false);
-        return;
-      }
-
-      const stepMeters = SIMULATION_SPEED_MPS * (SIMULATION_TICK_MS / 1000);
-      const { next, movedMeters } = moveTowards(current, destination, stepMeters);
-      regionRef.current = next;
-      setRegion(next);
-
-      const movedKm = movedMeters / 1000;
-      consumptionBufferRef.current.oxygen += movedKm * OXYGEN_PER_KM;
-      consumptionBufferRef.current.food += movedKm * FOOD_PER_KM;
-      flushConsumption();
-    }, SIMULATION_TICK_MS);
-
-    return () => {
-      if (simulationIntervalRef.current) {
-        clearInterval(simulationIntervalRef.current);
-        simulationIntervalRef.current = null;
-      }
-    };
-  }, [isSimulating, activeTrip?.status, activeTrip?.destination]);
-
-  // Calcular distancias y detectar proximidad (100m)
-  useEffect(() => {
     const distances: Record<string, number> = {};
     const collectible = new Set<string>();
 
@@ -347,8 +201,8 @@ export default function MapScreen() {
 
     suppliesList.forEach((supply) => {
       const distKm = calculateDistanceKm(
-        region.latitude,
-        region.longitude,
+        currentRegion.latitude,
+        currentRegion.longitude,
         supply.location.lat,
         supply.location.lng,
       );
@@ -363,10 +217,60 @@ export default function MapScreen() {
       }
     });
 
+    setSupplyDistances(distances);
+    setCollectibleSupplies(collectible);
+  }, [effectiveRegion, suppliesList, activeTrip]);
+
+  const calculateDistanceKm = (fromLat: number, fromLng: number, toLat: number, toLng: number): number => {
+    const toRad = (deg: number) => (deg * Math.PI) / 180;
+    const earthRadiusKm = 6371;
+    const dLat = toRad(toLat - fromLat);
+    const dLng = toRad(toLng - fromLng);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return earthRadiusKm * c;
+  };
+
+  // Simulation now handled by the store - just sync local region when not simulating
+  useEffect(() => {
+    if (!isSimulating && simulationRegion) {
+      setRegion(simulationRegion);
+    }
+  }, [simulationRegion, isSimulating]);
+
+  // Calculate distances and detect proximity (100m) - use effectiveRegion
+  useEffect(() => {
+    const currentRegion = effectiveRegion;
+    if (!currentRegion) return;
+
+    const distances: Record<string, number> = {};
+    const collectible = new Set<string>();
+
+    const isTripActive = activeTrip?.status === 'activo';
+
+    suppliesList.forEach((supply) => {
+      const distKm = calculateDistanceKm(
+        currentRegion.latitude,
+        currentRegion.longitude,
+        supply.location.lat,
+        supply.location.lng,
+      );
+      const distMeters = distKm * 1000;
+      distances[String(supply.id)] = distKm;
+
+      const isInRange = distMeters < 1000;
+      const isPendiente = supply.status === 'pendiente';
+
+      if (isInRange && isPendiente && isTripActive) {
+        collectible.add(String(supply.id));
+      }
+    });
 
     setSupplyDistances(distances);
     setCollectibleSupplies(collectible);
-  }, [region, suppliesList, activeTrip]);
+  }, [effectiveRegion, suppliesList, activeTrip]);
 
   const onRefresh = () => {
     if (page === 1) {
@@ -440,8 +344,8 @@ export default function MapScreen() {
         0,
         Math.ceil(
           calculateDistanceKm(
-            region.latitude,
-            region.longitude,
+            (effectiveRegion?.latitude ?? region.latitude),
+            (effectiveRegion?.longitude ?? region.longitude),
             activeTrip.destination.lat,
             activeTrip.destination.lng,
           ) * OXYGEN_PER_KM,
@@ -451,9 +355,10 @@ export default function MapScreen() {
   const selectedSupply = supplies.find((s) => String(s.id) === String(selectedSupplyId));
 
   const estimateOxygenBudget = (supply: Suministro): number => {
+    const currentRegion = effectiveRegion ?? region;
     const distanceKm = calculateDistanceKm(
-      region.latitude,
-      region.longitude,
+      currentRegion.latitude,
+      currentRegion.longitude,
       supply.location.lat,
       supply.location.lng,
     );
@@ -466,9 +371,10 @@ export default function MapScreen() {
     const oxygenBudget = estimateOxygenBudget(selectedSupply);
     const availableOxygen = oxygenResource?.currentAmount ?? 0;
     const oxygenAfter = availableOxygen - oxygenBudget;
+    const currentRegion = effectiveRegion ?? region;
     const distanceKm = calculateDistanceKm(
-      region.latitude,
-      region.longitude,
+      currentRegion.latitude,
+      currentRegion.longitude,
       selectedSupply.location.lat,
       selectedSupply.location.lng,
     );
@@ -515,7 +421,7 @@ export default function MapScreen() {
 
   const handleToggleSimulation = () => {
     if (isSimulating) {
-      setIsSimulating(false);
+      stopSimulation();
       return;
     }
     if (activeTrip?.status !== 'activo') {
@@ -526,7 +432,41 @@ export default function MapScreen() {
       Alert.alert('FALTAN RECURSOS', 'Necesitas recursos de oxígeno y comida para consumir durante la simulación.');
       return;
     }
-    setIsSimulating(true);
+    // Start simulation in the store, passing current region and consumption callback
+    startSimulation(
+      activeTrip.destination,
+      region,
+      async (oxygenAmount: number, foodAmount: number) => {
+        const tasks: Promise<any>[] = [];
+        if (oxygenAmount > 0 && oxygenResource) {
+          tasks.push(
+            recordMovement.mutateAsync({
+              id: oxygenResource.id,
+              data: {
+                recursoId: oxygenResource.id,
+                tipo: 'egreso',
+                cantidad: oxygenAmount,
+                razon: 'Consumo por caminata',
+              },
+            })
+          );
+        }
+        if (foodAmount > 0 && foodResource) {
+          tasks.push(
+            recordMovement.mutateAsync({
+              id: foodResource.id,
+              data: {
+                recursoId: foodResource.id,
+                tipo: 'egreso',
+                cantidad: foodAmount,
+                razon: 'Consumo por caminata',
+              },
+            })
+          );
+        }
+        await Promise.all(tasks);
+      }
+    );
   };
 
   const handleCancelTrip = () => {
@@ -540,7 +480,7 @@ export default function MapScreen() {
           text: 'CANCELAR',
           style: 'destructive',
           onPress: () => {
-            setIsSimulating(false);
+            stopSimulation();
             reset();
           },
         },
@@ -632,10 +572,12 @@ export default function MapScreen() {
           <MapView
             provider={PROVIDER_GOOGLE}
             style={{ flex: 1 }}
-            region={region}
+            initialRegion={region}
             showsUserLocation={true}
             showsMyLocationButton={true}
-            onRegionChangeComplete={(nextRegion) => setRegion(nextRegion)}
+            onRegionChangeComplete={(nextRegion) => {
+              setRegion(nextRegion);
+            }}
           >
             {supplies.map((supply) => {
               const isSelected = String(selectedSupplyId) === String(supply.id);
@@ -688,19 +630,23 @@ export default function MapScreen() {
           {data?.total || 0} SUMINISTROS
         </Text>
 
-        {/* Map View with supply markers - fixed section */}
-        <View style={{ height: 260, marginBottom: 12, position: 'relative' }}>
-          <MapView
-            provider={PROVIDER_GOOGLE}
-            style={{ flex: 1 }}
-            region={region}
-            showsUserLocation={true}
-            showsMyLocationButton={true}
-            onRegionChangeComplete={(nextRegion) => setRegion(nextRegion)}
-          >
+          {/* Map View with supply markers - fixed section */}
+          <View style={{ height: 260, marginBottom: 12, position: 'relative' }}>
+            <MapView
+              provider={PROVIDER_GOOGLE}
+              style={{ flex: 1 }}
+              initialRegion={region}
+              showsUserLocation={true}
+              showsMyLocationButton={true}
+              onRegionChangeComplete={(nextRegion) => {
+                setRegion(nextRegion);
+              }}
+            >
             {supplies.map((supply) => {
               const isSelected = String(selectedSupplyId) === String(supply.id);
               const isCollected = supply.status === 'recogido';
+              // No renderizar iconos ya recogidos
+              if (isCollected) return null;
               return (
                 <Marker
                   key={String(supply.id)}
@@ -738,30 +684,6 @@ export default function MapScreen() {
                 </Marker>
               );
             })}
-            {isSimulating && (
-              <Marker
-                key="ghost-marker"
-                coordinate={{ latitude: region.latitude, longitude: region.longitude }}
-                title="Posición simulada"
-                description="Movimiento simulado"
-              >
-                <View
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: 'rgba(0,183,235,0.5)',
-                    borderWidth: 2,
-                    borderColor: '#00b7eb',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    elevation: 10,
-                  }}
-                >
-                  <Text style={{ fontSize: 18 }}>👻</Text>
-                </View>
-              </Marker>
-            )}
           </MapView>
 
           <TouchableOpacity
