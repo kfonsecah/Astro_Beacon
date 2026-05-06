@@ -1,5 +1,5 @@
-import { create } from 'zustand';
 import type { Viaje } from '@/types-dtos';
+import { create } from 'zustand';
 
 // Region type for simulation (matches react-native-maps Region)
 interface Region {
@@ -130,8 +130,8 @@ export const useTripStore = create<TripState>((set, get) => ({
       const currentState = get();
       if (!currentState.isSimulating || !currentState.simulationDestination) return;
 
-      const SIMULATION_SPEED_MPS = 5;
-      const OXYGEN_PER_KM = 18;
+      const SIMULATION_SPEED_MPS = 1.39;
+      const OXYGEN_PER_KM = 36;
       const FOOD_PER_KM = 4;
       const SIMULATION_STOP_RADIUS_METERS = 35;
 

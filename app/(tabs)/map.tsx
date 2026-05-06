@@ -1,3 +1,4 @@
+import { RouteErrorFallback } from '@/components/common';
 import { CategoryLegend } from "@/components/map/CategoryLegend";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { colors } from "@/constants/colors";
@@ -12,7 +13,6 @@ import * as Location from "expo-location";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
-import { RouteErrorFallback } from '@/components/common';
 
 const statusColorMap: Record<string, string> = {
   pendiente: colors.supplyPendiente,
@@ -38,7 +38,7 @@ const categoryConfig = {
 } as const;
 
 const SIMULATION_STOP_RADIUS_METERS = 35;
-const OXYGEN_PER_KM = 18;
+const OXYGEN_PER_KM = 36;
 const FOOD_PER_KM = 4;
 
 type SupplyCategory = keyof typeof categoryConfig;
@@ -170,13 +170,21 @@ export default function MapScreen() {
       useTripStore.getState().stopOxygenCountdown();
       return;
     }
-    const oxygenRate = activeTrip.oxygenBudgeted / 60;
-    useTripStore.getState().startOxygenCountdown(oxygenRate);
+
+    const WALKING_SPEED_KMH = 5;
+    const distanceKm = calculateDistanceKm(
+      effectiveRegion.latitude,
+      effectiveRegion.longitude,
+      activeTrip.destination.lat,
+      activeTrip.destination.lng,
+    );
+    const estimatedMinutes = (distanceKm / WALKING_SPEED_KMH) * 60;
+    const oxygenRate = activeTrip.oxygenBudgeted / estimatedMinutes; useTripStore.getState().startOxygenCountdown(oxygenRate);
 
     return () => {
       useTripStore.getState().stopOxygenCountdown();
     };
-  }, [activeTrip?.status, activeTrip?.oxygenBudgeted]);
+  }, [activeTrip?.status, activeTrip?.oxygenBudgeted, effectiveRegion]);
 
   useEffect(() => {
     if (!data?.items) return;
@@ -323,34 +331,34 @@ export default function MapScreen() {
   // Auto-sort por distancia cuando trip activo
   const sortedSupplies = activeTrip?.status === 'activo'
     ? [...suppliesList].sort((a, b) => {
-        const aCollected = a.status === 'recogido';
-        const bCollected = b.status === 'recogido';
-        if (aCollected !== bCollected) return aCollected ? 1 : -1;
-        const distA = supplyDistances[String(a.id)] ?? Infinity;
-        const distB = supplyDistances[String(b.id)] ?? Infinity;
-        return distA - distB;
-      })
+      const aCollected = a.status === 'recogido';
+      const bCollected = b.status === 'recogido';
+      if (aCollected !== bCollected) return aCollected ? 1 : -1;
+      const distA = supplyDistances[String(a.id)] ?? Infinity;
+      const distB = supplyDistances[String(b.id)] ?? Infinity;
+      return distA - distB;
+    })
     : [...suppliesList].sort((a, b) => {
-        const aCollected = a.status === 'recogido';
-        const bCollected = b.status === 'recogido';
-        if (aCollected !== bCollected) return aCollected ? 1 : -1;
-        return 0;
-      });
+      const aCollected = a.status === 'recogido';
+      const bCollected = b.status === 'recogido';
+      if (aCollected !== bCollected) return aCollected ? 1 : -1;
+      return 0;
+    });
 
   const supplies = sortedSupplies;
   const availableOxygen = oxygenResource?.currentAmount ?? 0;
   const oxygenToDestination = activeTrip?.status === 'activo'
     ? Math.max(
-        0,
-        Math.ceil(
-          calculateDistanceKm(
-            (effectiveRegion?.latitude ?? region.latitude),
-            (effectiveRegion?.longitude ?? region.longitude),
-            activeTrip.destination.lat,
-            activeTrip.destination.lng,
-          ) * OXYGEN_PER_KM,
-        ),
-      )
+      0,
+      Math.ceil(
+        calculateDistanceKm(
+          (effectiveRegion?.latitude ?? region.latitude),
+          (effectiveRegion?.longitude ?? region.longitude),
+          activeTrip.destination.lat,
+          activeTrip.destination.lng,
+        ) * OXYGEN_PER_KM,
+      ),
+    )
     : 0;
   const selectedSupply = supplies.find((s) => String(s.id) === String(selectedSupplyId));
 
@@ -630,18 +638,18 @@ export default function MapScreen() {
           {data?.total || 0} SUMINISTROS
         </Text>
 
-          {/* Map View with supply markers - fixed section */}
-          <View style={{ height: 260, marginBottom: 12, position: 'relative' }}>
-            <MapView
-              provider={PROVIDER_GOOGLE}
-              style={{ flex: 1 }}
-              initialRegion={region}
-              showsUserLocation={true}
-              showsMyLocationButton={true}
-              onRegionChangeComplete={(nextRegion) => {
-                setRegion(nextRegion);
-              }}
-            >
+        {/* Map View with supply markers - fixed section */}
+        <View style={{ height: 260, marginBottom: 12, position: 'relative' }}>
+          <MapView
+            provider={PROVIDER_GOOGLE}
+            style={{ flex: 1 }}
+            initialRegion={region}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
+            onRegionChangeComplete={(nextRegion) => {
+              setRegion(nextRegion);
+            }}
+          >
             {supplies.map((supply) => {
               const isSelected = String(selectedSupplyId) === String(supply.id);
               const isCollected = supply.status === 'recogido';
