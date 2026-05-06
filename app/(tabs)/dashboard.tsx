@@ -145,10 +145,10 @@ export default function DashboardScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
-            onPress={() => router.push("/trips")}
+            onPress={() => router.push("/species/identify")}
           >
-            <Text style={{ fontSize: 24, marginBottom: 8 }}>📷</Text>
-            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>TOMAR FOTO</Text>
+            <Text style={{ fontSize: 24, marginBottom: 8 }}>🏷️</Text>
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>IDENTIFICAR ESPECIE</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
