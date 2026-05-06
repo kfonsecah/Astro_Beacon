@@ -45,6 +45,7 @@ export default function IdentifyScreen() {
   const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
   const [confidence, setConfidence] = useState<number | null>(null);
+  const [isTyping, setIsTyping] = useState(false);
 
   // Animation values
   const scanY = useSharedValue(0);
@@ -74,8 +75,17 @@ export default function IdentifyScreen() {
     opacity: textOpacity.value,
   }));
 
+  const typeText = async (fullText: string, setter: (t: string) => void, speed = 25) => {
+    let current = '';
+    for (let i = 0; i < fullText.length; i++) {
+      current += fullText[i];
+      setter(current);
+      await new Promise(resolve => setTimeout(resolve, speed));
+    }
+  };
+
   const handleIdentify = async () => {
-    if (!image?.base64 || isScanning) {
+    if (!image?.base64 || isScanning || isTyping) {
       if (!image) Alert.alert('REQUERIDO', 'Captura o selecciona una imagen primero.');
       return;
     }
@@ -84,19 +94,29 @@ export default function IdentifyScreen() {
       const cleanBase64 = image.base64.replace(/^data:image\/\w+;base64,/, '');
       const result = await identifySpecies.mutateAsync(cleanBase64);
       
-      setName(result.name);
+      // Reset for animation
+      setName('');
+      setDescription('');
+      setIsTyping(true);
+
       setClassification(result.classification);
       setDangerLevel(result.dangerLevel);
-      setDescription(result.description);
-      setNotes(''); // Leave notes empty for astronaut's manual observations
       setConfidence(result.confidence);
+      setNotes('');
+
+      // Typewriter sequence
+      await typeText(result.name, setName, 40);
+      await typeText(result.description, setDescription, 12);
+      
+      setIsTyping(false);
     } catch {
+      setIsTyping(false);
       Alert.alert('ERROR', 'ANÁLISIS NO DISPONIBLE — Completa los datos manualmente.');
     }
   };
 
   const handleSave = async () => {
-    if (!isValid || isSubmitting) return;
+    if (!isValid || isSubmitting || isTyping) return;
     try {
       await createSpecies.mutateAsync({
         name: name.trim(),
@@ -201,7 +221,7 @@ export default function IdentifyScreen() {
 
                   <TouchableOpacity
                     onPress={clearImage}
-                    disabled={isScanning}
+                    disabled={isScanning || isTyping}
                     style={{ position: 'absolute', top: 8, right: 8, backgroundColor: tc.danger + 'CC', paddingHorizontal: 8, paddingVertical: 4 }}
                   >
                     <Text style={{ color: tc.text, fontFamily: 'monospace', fontSize: 9, letterSpacing: 1 }}>ELIMINAR</Text>
@@ -219,17 +239,17 @@ export default function IdentifyScreen() {
           <View style={{ flexDirection: 'row', marginHorizontal: 16, marginBottom: 16, gap: 8 }}>
             <TouchableOpacity
               onPress={pickFromCamera}
-              disabled={isScanning}
-              style={{ flex: 1, borderWidth: 1, borderColor: isScanning ? tc.textDisabled : tc.primary, paddingVertical: 10, alignItems: 'center' }}
+              disabled={isScanning || isTyping}
+              style={{ flex: 1, borderWidth: 1, borderColor: (isScanning || isTyping) ? tc.textDisabled : tc.primary, paddingVertical: 10, alignItems: 'center' }}
             >
-              <Text style={{ color: isScanning ? tc.textDisabled : tc.primary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>CÁMARA</Text>
+              <Text style={{ color: (isScanning || isTyping) ? tc.textDisabled : tc.primary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>CÁMARA</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={pickFromGallery}
-              disabled={isScanning}
-              style={{ flex: 1, borderWidth: 1, borderColor: isScanning ? tc.textDisabled : tc.primary, paddingVertical: 10, alignItems: 'center' }}
+              disabled={isScanning || isTyping}
+              style={{ flex: 1, borderWidth: 1, borderColor: (isScanning || isTyping) ? tc.textDisabled : tc.primary, paddingVertical: 10, alignItems: 'center' }}
             >
-              <Text style={{ color: isScanning ? tc.textDisabled : tc.primary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>GALERÍA</Text>
+              <Text style={{ color: (isScanning || isTyping) ? tc.textDisabled : tc.primary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>GALERÍA</Text>
             </TouchableOpacity>
           </View>
 
@@ -237,22 +257,22 @@ export default function IdentifyScreen() {
           <View style={{ marginHorizontal: 16, marginBottom: 24 }}>
             <TouchableOpacity
               onPress={handleIdentify}
-              disabled={!image || isScanning}
+              disabled={!image || isScanning || isTyping}
               style={{ 
                 borderWidth: 1, 
-                borderColor: (!image || isScanning) ? tc.textDisabled : tc.primary, 
-                backgroundColor: (!image || isScanning) ? 'transparent' : tc.primary + '22',
+                borderColor: (!image || isScanning || isTyping) ? tc.textDisabled : tc.primary, 
+                backgroundColor: (!image || isScanning || isTyping) ? 'transparent' : tc.primary + '22',
                 paddingVertical: 10, 
                 alignItems: 'center' 
               }}
             >
-              <Text style={{ color: (!image || isScanning) ? tc.textDisabled : tc.primary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>
-                {isScanning ? 'ANALIZANDO...' : 'IDENTIFICAR CON IA'}
+              <Text style={{ color: (!image || isScanning || isTyping) ? tc.textDisabled : tc.primary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>
+                {isScanning ? 'ANALIZANDO...' : isTyping ? 'RECIBIENDO DATOS...' : 'IDENTIFICAR CON IA'}
               </Text>
             </TouchableOpacity>
             
             {/* Confidence Display */}
-            {confidence !== null && !isScanning && (
+            {confidence !== null && !isScanning && !isTyping && (
               <View style={{ marginTop: 8, alignItems: 'center' }}>
                 <Text style={{ 
                   fontFamily: 'monospace', 
@@ -273,6 +293,7 @@ export default function IdentifyScreen() {
             <TextInput
               value={name}
               onChangeText={setName}
+              editable={!isTyping}
               placeholder="NOMBRE DE LA ESPECIE"
               placeholderTextColor={tc.textDisabled}
               style={{ borderWidth: 1, borderColor: tc.border, backgroundColor: tc.surface, color: tc.text, fontFamily: 'monospace', fontSize: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 16, letterSpacing: 1 }}
@@ -282,7 +303,7 @@ export default function IdentifyScreen() {
             <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, letterSpacing: 2, marginBottom: 6 }}>CLASIFICACIÓN *</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 }}>
               {CLASSIFICATIONS.map((c) => (
-                <TouchableOpacity key={c} onPress={() => setClassification(c)} style={chipStyle(classification === c)}>
+                <TouchableOpacity key={c} onPress={() => setClassification(c)} disabled={isTyping} style={chipStyle(classification === c)}>
                   <Text style={chipTextStyle(classification === c)}>{c.toUpperCase()}</Text>
                 </TouchableOpacity>
               ))}
@@ -292,7 +313,7 @@ export default function IdentifyScreen() {
             <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, letterSpacing: 2, marginBottom: 6 }}>NIVEL DE PELIGRO *</Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginBottom: 16 }}>
               {DANGER_LEVELS.map((d) => (
-                <TouchableOpacity key={d} onPress={() => setDangerLevel(d)} style={chipStyle(dangerLevel === d)}>
+                <TouchableOpacity key={d} onPress={() => setDangerLevel(d)} disabled={isTyping} style={chipStyle(dangerLevel === d)}>
                   <Text style={chipTextStyle(dangerLevel === d)}>{d.toUpperCase()}</Text>
                 </TouchableOpacity>
               ))}
@@ -303,6 +324,7 @@ export default function IdentifyScreen() {
             <TextInput
               value={description}
               onChangeText={setDescription}
+              editable={!isTyping}
               placeholder="DESCRIPCIÓN DE LA ESPECIE"
               placeholderTextColor={tc.textDisabled}
               multiline
@@ -315,6 +337,7 @@ export default function IdentifyScreen() {
             <TextInput
               value={notes}
               onChangeText={setNotes}
+              editable={!isTyping}
               placeholder="OBSERVACIONES OPCIONALES"
               placeholderTextColor={tc.textDisabled}
               multiline
@@ -325,10 +348,10 @@ export default function IdentifyScreen() {
             {/* Save button */}
             <TouchableOpacity
               onPress={handleSave}
-              disabled={!isValid || isSubmitting || isScanning}
-              style={{ borderWidth: 1, borderColor: isValid && !isSubmitting && !isScanning ? tc.primary : tc.textDisabled, backgroundColor: isValid && !isSubmitting && !isScanning ? tc.primary + '22' : 'transparent', paddingVertical: 14, alignItems: 'center' }}
+              disabled={!isValid || isSubmitting || isScanning || isTyping}
+              style={{ borderWidth: 1, borderColor: isValid && !isSubmitting && !isScanning && !isTyping ? tc.primary : tc.textDisabled, backgroundColor: isValid && !isSubmitting && !isScanning && !isTyping ? tc.primary + '22' : 'transparent', paddingVertical: 14, alignItems: 'center' }}
             >
-              <Text style={{ color: isValid && !isSubmitting && !isScanning ? tc.primary : tc.textDisabled, fontFamily: 'monospace', fontSize: 12, letterSpacing: 4 }}>
+              <Text style={{ color: isValid && !isSubmitting && !isScanning && !isTyping ? tc.primary : tc.textDisabled, fontFamily: 'monospace', fontSize: 12, letterSpacing: 4 }}>
                 {isSubmitting ? 'GUARDANDO...' : 'GUARDAR ESPECIE'}
               </Text>
             </TouchableOpacity>
