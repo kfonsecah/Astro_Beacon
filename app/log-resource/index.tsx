@@ -14,7 +14,7 @@ export default function LogResourceScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
-  const [selectedResourceId, setSelectedResourceId] = useState<string>('');
+  const [selectedResource, setSelectedResource] = useState<Recurso | null>(null);
   const [movementType, setMovementType] = useState<'ingreso' | 'egreso'>('ingreso');
   const [amount, setAmount] = useState<string>('');
   const [reason, setReason] = useState<string>('');
@@ -30,7 +30,7 @@ export default function LogResourceScreen() {
   const handleRegister = async () => {
     setValidationError(null);
 
-    if (!selectedResourceId) {
+    if (!selectedResource) {
       setValidationError('Debe seleccionar un recurso antes de continuar');
       return;
     }
@@ -41,11 +41,18 @@ export default function LogResourceScreen() {
       return;
     }
 
+    if (movementType === 'egreso' && parsedAmount > selectedResource.currentAmount) {
+      setValidationError(
+        `Solo hay ${selectedResource.currentAmount} ${selectedResource.unit} disponibles de ${selectedResource.name}`
+      );
+      return;
+    }
+
     try {
       await recordMovement.mutateAsync({
-        id: selectedResourceId,
+        id: selectedResource.id,
         data: {
-          recursoId: selectedResourceId,
+          recursoId: selectedResource.id,
           tipo: movementType,
           cantidad: parsedAmount,
           razon: reason || (movementType === 'ingreso' ? 'Ingreso manual' : 'Egreso manual'),
@@ -79,18 +86,18 @@ export default function LogResourceScreen() {
                 style={[
                   styles.chip,
                   { borderColor: tc.border },
-                  selectedResourceId === resource.id && { backgroundColor: tc.primary, borderColor: tc.primary }
+                  selectedResource?.id === resource.id && { backgroundColor: tc.primary, borderColor: tc.primary }
                 ]}
-                onPress={() => { setSelectedResourceId(resource.id); setValidationError(null); }}
+                onPress={() => { setSelectedResource(resource); setValidationError(null); }}
               >
                 <Text
                   style={[
                     styles.chipText,
                     { color: tc.textSecondary },
-                    selectedResourceId === resource.id && { color: tc.background }
+                    selectedResource?.id === resource.id && { color: tc.background }
                   ]}
                 >
-                  {resource.name.toUpperCase()}
+                  {resource.name.toUpperCase()}{resource.currentAmount != null ? `  ${resource.currentAmount} ${resource.unit}` : ''}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -190,10 +197,10 @@ export default function LogResourceScreen() {
           style={[
             styles.submitButton,
             { backgroundColor: tc.primary },
-            (!selectedResourceId || !amount || isSubmitting) && { opacity: 0.5 }
+            (!selectedResource || !amount || isSubmitting) && { opacity: 0.5 }
           ]}
           onPress={handleRegister}
-          disabled={!selectedResourceId || !amount || isSubmitting}
+          disabled={!selectedResource || !amount || isSubmitting}
         >
           {isSubmitting ? (
             <ActivityIndicator color={tc.background} />

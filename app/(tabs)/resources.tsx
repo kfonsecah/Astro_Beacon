@@ -8,6 +8,16 @@ import { useResources, useResourceAlerts } from "@/hooks/useResources";
 import { useState, useEffect } from "react";
 import type { Recurso } from "@/types-dtos";
 import { RouteErrorFallback } from '@/components/common';
+import { colors } from '@/constants/colors';
+
+const CATEGORY_CONFIG: Record<string, { color: string; symbol: string }> = {
+  oxigeno: { color: colors.categoryOxigeno, symbol: 'O2'  },
+  agua:    { color: colors.categoryAgua,    symbol: 'H2O' },
+  comida:  { color: colors.categoryComida,  symbol: 'ALI' },
+  medico:  { color: colors.categoryMedico,  symbol: 'MED' },
+  equipo:  { color: colors.categoryEquipo,  symbol: 'EQP' },
+  otro:    { color: colors.categoryOtro,    symbol: 'OTR' },
+};
 
 export default function ResourcesScreen() {
   const theme = useTheme();
@@ -120,13 +130,19 @@ export default function ResourcesScreen() {
           const max = item.maxCapacity ?? (item.threshold ? Math.round(item.threshold / 0.15) : 100);
           const thresholdPercentage = max > 0 ? (item.threshold / max) * 100 : 15;
           const isCritical = (current / max) * 100 < thresholdPercentage;
+          const catConfig = CATEGORY_CONFIG[item.category] ?? CATEGORY_CONFIG['otro'];
 
           return (
-            <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
+            <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, borderLeftWidth: 3, borderLeftColor: catConfig.color, padding: 14, marginBottom: 10 }}>
               <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
-                <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
-                  {item.name.toUpperCase()}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ color: catConfig.color, fontFamily: 'monospace', fontSize: 9, letterSpacing: 1, marginRight: 6 }}>
+                    {catConfig.symbol}
+                  </Text>
+                  <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+                    {item.name.toUpperCase()}
+                  </Text>
+                </View>
                 <Text style={{ color: isCritical ? tc.danger : tc.primary, fontFamily: "monospace", fontSize: 12 }}>
                   {current} / {max} {item.unit || ''}
                 </Text>
