@@ -91,7 +91,7 @@ export default function DashboardScreen() {
             const resId = resource.id || (resource as any)._id;
             const resName = resource.name || 'UNKNOWN';
             const current = resource.currentAmount ?? 0;
-            const max = resource.threshold ? resource.threshold * 2 : 100;
+            const max = resource.maxCapacity ?? (resource.threshold ? Math.round(resource.threshold / 0.15) : 100);
             const thresholdPercentage = max > 0 ? ((resource.threshold ?? 0) / max) * 100 : 0;
             const isCritical = (current / max) * 100 < thresholdPercentage;
 
