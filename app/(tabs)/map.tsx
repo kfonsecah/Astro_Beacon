@@ -2,13 +2,14 @@ import { CategoryLegend } from "@/components/map/CategoryLegend";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { colors } from "@/constants/colors";
 import { useTheme } from "@/hooks/use-theme";
+import { useRecordResourceMovement, useResources } from "@/hooks/useResources";
 import { useCollectSupply, useCreateSupply, useSupplies } from "@/hooks/useSupplies";
 import { useAuthStore } from "@/stores/auth.store";
 import { useTripStore } from "@/stores/trip.store";
-import type { CreateSuministroDTO, Suministro, Viaje } from "@/types-dtos";
+import type { CreateSuministroDTO, Recurso, Suministro, Viaje } from "@/types-dtos";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Location from "expo-location";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 import { RouteErrorFallback } from '@/components/common';
@@ -36,6 +37,12 @@ const categoryConfig = {
   otro: { symbol: "📦", color: colors.categoryOtro },
 } as const;
 
+const SIMULATION_TICK_MS = 1000;
+const SIMULATION_SPEED_MPS = 5;
+const SIMULATION_STOP_RADIUS_METERS = 35;
+const OXYGEN_PER_KM = 18;
+const FOOD_PER_KM = 4;
+
 type SupplyCategory = keyof typeof categoryConfig;
 
 function normalizeCategory(raw: string): SupplyCategory {
@@ -61,11 +68,20 @@ export default function MapScreen() {
   const { data, isLoading, isError, refetch, isFetching } = useSupplies(page, limit);
   const createSupplyMutation = useCreateSupply();
   const collectSupplyMutation = useCollectSupply();
+  const { data: resourcesData } = useResources(1, 50);
+  const recordMovement = useRecordResourceMovement();
   const [suppliesList, setSuppliesList] = useState<Suministro[]>([]);
   const [selectedSupplyId, setSelectedSupplyId] = useState<string | null>(null);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
   const [supplyDistances, setSupplyDistances] = useState<Record<string, number>>({});
   const [collectibleSupplies, setCollectibleSupplies] = useState<Set<string>>(new Set());
+  const [isSimulating, setIsSimulating] = useState(false);
+
+  const regionRef = useRef<Region | null>(null);
+  const simulationIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const consumptionBufferRef = useRef({ oxygen: 0, food: 0 });
+  const consumptionInFlightRef = useRef(false);
+  const consumptionErrorRef = useRef(false);
 
   const [region, setRegion] = useState<Region>({
     latitude: -12.0464, // Default to Lima, Peru
@@ -74,8 +90,30 @@ export default function MapScreen() {
     longitudeDelta: 0.0421,
   });
 
+  useEffect(() => {
+    regionRef.current = region;
+  }, [region]);
+
   // Trip store integration
-  const { activeTrip, isTracking, startTracking, oxygenRemaining, setActiveTrip } = useTripStore();
+  const { activeTrip, isTracking, startTracking, setActiveTrip, reset } = useTripStore();
+
+  const oxygenResource = useMemo(() => {
+    const items = resourcesData?.items ?? [];
+    return items.reduce<Recurso | null>((best, item) => {
+      if (item.category !== 'oxigeno') return best;
+      if (!best || item.currentAmount > best.currentAmount) return item;
+      return best;
+    }, null);
+  }, [resourcesData?.items]);
+
+  const foodResource = useMemo(() => {
+    const items = resourcesData?.items ?? [];
+    return items.reduce<Recurso | null>((best, item) => {
+      if (item.category !== 'comida') return best;
+      if (!best || item.currentAmount > best.currentAmount) return item;
+      return best;
+    }, null);
+  }, [resourcesData?.items]);
 
   useEffect(() => {
     (async () => {
@@ -101,7 +139,7 @@ export default function MapScreen() {
   useEffect(() => {
     let subscription: Location.LocationSubscription | null = null;
 
-    if (activeTrip?.status !== 'activo') return;
+    if (activeTrip?.status !== 'activo' || isSimulating) return;
 
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -128,7 +166,7 @@ export default function MapScreen() {
     return () => {
       subscription?.remove();
     };
-  }, [activeTrip?.status]);
+  }, [activeTrip?.status, isSimulating]);
 
   // Oxygen countdown management
   useEffect(() => {
@@ -145,24 +183,26 @@ export default function MapScreen() {
   }, [activeTrip?.status, activeTrip?.oxygenBudgeted]);
 
   useEffect(() => {
+    if (activeTrip?.status !== 'activo') {
+      setIsSimulating(false);
+    }
+  }, [activeTrip?.status]);
+
+  useEffect(() => {
+    consumptionBufferRef.current = { oxygen: 0, food: 0 };
+    consumptionErrorRef.current = false;
+  }, [activeTrip?.id]);
+
+  useEffect(() => {
     if (!data?.items) return;
 
     setSuppliesList((prev) => {
-      if (page === 1) {
-        return data.items;
-      }
-
-      const merged = [...prev];
-      const existingIds = new Set(prev.map((item) => String(item.id)));
-      for (const item of data.items) {
-        const itemId = String(item.id);
-        if (!existingIds.has(itemId)) {
-          merged.push(item);
-        }
-      }
-      return merged;
+      const mergedMap = new Map<string, Suministro>();
+      prev.forEach((item) => mergedMap.set(String(item.id), item));
+      data.items.forEach((item) => mergedMap.set(String(item.id), item));
+      return Array.from(mergedMap.values());
     });
-  }, [data?.items, page]);
+  }, [data?.items]);
 
   const calculateDistanceKm = (fromLat: number, fromLng: number, toLat: number, toLng: number): number => {
     const toRad = (deg: number) => (deg * Math.PI) / 180;
@@ -175,6 +215,128 @@ export default function MapScreen() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return earthRadiusKm * c;
   };
+
+  const moveTowards = (from: Region, to: { lat: number; lng: number }, stepMeters: number) => {
+    const distanceKm = calculateDistanceKm(from.latitude, from.longitude, to.lat, to.lng);
+    const distanceMeters = distanceKm * 1000;
+    if (distanceMeters === 0) {
+      return { next: from, movedMeters: 0, reached: true };
+    }
+    if (distanceMeters <= stepMeters) {
+      return {
+        next: { ...from, latitude: to.lat, longitude: to.lng },
+        movedMeters: distanceMeters,
+        reached: true,
+      };
+    }
+    const ratio = stepMeters / distanceMeters;
+    return {
+      next: {
+        ...from,
+        latitude: from.latitude + (to.lat - from.latitude) * ratio,
+        longitude: from.longitude + (to.lng - from.longitude) * ratio,
+      },
+      movedMeters: stepMeters,
+      reached: false,
+    };
+  };
+
+  const flushConsumption = async () => {
+    if (consumptionInFlightRef.current || consumptionErrorRef.current) return;
+    const oxygenAmount = Math.floor(consumptionBufferRef.current.oxygen);
+    const foodAmount = Math.floor(consumptionBufferRef.current.food);
+    if (oxygenAmount <= 0 && foodAmount <= 0) return;
+    if (!oxygenResource || !foodResource) return;
+
+    consumptionInFlightRef.current = true;
+    try {
+      const tasks: Promise<any>[] = [];
+      if (oxygenAmount > 0) {
+        tasks.push(
+          recordMovement.mutateAsync({
+            id: oxygenResource.id,
+            data: {
+              recursoId: oxygenResource.id,
+              tipo: 'egreso',
+              cantidad: oxygenAmount,
+              razon: 'Consumo por caminata',
+            },
+          })
+        );
+      }
+      if (foodAmount > 0) {
+        tasks.push(
+          recordMovement.mutateAsync({
+            id: foodResource.id,
+            data: {
+              recursoId: foodResource.id,
+              tipo: 'egreso',
+              cantidad: foodAmount,
+              razon: 'Consumo por caminata',
+            },
+          })
+        );
+      }
+
+      await Promise.all(tasks);
+      consumptionBufferRef.current.oxygen -= oxygenAmount;
+      consumptionBufferRef.current.food -= foodAmount;
+    } catch (error) {
+      consumptionErrorRef.current = true;
+      setIsSimulating(false);
+      Alert.alert('ERROR', 'No se pudo registrar el consumo de recursos.');
+    } finally {
+      consumptionInFlightRef.current = false;
+    }
+  };
+
+  useEffect(() => {
+    if (!isSimulating || activeTrip?.status !== 'activo') {
+      if (simulationIntervalRef.current) {
+        clearInterval(simulationIntervalRef.current);
+        simulationIntervalRef.current = null;
+      }
+      return;
+    }
+
+    consumptionErrorRef.current = false;
+    const destination = activeTrip.destination;
+
+    simulationIntervalRef.current = setInterval(() => {
+      const current = regionRef.current;
+      if (!current) return;
+
+      const distanceKm = calculateDistanceKm(
+        current.latitude,
+        current.longitude,
+        destination.lat,
+        destination.lng,
+      );
+      const distanceMeters = distanceKm * 1000;
+
+      if (distanceMeters <= SIMULATION_STOP_RADIUS_METERS) {
+        setIsSimulating(false);
+        return;
+      }
+
+      const stepMeters = SIMULATION_SPEED_MPS * (SIMULATION_TICK_MS / 1000);
+      const { next, movedMeters } = moveTowards(current, destination, stepMeters);
+      regionRef.current = next;
+      setRegion(next);
+
+      const movedKm = movedMeters / 1000;
+      consumptionBufferRef.current.oxygen += movedKm * OXYGEN_PER_KM;
+      consumptionBufferRef.current.food += movedKm * FOOD_PER_KM;
+      flushConsumption();
+    }, SIMULATION_TICK_MS);
+
+    return () => {
+      if (simulationIntervalRef.current) {
+        clearInterval(simulationIntervalRef.current);
+        simulationIntervalRef.current = null;
+      }
+    };
+  }, [isSimulating, activeTrip?.status, activeTrip?.destination]);
 
   // Calcular distancias y detectar proximidad (100m)
   useEffect(() => {
@@ -207,9 +369,11 @@ export default function MapScreen() {
   }, [region, suppliesList, activeTrip]);
 
   const onRefresh = () => {
-    setPage(1);
-    setSuppliesList([]);
-    refetch();
+    if (page === 1) {
+      refetch();
+    } else {
+      setPage(1);
+    }
   };
 
   const loadMore = () => {
@@ -255,13 +419,35 @@ export default function MapScreen() {
   // Auto-sort por distancia cuando trip activo
   const sortedSupplies = activeTrip?.status === 'activo'
     ? [...suppliesList].sort((a, b) => {
+        const aCollected = a.status === 'recogido';
+        const bCollected = b.status === 'recogido';
+        if (aCollected !== bCollected) return aCollected ? 1 : -1;
         const distA = supplyDistances[String(a.id)] ?? Infinity;
         const distB = supplyDistances[String(b.id)] ?? Infinity;
         return distA - distB;
       })
-    : suppliesList;
+    : [...suppliesList].sort((a, b) => {
+        const aCollected = a.status === 'recogido';
+        const bCollected = b.status === 'recogido';
+        if (aCollected !== bCollected) return aCollected ? 1 : -1;
+        return 0;
+      });
 
   const supplies = sortedSupplies;
+  const availableOxygen = oxygenResource?.currentAmount ?? 0;
+  const oxygenToDestination = activeTrip?.status === 'activo'
+    ? Math.max(
+        0,
+        Math.ceil(
+          calculateDistanceKm(
+            region.latitude,
+            region.longitude,
+            activeTrip.destination.lat,
+            activeTrip.destination.lng,
+          ) * OXYGEN_PER_KM,
+        ),
+      )
+    : 0;
   const selectedSupply = supplies.find((s) => String(s.id) === String(selectedSupplyId));
 
   const estimateOxygenBudget = (supply: Suministro): number => {
@@ -271,17 +457,15 @@ export default function MapScreen() {
       supply.location.lat,
       supply.location.lng,
     );
-
-    const roundTripKm = distanceKm * 2;
-    const movementCost = roundTripKm * 18;
-    const operationReserve = 40;
-    return Math.max(60, Math.ceil(movementCost + operationReserve));
+    return Math.ceil(distanceKm * OXYGEN_PER_KM);
   };
 
   const handleStartTripFromSupply = () => {
     if (!selectedSupply) return;
 
     const oxygenBudget = estimateOxygenBudget(selectedSupply);
+    const availableOxygen = oxygenResource?.currentAmount ?? 0;
+    const oxygenAfter = availableOxygen - oxygenBudget;
     const distanceKm = calculateDistanceKm(
       region.latitude,
       region.longitude,
@@ -291,7 +475,7 @@ export default function MapScreen() {
 
     Alert.alert(
       "INICIAR VIAJE",
-      `Destino: ${selectedSupply.name}\nDistancia estimada: ${distanceKm.toFixed(2)} km\nCosto O₂ estimado: ${oxygenBudget} unidades\n\n¿Deseas iniciar este viaje?`,
+      `Destino: ${selectedSupply.name}\nDistancia estimada: ${distanceKm.toFixed(2)} km\nOxígeno disponible: ${availableOxygen} unidades\nOxígeno requerido: ${oxygenBudget} unidades\nOxígeno restante: ${oxygenAfter} unidades\n\n¿Deseas iniciar este viaje?`,
       [
         { text: "CANCELAR", style: "cancel" },
         {
@@ -300,6 +484,13 @@ export default function MapScreen() {
             const userId = useAuthStore.getState().user?.id;
             if (!userId) {
               Alert.alert("ERROR", "No se pudo obtener el ID de usuario.");
+              return;
+            }
+            if (oxygenResource && oxygenAfter < 0) {
+              Alert.alert(
+                'OXÍGENO INSUFICIENTE',
+                `Te faltan ${Math.abs(oxygenAfter)} unidades de oxígeno para completar el viaje.`,
+              );
               return;
             }
             const localTrip: Viaje = {
@@ -316,6 +507,41 @@ export default function MapScreen() {
 
             setActiveTrip(localTrip);
             startTracking();
+          },
+        },
+      ],
+    );
+  };
+
+  const handleToggleSimulation = () => {
+    if (isSimulating) {
+      setIsSimulating(false);
+      return;
+    }
+    if (activeTrip?.status !== 'activo') {
+      Alert.alert('AVISO', 'Debes iniciar un viaje antes de simular la caminata.');
+      return;
+    }
+    if (!oxygenResource || !foodResource) {
+      Alert.alert('FALTAN RECURSOS', 'Necesitas recursos de oxígeno y comida para consumir durante la simulación.');
+      return;
+    }
+    setIsSimulating(true);
+  };
+
+  const handleCancelTrip = () => {
+    if (activeTrip?.status !== 'activo') return;
+    Alert.alert(
+      'CANCELAR VIAJE',
+      '¿Deseas cancelar el viaje actual? Esta acción detendrá el rastreo y la simulación.',
+      [
+        { text: 'VOLVER', style: 'cancel' },
+        {
+          text: 'CANCELAR',
+          style: 'destructive',
+          onPress: () => {
+            setIsSimulating(false);
+            reset();
           },
         },
       ],
@@ -376,9 +602,11 @@ export default function MapScreen() {
 
       // Call mutation
       await createSupplyMutation.mutateAsync(newSupply);
-      setPage(1);
-      setSuppliesList([]);
-      await refetch();
+      if (page === 1) {
+        await refetch();
+      } else {
+        setPage(1);
+      }
     } catch (error) {
       console.error("Error requesting supply:", error);
       Alert.alert(
@@ -407,9 +635,11 @@ export default function MapScreen() {
             region={region}
             showsUserLocation={true}
             showsMyLocationButton={true}
+            onRegionChangeComplete={(nextRegion) => setRegion(nextRegion)}
           >
             {supplies.map((supply) => {
               const isSelected = String(selectedSupplyId) === String(supply.id);
+              const isCollected = supply.status === 'recogido';
               return (
                 <Marker
                   key={`fullscreen-${String(supply.id)}`}
@@ -420,7 +650,11 @@ export default function MapScreen() {
                   pinColor={categoryConfig[getSupplyCategory(supply.contents)].color}
                   title={`Supply ${String(supply.id || '').slice(-4)}`}
                   description={`${categoryConfig[getSupplyCategory(supply.contents)].symbol} ${supply.contents.join(", ")}`}
-                  onPress={() => setSelectedSupplyId(String(supply.id))}
+                  onPress={() => {
+                    if (!isCollected) {
+                      setSelectedSupplyId(String(supply.id));
+                    }
+                  }}
                 >
                   <View
                     style={{
@@ -455,16 +689,18 @@ export default function MapScreen() {
         </Text>
 
         {/* Map View with supply markers - fixed section */}
-        <View style={{ height: 200, marginBottom: 12, position: 'relative' }}>
+        <View style={{ height: 260, marginBottom: 12, position: 'relative' }}>
           <MapView
             provider={PROVIDER_GOOGLE}
             style={{ flex: 1 }}
             region={region}
             showsUserLocation={true}
             showsMyLocationButton={true}
+            onRegionChangeComplete={(nextRegion) => setRegion(nextRegion)}
           >
             {supplies.map((supply) => {
               const isSelected = String(selectedSupplyId) === String(supply.id);
+              const isCollected = supply.status === 'recogido';
               return (
                 <Marker
                   key={String(supply.id)}
@@ -475,7 +711,11 @@ export default function MapScreen() {
                   pinColor={categoryConfig[getSupplyCategory(supply.contents)].color}
                   title={`Supply ${String(supply.id || '').slice(-4)}`}
                   description={`${categoryConfig[getSupplyCategory(supply.contents)].symbol} ${supply.contents.join(", ")}`}
-                  onPress={() => setSelectedSupplyId(String(supply.id))}
+                  onPress={() => {
+                    if (!isCollected) {
+                      setSelectedSupplyId(String(supply.id));
+                    }
+                  }}
                 >
                   <View
                     style={{
@@ -498,6 +738,30 @@ export default function MapScreen() {
                 </Marker>
               );
             })}
+            {isSimulating && (
+              <Marker
+                key="ghost-marker"
+                coordinate={{ latitude: region.latitude, longitude: region.longitude }}
+                title="Posición simulada"
+                description="Movimiento simulado"
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: 'rgba(0,183,235,0.5)',
+                    borderWidth: 2,
+                    borderColor: '#00b7eb',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    elevation: 10,
+                  }}
+                >
+                  <Text style={{ fontSize: 18 }}>👻</Text>
+                </View>
+              </Marker>
+            )}
           </MapView>
 
           <TouchableOpacity
@@ -531,19 +795,19 @@ export default function MapScreen() {
             </View>
           )}
 
-          {/* Oxygen countdown display */}
           {activeTrip?.status === 'activo' && (
             <View style={{ position: 'absolute', bottom: 14, left: 14, right: 14, zIndex: 1000 }}>
-              <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.danger, padding: 10, borderRadius: 8 }}>
-                <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 18, textAlign: 'center', fontWeight: 'bold' }}>
-                  O₂: {Math.round(oxygenRemaining)} / {activeTrip.oxygenBudgeted}
+              <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 10, borderRadius: 8 }}>
+                <Text style={{ color: tc.text, fontFamily: 'monospace', fontSize: 12, textAlign: 'center' }}>
+                  O₂ TANQUE: {availableOxygen}
                 </Text>
-                <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, textAlign: 'center', marginTop: 2 }}>
-                  Consumo en tiempo real
+                <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 11, textAlign: 'center', marginTop: 4 }}>
+                  O₂ LLEGADA: ~{oxygenToDestination}
                 </Text>
               </View>
             </View>
           )}
+
         </View>
 
         <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
@@ -584,6 +848,40 @@ export default function MapScreen() {
           </TouchableOpacity>
         </View>
 
+        {activeTrip?.status === 'activo' && (
+          <TouchableOpacity
+            onPress={handleToggleSimulation}
+            style={{
+              backgroundColor: isSimulating ? tc.danger : tc.primary,
+              borderRadius: 6,
+              paddingVertical: 10,
+              alignItems: 'center',
+              marginBottom: 10,
+            }}
+          >
+            <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
+              {isSimulating ? '⏸ DETENER SIMULACIÓN' : '▶ SIMULAR CAMINATA'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
+        {activeTrip?.status === 'activo' && (
+          <TouchableOpacity
+            onPress={handleCancelTrip}
+            style={{
+              backgroundColor: tc.danger,
+              borderRadius: 6,
+              paddingVertical: 10,
+              alignItems: 'center',
+              marginBottom: 10,
+            }}
+          >
+            <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
+              ✖ CANCELAR VIAJE
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* Category Legend */}
         <CategoryLegend />
 
@@ -601,6 +899,7 @@ export default function MapScreen() {
         renderItem={({ item }) => {
           const isSelected = String(selectedSupplyId) === String(item.id);
           const isCollectible = collectibleSupplies.has(String(item.id));
+          const isCollected = item.status === 'recogido';
           const distKm = supplyDistances[String(item.id)] ?? 0;
           const distMeters = Math.round(distKm * 1000);
 
@@ -616,10 +915,16 @@ export default function MapScreen() {
                 borderColor: isCollectible ? tc.success : (isSelected ? tc.primary : tc.border),
                 padding: 12,
                 marginBottom: 8,
+                opacity: isCollected ? 0.65 : 1,
               }}
             >
               <TouchableOpacity
-                onPress={() => setSelectedSupplyId(String(item.id))}
+                onPress={() => {
+                  if (!isCollected) {
+                    setSelectedSupplyId(String(item.id));
+                  }
+                }}
+                disabled={isCollected}
                 style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
               >
                 <View style={{ paddingHorizontal: 8, paddingVertical: 4, marginRight: 12, backgroundColor: isCollectible ? tc.success + "44" : getStatusColor(item.status) + "33" }}>
