@@ -5,6 +5,7 @@ export interface Recurso {
   name: string;
   category: ResourceCategory;
   currentAmount: number;
+  maxCapacity?: number;
   unit: string;
   threshold: number;
   movements: RecursoMovimiento[];

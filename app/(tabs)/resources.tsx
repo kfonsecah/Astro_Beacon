@@ -24,18 +24,18 @@ export default function ResourcesScreen() {
   const { data: alerts } = useResourceAlerts();
 
   // Accumulate resources across pages
-    useEffect(() => {
-      const newItems = data?.items ?? [];
-      if (newItems.length > 0) {
-        setAllResources(prev => {
-          const existingIds = new Set(prev.map(r => r.id));
-          const filtered = newItems.filter(r => !existingIds.has(r.id));
-          const next = filtered.length > 0 ? [...prev, ...filtered] : prev;
-          setHasMore((data?.total ?? 0) > next.length);
-          return next;
-        });
-      }
-    }, [data]);
+  useEffect(() => {
+    const newItems = data?.items ?? [];
+    if (newItems.length > 0) {
+      setAllResources(prev => {
+        const existingIds = new Set(prev.map(r => r.id));
+        const filtered = newItems.filter(r => !existingIds.has(r.id));
+        const next = filtered.length > 0 ? [...prev, ...filtered] : prev;
+        setHasMore((data?.total ?? 0) > next.length);
+        return next;
+      });
+    }
+  }, [data]);
 
   const loadMore = () => {
     if (hasMore && !isLoading && !isRefreshing && !error && allResources.length < (data?.total ?? 0)) {
@@ -80,7 +80,7 @@ export default function ResourcesScreen() {
     <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
       <FlatList
         data={allResources}
-        keyExtractor={(item: Recurso) => item.id ?? (item as any)._id ?? item.name ?? `resource-fallback`}
+        keyExtractor={(item, index) => item.id ?? `resource-${index}`}
         contentContainerStyle={{ padding: 16 }}
         refreshControl={
           <RefreshControl
@@ -100,7 +100,7 @@ export default function ResourcesScreen() {
             {alerts && alerts.length > 0 && (
               <View style={{ marginBottom: 16 }}>
                 {alerts.map((alert: any) => (
-                  <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: "rgba(251,146,60,0.1)", borderWidth: 1, borderColor: "rgba(251,146,60,0.3)", padding: 12, marginBottom: 8 }}>
+                  <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.warningMuted, borderWidth: 1, borderColor: tc.warningBorder, padding: 12, marginBottom: 8 }}>
                     <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
                     <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
                       {alert.message}
@@ -116,9 +116,9 @@ export default function ResourcesScreen() {
           </>
         )}
         renderItem={({ item }: { item: Recurso }) => {
-            const current = item.currentAmount ?? 0;
-            const max = item.threshold ? item.threshold * 2 : 100;
-            const thresholdPercentage = max > 0 ? ((item.threshold ?? 0) / max) * 100 : 0;
+          const current = item.currentAmount ?? 0;
+          const max = item.maxCapacity ?? (item.threshold ? Math.round(item.threshold / 0.15) : 100);
+          const thresholdPercentage = max > 0 ? (item.threshold / max) * 100 : 15;
           const isCritical = (current / max) * 100 < thresholdPercentage;
 
           return (
@@ -128,14 +128,35 @@ export default function ResourcesScreen() {
                   {item.name.toUpperCase()}
                 </Text>
                 <Text style={{ color: isCritical ? tc.danger : tc.primary, fontFamily: "monospace", fontSize: 12 }}>
-                   {current}/{max} {item.unit || ''}
+                  {current} / {max} {item.unit || ''}
                 </Text>
               </View>
-              <ProgressBar value={current} max={max} criticalThreshold={thresholdPercentage} showValue={true} />
+              <ProgressBar value={current} max={max} criticalThreshold={thresholdPercentage} showValue={false} />
               {isCritical && (
                 <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 6 }}>
-                  ⚠️ NIVEL CRÍTICO
+                  NIVEL CRITICO — {Math.round((current / max) * 100)}%
                 </Text>
+              )}
+              {(item.movements ?? []).length > 0 && (
+                <View style={{ borderTopWidth: 1, borderTopColor: tc.border, marginTop: 10, paddingTop: 10 }}>
+                  <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 8, letterSpacing: 2, marginBottom: 6 }}>
+                    ULTIMOS MOVIMIENTOS
+                  </Text>
+                  {(item.movements ?? []).slice(0, 3).map((mov, idx) => (
+                    <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                      <Text style={{ color: mov.type === 'ingreso' ? tc.success : tc.danger,
+                                     fontFamily: 'monospace', fontSize: 11, width: 20 }}>
+                        {mov.type === 'ingreso' ? '+' : '-'}
+                      </Text>
+                      <Text style={{ color: tc.text, fontFamily: 'monospace', fontSize: 9, flex: 1 }}>
+                        {mov.amount} {item.unit}
+                      </Text>
+                      <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 8 }}>
+                        {new Date(mov.timestamp).toLocaleDateString()}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
               )}
             </View>
           );
@@ -155,33 +176,6 @@ export default function ResourcesScreen() {
           </View>
         )}
       />
-
-      {/* Historial de Movimientos */}
-      {allResources.map((resource, rIdx) => {
-        const movements = (resource as any).movements || [];
-        if (movements.length === 0) return null;
-        const resourceKey = (resource as any)._id || resource.id || `resource-${rIdx}`;
-        return (
-          <View key={`history-${resourceKey}`} style={{ paddingHorizontal: 16, marginTop: 20 }}>
-            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>
-              HISTORIAL DE MOVIMIENTOS - {resource.name.toUpperCase()}
-            </Text>
-            {movements.map((mov: any, idx: number) => (
-              <View key={`${resourceKey}-mov-${idx}`} style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                <Text style={{ fontSize: 12, width: 20 }}>{mov.type === 'ingreso' ? '↑' : '↓'}</Text>
-                <View style={{ flex: 1, marginLeft: 8 }}>
-                  <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 10 }}>
-                    {mov.type === 'ingreso' ? '+' : '-'}{mov.amount} {resource.unit}
-                  </Text>
-                  <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 8 }}>
-                    {mov.notes || 'Ajuste de inventario'} · {new Date(mov.timestamp).toLocaleDateString()}
-                  </Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        );
-      })}
 
       {/* FAB to register movement */}
       <TouchableOpacity

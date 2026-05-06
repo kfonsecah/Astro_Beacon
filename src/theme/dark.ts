@@ -18,6 +18,8 @@ export const darkTheme = {
     primaryBorder: colors.primaryBorder,
     success: colors.success,
     warning: colors.warning,
+    warningMuted: colors.warningMuted,
+    warningBorder: colors.warningBorder,
     danger: colors.danger,
     info: colors.info,
     card: colors.surface,

@@ -16,6 +16,8 @@ export const lightTheme = {
     primaryBorder: 'rgba(5, 150, 105, 0.3)',
     success: '#16A34A',
     warning: '#EA580C',
+    warningMuted: 'rgba(251, 146, 60, 0.1)',
+    warningBorder: 'rgba(251, 146, 60, 0.3)',
     danger: '#DC2626',
     info: '#2563EB',
     card: '#FFFFFF',
