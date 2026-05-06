@@ -20,7 +20,7 @@ const DEFAULT_THRESHOLDS: Record<ResourceCategory, number> = {
   [ResourceCategory.OXIGENO]: 20,
   [ResourceCategory.AGUA]: 15,
   [ResourceCategory.COMIDA]: 10,
-  [ResourceCategory.MEDICO]: 0,
+  [ResourceCategory.MEDICO]: 5,
   [ResourceCategory.EQUIPO]: 0,
   [ResourceCategory.OTRO]: 0,
 };

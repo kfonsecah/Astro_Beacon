@@ -128,7 +128,7 @@ export default function ResourcesScreen() {
           const current = item.currentAmount ?? 0;
           const max = item.maxCapacity ?? (item.threshold ? Math.round(item.threshold / 0.15) : 100);
           const thresholdPercentage = max > 0 ? (item.threshold / max) * 100 : 15;
-          const isCritical = (current / max) * 100 < thresholdPercentage;
+          const isCritical = (current / max) * 100 <= thresholdPercentage;
           const catConfig = CATEGORY_CONFIG[item.category] ?? CATEGORY_CONFIG['otro'];
 
           return (

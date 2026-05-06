@@ -171,9 +171,9 @@ export class ResourceService {
       threshold: { $gt: 0 } // Only resources with threshold > 0
     }).lean();
 
-    // Filter to those below threshold
+    // Filter to those at or below threshold
     const alerts: ResourceAlert[] = resources
-      .filter(r => r.currentAmount < r.threshold)
+      .filter(r => r.currentAmount <= r.threshold)
       .map(r => ({
         resourceId: r._id.toString(),
         name: r.name,

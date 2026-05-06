@@ -71,7 +71,9 @@ export default function LogResourceScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: tc.background, paddingTop: insets.top }]}>
-      <HudHeader title="REGISTRAR MOVIMIENTO" subtitle="GESTIÓN DE SUMINISTROS" />
+      <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 8 }}>
+        <HudHeader title="REGISTRAR MOVIMIENTO" subtitle="GESTIÓN DE SUMINISTROS" />
+      </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Resource Selector */}
