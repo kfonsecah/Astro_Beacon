@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { Especie, CreateEspecieDTO } from '@/types-dtos';
+import type { Especie, CreateEspecieDTO, IdentifyResult } from '@/types-dtos';
 
 /**
  * PaginatedSpecies defines the structure for paginated species lists.
@@ -20,6 +20,7 @@ export interface SpeciesService {
   getAll(page?: number, limit?: number): Promise<PaginatedSpecies>;
   getById(speciesId: string): Promise<Especie | null>;
   create(data: CreateEspecieDTO): Promise<Especie>;
+  identify(imageBase64: string): Promise<IdentifyResult>;
 }
 
 export const speciesService: SpeciesService = {
@@ -51,6 +52,14 @@ export const speciesService: SpeciesService = {
 
   async create(data: CreateEspecieDTO): Promise<Especie> {
     const response = await api.post<{ success: boolean; data: Especie }>(`/species`, data);
+    return response.data.data;
+  },
+
+  async identify(imageBase64: string): Promise<IdentifyResult> {
+    const response = await api.post<{ success: boolean; data: IdentifyResult }>(
+      '/species/identify',
+      { imageBase64 }
+    );
     return response.data.data;
   },
 };

@@ -1,5 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState, useEffect } from 'react';
 import { ActivityIndicator, Image, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import * as Speech from 'expo-speech';
 import { useTheme } from '@/hooks/use-theme';
 import { useSpeciesById } from '@/hooks/useSpecies';
 import { HudHeader } from '@/components/ui/HudHeader';
@@ -11,6 +13,37 @@ export default function SpeciesDetailScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
 
+  const [isSpeaking, setIsSpeaking] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      Speech.stop();
+    };
+  }, []);
+
+  const { data: species, isLoading, isError, refetch } = useSpeciesById(id!);
+
+  const handleNarrate = async () => {
+    if (isSpeaking) {
+      Speech.stop();
+      setIsSpeaking(false);
+      return;
+    }
+
+    if (!species) return;
+
+    const textToSpeak = `${species.name}. Clasificación: ${species.classification}. ${species.description || 'Sin descripción disponible.'}`;
+    
+    setIsSpeaking(true);
+    Speech.speak(textToSpeak, {
+      language: 'es-MX',
+      rate: 0.9,
+      onDone: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
+      onStopped: () => setIsSpeaking(false),
+    });
+  };
+
   if (!id) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: 'center', alignItems: 'center' }}>
@@ -18,8 +51,6 @@ export default function SpeciesDetailScreen() {
       </SafeAreaView>
     );
   }
-
-  const { data: species, isLoading, isError, refetch } = useSpeciesById(id);
 
   if (isLoading) {
     return (
@@ -129,13 +160,21 @@ export default function SpeciesDetailScreen() {
           </View>
         ) : null}
 
-        {/* NARRAR button — disabled placeholder for Phase 25 */}
+        {/* NARRAR button */}
         <View style={{ marginHorizontal: 16, marginTop: 8 }}>
           <TouchableOpacity
-            disabled
-            style={{ borderWidth: 1, borderColor: tc.textDisabled, paddingVertical: 12, alignItems: 'center' }}
+            onPress={handleNarrate}
+            style={{ 
+              borderWidth: 1, 
+              borderColor: isSpeaking ? tc.danger : tc.primary, 
+              backgroundColor: isSpeaking ? tc.danger + '22' : tc.primary + '22',
+              paddingVertical: 12, 
+              alignItems: 'center' 
+            }}
           >
-            <Text style={{ color: tc.textDisabled, fontFamily: 'monospace', fontSize: 12, letterSpacing: 4 }}>NARRAR</Text>
+            <Text style={{ color: isSpeaking ? tc.danger : tc.primary, fontFamily: 'monospace', fontSize: 12, letterSpacing: 4 }}>
+              {isSpeaking ? 'DETENER' : 'NARRAR'}
+            </Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

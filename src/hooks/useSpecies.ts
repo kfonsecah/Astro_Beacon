@@ -32,3 +32,10 @@ export function useCreateSpecies() {
     },
   });
 }
+
+export function useIdentifySpecies() {
+  return useMutation({
+    mutationFn: (imageBase64: string) => 
+      speciesService.identify(imageBase64),
+  });
+}

@@ -29,6 +29,14 @@ export interface EspecieClasificada {
   suggestedName?: string;
 }
 
+export interface IdentifyResult {
+  classification: SpeciesClassification;
+  dangerLevel: DangerLevel;
+  name: string;
+  description: string;
+  confidence: number;
+}
+
 export interface PaginatedSpecies {
   items: Especie[];
   page: number;
