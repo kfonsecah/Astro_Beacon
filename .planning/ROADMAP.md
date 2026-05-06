@@ -17,6 +17,7 @@
 - [/] **Phase 20: Design System Compliance** - Eliminar hex hardcodeados en map.tsx y trips.tsx introducidos en fases 16-17
 - [x] **Phase 21: Error Handling & Offline** - Error boundaries y soporte offline (era Phase 18, reposicionada post-bugfixes) (completed 2026-05-05)
 - [ ] **Phase 22: Code Cleanup** - Eliminar código muerto, artefactos de dev, actualizar documentación
+- [x] **Phase 27: Resources Tab — Fix, Complete & Enhance** - Bugs críticos de ProgressBar, historial fuera de FlatList, colores hardcodeados, validación egreso en log-resource (completed 2026-05-06)
 
 ---
 
@@ -218,6 +219,22 @@ Plans:
 - [ ] 25-01-PLAN.md — Hook `useIdentifySpecies` → `POST /api/v1/species/identify`; integrar en `species/identify.tsx` con animación de escaneo Reanimated 4
 - [ ] 25-02-PLAN.md — Instalar expo-speech; añadir botón de narración en `species/[id].tsx`
 
+### Phase 27: Resources Tab — Fix, Complete & Enhance
+**Goal**: Corregir bugs críticos del tab de Recursos (ProgressBar con `max` incorrecto, historial de movimientos renderizado fuera del FlatList, colores hardcodeados) y completar `log-resource` con validación de egreso del lado del cliente y UX mejorada del selector.
+**Depends on**: Phase 26 (log-resource screen existe)
+**Requirements**: UI-04, DOM-03, LOGR-01, ERR-05
+**Success Criteria** (what must be TRUE):
+  1. `ProgressBar` en resources.tsx usa `item.maxCapacity` (campo añadido al DTO) como `max`, no `threshold * 2`
+  2. El historial de movimientos se renderiza dentro de cada card de recurso (dentro del FlatList), no después
+  3. Cero strings `rgba(251,146,60` en resources.tsx — se usan `tc.warningMuted` y `tc.warningBorder`
+  4. Cards de recurso muestran borde izquierdo coloreado y símbolo por categoría (O2, H2O, ALI, MED, EQP, OTR)
+  5. log-resource muestra cantidad disponible en los chips de recurso y bloquea egreso > currentAmount con mensaje inline
+**Plans**: 2 plans
+
+Plans:
+- [x] 27-01-PLAN.md — Fix bugs: DTO maxCapacity + ProgressBar calc + historial en renderItem + design system compliance
+- [x] 27-02-PLAN.md — Enhancements: category colors/symbols en cards + log-resource egreso validation + selector UX
+
 ### Phase 26: Gestures + Log Resource Screen
 **Goal**: Implementar mínimo 2 gestos requeridos por el curso (react-native-gesture-handler) para procesos clave, y construir la pantalla `app/log-resource/index.tsx` de registro de movimientos de recursos.
 **Depends on**: Phase 25 (todas las pantallas listas antes de añadir gestos)
@@ -255,6 +272,7 @@ Plans:
 | 24. Species Detail + Camera Setup | 0/3 | Planned | - |
 | 25. AI Flow + Audio Narration | 0/2 | Not started | - |
 | 26. Gestures + Log Resource Screen | 2/2 | Complete | 2026-05-05 |
+| 27. Resources Tab — Fix, Complete & Enhance | 2/2 | Complete   | 2026-05-06 |
 
 ---
 

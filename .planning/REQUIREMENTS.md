@@ -64,7 +64,7 @@ Requirements for API-Frontend integration milestone. Scope estricto: integrar pa
 - [x] **ERR-02**: Root layout (app/_layout.tsx) has catch-all ErrorBoundary
 - [x] **ERR-03**: Offline detection shows OfflineBanner component when network unavailable
 - [x] **ERR-04**: Network errors (no response) display user-friendly "Check connection" message
-- [ ] **ERR-05**: Form validation errors display per-field with clear messaging
+- [x] **ERR-05**: Form validation errors display per-field with clear messaging
 - [x] **ERR-06**: TanStack Query onlineManager pauses queries when offline, retries when online
 
 ## AI Camera Detection Requirements (Phases 23-25)
@@ -102,7 +102,7 @@ Requirements for AI species identification with camera. Added 2026-05-05.
 
 ### Log Resource (LOGR)
 
-- [ ] **LOGR-01**: `log-resource/index.tsx` conectada a `useConsumeResource`/`useCreateResource`; botón en resources.tsx navega a esta pantalla; retorna con datos actualizados tras guardar
+- [x] **LOGR-01**: `log-resource/index.tsx` conectada a `useConsumeResource`/`useCreateResource`; botón en resources.tsx navega a esta pantalla; retorna con datos actualizados tras guardar
 
 ## v2 Requirements (Deferred)
 
