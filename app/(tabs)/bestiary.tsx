@@ -3,9 +3,10 @@ import { useTheme } from "@/hooks/use-theme";
 import { useSpecies } from "@/hooks/useSpecies";
 import type { Especie } from "@/types-dtos";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, TouchableOpacity, View, Image } from "react-native";
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, TouchableOpacity, View, Image, Modal } from "react-native";
 import { useRouter } from "expo-router";
 import { RouteErrorFallback } from '@/components/common';
+import { Swipeable } from "react-native-gesture-handler";
 
 const classificationColorMap: Record<string, string> = {
   planta: "#4CAF50",
@@ -33,6 +34,7 @@ export default function BestiaryScreen() {
   const { data, isLoading, isError, refetch, isFetching } = useSpecies(page, limit);
   const [allSpecies, setAllSpecies] = useState<Especie[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [previewSpecies, setPreviewSpecies] = useState<Especie | null>(null);
 
   useEffect(() => {
     if (data?.items && data.page === page) {
@@ -56,6 +58,23 @@ export default function BestiaryScreen() {
     if (!isFetching && hasMore) {
       setPage(prev => prev + 1);
     }
+  };
+
+  const renderRightActions = (id: string) => {
+    return (
+      <TouchableOpacity
+        onPress={() => router.push('/species/' + id)}
+        style={{
+          backgroundColor: tc.primary,
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: 80,
+          marginBottom: 12,
+        }}
+      >
+        <Text style={{ color: tc.background, fontFamily: 'monospace', fontWeight: 'bold' }}>VER</Text>
+      </TouchableOpacity>
+    );
   };
 
   if (isLoading && page === 1) {
@@ -91,6 +110,9 @@ export default function BestiaryScreen() {
         ListHeaderComponent={() => (
           <>
             <HudHeader title="BITÁCORA DE ESPECIES" subtitle="BESTIARIO PLANETARIO" />
+            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 8, marginBottom: 8 }}>
+              ← DESLIZA | MANTÉN PRESIONADO PARA PREVIEW
+            </Text>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
               {data?.total || 0} REGISTROS
             </Text>
@@ -101,40 +123,47 @@ export default function BestiaryScreen() {
           const dngColor = dangerColorMap[item.dangerLevel] || tc.textMuted;
 
           return (
-            <TouchableOpacity
-              onPress={() => router.push('/species/' + item.id)}
-              style={{ flexDirection: "row", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 12, padding: 12 }}
+            <Swipeable 
+              renderRightActions={() => renderRightActions(item.id)}
+              overshootRight={false}
             >
-              {item.imageUrl ? (
-                <Image 
-                  source={{ uri: item.imageUrl }} 
-                  style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12 }}
-                  resizeMode="cover"
-                />
-              ) : (
-                <View style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12, justifyContent: 'center', alignItems: 'center' }}>
-                  <Text style={{ color: tc.textMuted, fontSize: 8, fontFamily: 'monospace' }}>N/A</Text>
-                </View>
-              )}
-              <View style={{ flex: 1, justifyContent: "center" }}>
-                <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1, marginBottom: 8 }}>
-                  {item.name.toUpperCase()}
-                </Text>
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <View style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: classColor + "33" }}>
-                    <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: classColor }}>
-                      {item.classification.toUpperCase()}
+              <TouchableOpacity
+                onPress={() => router.push('/species/' + item.id)}
+                onLongPress={() => setPreviewSpecies(item)}
+                delayLongPress={500}
+                style={{ flexDirection: "row", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 12, padding: 12 }}
+              >
+                {item.imageUrl ? (
+                  <Image 
+                    source={{ uri: item.imageUrl }} 
+                    style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12 }}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ color: tc.textMuted, fontSize: 8, fontFamily: 'monospace' }}>N/A</Text>
+                  </View>
+                )}
+                <View style={{ flex: 1, justifyContent: "center" }}>
+                  <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1, marginBottom: 8 }}>
+                    {item.name.toUpperCase()}
+                  </Text>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <View style={{ paddingHorizontal: 8, paddingVertical: 2, backgroundColor: classColor + "33" }}>
+                      <Text style={{ fontFamily: "monospace", fontSize: 8, letterSpacing: 1, color: classColor }}>
+                        {item.classification.toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={{ width: 12, height: 12, borderRadius: 6, borderWidth: 1, borderColor: tc.textDisabled, alignItems: "center", justifyContent: "center" }}>
+                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: dngColor }} />
+                    </View>
+                    <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>
+                      IA: {Math.round((item.iaConfidence || 0) * 100)}%
                     </Text>
                   </View>
-                  <View style={{ width: 12, height: 12, borderRadius: 6, borderWidth: 1, borderColor: tc.textDisabled, alignItems: "center", justifyContent: "center" }}>
-                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: dngColor }} />
-                  </View>
-                  <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>
-                    IA: {Math.round((item.iaConfidence || 0) * 100)}%
-                  </Text>
                 </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </Swipeable>
           );
         }}
         onEndReached={loadMore}
@@ -145,6 +174,53 @@ export default function BestiaryScreen() {
           ) : null
         )}
       />
+      
+      <Modal
+        visible={previewSpecies !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setPreviewSpecies(null)}
+      >
+        <TouchableOpacity 
+          activeOpacity={1} 
+          onPress={() => setPreviewSpecies(null)}
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'center', alignItems: 'center', padding: 20 }}
+        >
+          <View 
+            onStartShouldSetResponder={() => true}
+            style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.primary, padding: 20, width: '100%', maxWidth: 400 }}
+          >
+            <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 16, marginBottom: 12, borderBottomWidth: 1, borderBottomColor: tc.primary + '33' }}>
+              PREVIEW RÁPIDO
+            </Text>
+            
+            <Text style={{ color: tc.text, fontFamily: 'monospace', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>
+              {previewSpecies?.name.toUpperCase()}
+            </Text>
+            
+            <View style={{ flexDirection: 'row', gap: 10, marginBottom: 12 }}>
+              <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 10 }}>
+                CLASE: {previewSpecies?.classification.toUpperCase()}
+              </Text>
+              <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 10 }}>
+                PELIGRO: {previewSpecies?.dangerLevel.toUpperCase()}
+              </Text>
+            </View>
+
+            <Text style={{ color: tc.textSecondary, fontFamily: 'monospace', fontSize: 12, marginBottom: 20 }}>
+              {previewSpecies?.description || 'Sin descripción disponible.'}
+            </Text>
+
+            <TouchableOpacity 
+              onPress={() => setPreviewSpecies(null)}
+              style={{ backgroundColor: tc.surfaceElevated, borderWidth: 1, borderColor: tc.border, padding: 10, alignItems: 'center' }}
+            >
+              <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 12 }}>CERRAR</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <TouchableOpacity
         onPress={() => router.push('/species/identify')}
         style={{ position: 'absolute', right: 20, bottom: 30, width: 52, height: 52, backgroundColor: tc.primary, justifyContent: 'center', alignItems: 'center' }}
