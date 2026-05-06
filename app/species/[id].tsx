@@ -32,7 +32,7 @@ export default function SpeciesDetailScreen() {
 
     if (!species) return;
 
-    const textToSpeak = `${species.name}. Clasificación: ${species.classification}. ${species.description || 'Sin descripción disponible.'}`;
+    const textToSpeak = `${species.name}. Clasificación: ${species.classification}. Nivel de peligro: ${species.dangerLevel}. ${species.description || ''} ${species.notes ? 'Notas del explorador: ' + species.notes : ''}`;
     
     setIsSpeaking(true);
     Speech.speak(textToSpeak, {

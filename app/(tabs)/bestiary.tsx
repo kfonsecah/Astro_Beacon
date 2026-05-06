@@ -3,7 +3,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useSpecies } from "@/hooks/useSpecies";
 import type { Especie } from "@/types-dtos";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, TouchableOpacity, View, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { RouteErrorFallback } from '@/components/common';
 
@@ -105,7 +105,17 @@ export default function BestiaryScreen() {
               onPress={() => router.push('/species/' + item.id)}
               style={{ flexDirection: "row", backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, marginBottom: 12, padding: 12 }}
             >
-              <View style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12 }} />
+              {item.imageUrl ? (
+                <Image 
+                  source={{ uri: item.imageUrl }} 
+                  style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={{ width: 60, height: 60, backgroundColor: tc.surfaceElevated, marginRight: 12, justifyContent: 'center', alignItems: 'center' }}>
+                  <Text style={{ color: tc.textMuted, fontSize: 8, fontFamily: 'monospace' }}>N/A</Text>
+                </View>
+              )}
               <View style={{ flex: 1, justifyContent: "center" }}>
                 <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1, marginBottom: 8 }}>
                   {item.name.toUpperCase()}

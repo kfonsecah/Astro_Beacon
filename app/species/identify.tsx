@@ -42,6 +42,7 @@ export default function IdentifyScreen() {
   const [name, setName] = useState('');
   const [classification, setClassification] = useState<SpeciesClassification | null>(null);
   const [dangerLevel, setDangerLevel] = useState<DangerLevel | null>(null);
+  const [description, setDescription] = useState('');
   const [notes, setNotes] = useState('');
   const [confidence, setConfidence] = useState<number | null>(null);
 
@@ -86,6 +87,7 @@ export default function IdentifyScreen() {
       setName(result.name);
       setClassification(result.classification);
       setDangerLevel(result.dangerLevel);
+      setDescription(result.description);
       setNotes(result.description);
       setConfidence(result.confidence);
     } catch {
@@ -100,6 +102,7 @@ export default function IdentifyScreen() {
         name: name.trim(),
         classification: classification!,
         dangerLevel: dangerLevel!,
+        description: description.trim() || undefined,
         notes: notes.trim() || undefined,
         imageUrl: image?.base64 ?? undefined,
       });
@@ -284,6 +287,18 @@ export default function IdentifyScreen() {
                 </TouchableOpacity>
               ))}
             </View>
+
+            {/* Description */}
+            <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, letterSpacing: 2, marginBottom: 6 }}>DESCRIPCIÓN</Text>
+            <TextInput
+              value={description}
+              onChangeText={setDescription}
+              placeholder="DESCRIPCIÓN DE LA ESPECIE"
+              placeholderTextColor={tc.textDisabled}
+              multiline
+              numberOfLines={3}
+              style={{ borderWidth: 1, borderColor: tc.border, backgroundColor: tc.surface, color: tc.text, fontFamily: 'monospace', fontSize: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 16, letterSpacing: 1, textAlignVertical: 'top' }}
+            />
 
             {/* Notes */}
             <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, letterSpacing: 2, marginBottom: 6 }}>NOTAS</Text>
