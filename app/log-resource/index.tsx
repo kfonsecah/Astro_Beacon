@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Platform, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/hooks/use-theme';
@@ -25,8 +25,14 @@ export default function LogResourceScreen() {
   const resources = resourcesData?.items || [];
 
   const handleRegister = async () => {
-    if (!selectedResourceId || !amount || parseFloat(amount) <= 0) {
-      // Basic validation
+    if (!selectedResourceId) {
+      Alert.alert('ERROR', 'DEBE SELECCIONAR UN RECURSO');
+      return;
+    }
+
+    const parsedAmount = parseFloat(amount);
+    if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
+      Alert.alert('ERROR', 'LA CANTIDAD DEBE SER MAYOR A CERO');
       return;
     }
 
@@ -36,14 +42,16 @@ export default function LogResourceScreen() {
         data: {
           recursoId: selectedResourceId,
           tipo: movementType,
-          cantidad: parseFloat(amount),
+          cantidad: parsedAmount,
           razon: reason || (movementType === 'ingreso' ? 'Ingreso manual' : 'Egreso manual'),
           viajeId: tripId || undefined,
         },
       });
+      Alert.alert('ÉXITO', 'MOVIMIENTO REGISTRADO CORRECTAMENTE');
       router.back();
     } catch (error) {
       console.error('Error recording movement:', error);
+      Alert.alert('ERROR', 'NO SE PUDO REGISTRAR EL MOVIMIENTO');
     }
   };
 

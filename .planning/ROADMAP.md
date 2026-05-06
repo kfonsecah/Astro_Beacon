@@ -254,7 +254,7 @@ Plans:
 | 23. Backend AI Identify Endpoint | 2/2 | Complete | 2026-05-05 |
 | 24. Species Detail + Camera Setup | 0/3 | Planned | - |
 | 25. AI Flow + Audio Narration | 0/2 | Not started | - |
-| 26. Gestures + Log Resource Screen | 0/2 | Planned | - |
+| 26. Gestures + Log Resource Screen | 2/2 | Complete | 2026-05-05 |
 
 ---
 

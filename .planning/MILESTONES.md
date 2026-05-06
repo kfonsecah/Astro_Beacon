@@ -65,7 +65,7 @@ Track what shipped in each milestone.
 - Phase 23: Backend AI Identify Endpoint (Google Cloud Vision)
 - Phase 24: Species Detail Screen + Camera Setup (expo-image-picker)
 - Phase 25: AI Flow + Audio Narration (expo-speech)
-- Phase 26: Gestures + Log Resource Screen
+- Phase 26: Gestures + Log Resource Screen ✓
 
 **Key Deliverables:**
 - `species/[id].tsx` — Pantalla de detalle de especie con foto, clasificación, audio
