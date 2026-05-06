@@ -1,5 +1,6 @@
-import { View, Text, FlatList, RefreshControl, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { HudHeader } from "@/components/ui/HudHeader";
@@ -12,6 +13,7 @@ export default function ResourcesScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   const [page, setPage] = useState(1);
   const [allResources, setAllResources] = useState<Recurso[]>([]);
@@ -180,6 +182,30 @@ export default function ResourcesScreen() {
           </View>
         );
       })}
+
+      {/* FAB to register movement */}
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          right: 20,
+          bottom: 20,
+          backgroundColor: tc.primary,
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          justifyContent: 'center',
+          alignItems: 'center',
+          elevation: 5,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+          zIndex: 10,
+        }}
+        onPress={() => router.push('/log-resource')}
+      >
+        <Text style={{ color: tc.background, fontSize: 30, fontWeight: 'bold', marginTop: -2 }}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
