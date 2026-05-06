@@ -233,8 +233,8 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 26-01-PLAN.md — Implementar 2 gestos con react-native-gesture-handler: swipe en lista + long-press/pinch en species
-- [ ] 26-02-PLAN.md — Crear `app/log-resource/index.tsx` (formulario de movimiento de recurso) + botón en resources.tsx
+- [ ] 26-01-PLAN.md — Foundation + Bestiary Gestures (GEST-01, GEST-02)
+- [ ] 26-02-PLAN.md — Log Resource Screen + DTO Fix (LOGR-01)
 
 ---
 
@@ -254,7 +254,7 @@ Plans:
 | 23. Backend AI Identify Endpoint | 2/2 | Complete | 2026-05-05 |
 | 24. Species Detail + Camera Setup | 0/3 | Planned | - |
 | 25. AI Flow + Audio Narration | 0/2 | Not started | - |
-| 26. Gestures + Log Resource Screen | 0/2 | Not started | - |
+| 26. Gestures + Log Resource Screen | 0/2 | Planned | - |
 
 ---
 
