@@ -31,18 +31,17 @@ export default function ResourcesScreen() {
   const { data, isLoading, error, refetch } = useResources(page, 10);
   const { data: alerts } = useResourceAlerts();
 
-  // Accumulate resources across pages
+  // Accumulate resources across pages, updating existing entries on refetch
   useEffect(() => {
     const newItems = data?.items ?? [];
-    if (newItems.length > 0) {
-      setAllResources(prev => {
-        const existingIds = new Set(prev.map(r => r.id));
-        const filtered = newItems.filter(r => !existingIds.has(r.id));
-        const next = filtered.length > 0 ? [...prev, ...filtered] : prev;
-        setHasMore((data?.total ?? 0) > next.length);
-        return next;
-      });
-    }
+    if (newItems.length === 0) return;
+    setAllResources(prev => {
+      const map = new Map(prev.map(r => [r.id, r]));
+      for (const item of newItems) map.set(item.id, item);
+      const next = [...map.values()];
+      setHasMore((data?.total ?? 0) > next.length);
+      return next;
+    });
   }, [data]);
 
   const loadMore = () => {
@@ -132,7 +131,10 @@ export default function ResourcesScreen() {
           const catConfig = CATEGORY_CONFIG[item.category] ?? CATEGORY_CONFIG['otro'];
 
           return (
-            <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, borderLeftWidth: 3, borderLeftColor: catConfig.color, padding: 14, marginBottom: 10 }}>
+            <TouchableOpacity
+              onPress={() => router.push(`/resource/${item.id}`)}
+              style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, borderLeftWidth: 3, borderLeftColor: catConfig.color, padding: 14, marginBottom: 10 }}
+            >
               <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={{ color: catConfig.color, fontFamily: 'monospace', fontSize: 9, letterSpacing: 1, marginRight: 6 }}>
@@ -173,7 +175,7 @@ export default function ResourcesScreen() {
                   ))}
                 </View>
               )}
-            </View>
+            </TouchableOpacity>
           );
         }}
         ListFooterComponent={() =>

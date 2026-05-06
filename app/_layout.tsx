@@ -41,6 +41,7 @@ export default function RootLayout() {
             <Stack.Screen name="species/[id]" options={{ headerShown: false }} />
             <Stack.Screen name="species/identify" options={{ presentation: 'modal', headerShown: false }} />
             <Stack.Screen name="log-resource/index" options={{ presentation: 'modal', headerShown: false }} />
+            <Stack.Screen name="resource/[id]" options={{ headerShown: false }} />
           </Stack.Protected>
         </Stack>
         <ToastContainer />
