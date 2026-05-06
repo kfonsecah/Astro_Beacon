@@ -69,7 +69,12 @@ export const resourceService: ResourceService = {
   },
 
   async recordMovement(resourceId: string, data: CreateRecursoMovimientoDTO): Promise<Recurso> {
-    const response = await api.post<{ success: boolean; data: Recurso }>(`/resources/${resourceId}/movement`, data);
+    const response = await api.post<{ success: boolean; data: Recurso }>(`/resources/${resourceId}/movements`, {
+      type: data.tipo,
+      amount: data.cantidad,
+      notes: data.razon,
+      tripId: data.viajeId,
+    });
     return response.data.data;
   },
 
