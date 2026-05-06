@@ -10,6 +10,7 @@ import { useTripStore } from "@/stores/trip.store";
 import type { CreateSuministroDTO, Recurso, Suministro, Viaje } from "@/types-dtos";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Location from "expo-location";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
@@ -37,6 +38,35 @@ const categoryConfig = {
   otro: { symbol: "📦", color: colors.categoryOtro },
 } as const;
 
+const MAP_DARK_STYLE = [
+  { elementType: 'geometry',                     stylers: [{ color: '#0B1120' }] },
+  { elementType: 'labels.text.fill',             stylers: [{ color: '#6B7280' }] },
+  { elementType: 'labels.text.stroke',           stylers: [{ color: '#0B1120' }] },
+  { featureType: 'administrative',               elementType: 'geometry',           stylers: [{ color: '#1F2937' }] },
+  { featureType: 'administrative',               elementType: 'geometry.stroke',    stylers: [{ color: '#1F2937' }] },
+  { featureType: 'administrative.country',       elementType: 'labels.text.fill',   stylers: [{ color: '#9CA3AF' }] },
+  { featureType: 'administrative.locality',      elementType: 'labels.text.fill',   stylers: [{ color: '#6EE7B7' }] },
+  { featureType: 'administrative.neighborhood',  elementType: 'labels.text.fill',   stylers: [{ color: '#374151' }] },
+  { featureType: 'landscape',                    elementType: 'geometry',           stylers: [{ color: '#111827' }] },
+  { featureType: 'landscape.natural',            elementType: 'geometry',           stylers: [{ color: '#0D1A0D' }] },
+  { featureType: 'poi',                          stylers:                           [{ visibility: 'off' }] },
+  { featureType: 'poi.park',                     elementType: 'geometry',           stylers: [{ color: '#0D1A0D' }] },
+  { featureType: 'poi.park',                     elementType: 'labels.text.fill',   stylers: [{ color: '#374151' }] },
+  { featureType: 'road',                         elementType: 'geometry',           stylers: [{ color: '#2A3F5F' }] },
+  { featureType: 'road',                         elementType: 'geometry.stroke',    stylers: [{ color: '#1A2D45' }] },
+  { featureType: 'road',                         elementType: 'labels.text.fill',   stylers: [{ color: '#9CA3AF' }] },
+  { featureType: 'road',                         elementType: 'labels.icon',        stylers: [{ visibility: 'off' }] },
+  { featureType: 'road.highway',                 elementType: 'geometry',           stylers: [{ color: '#3A5A8A' }] },
+  { featureType: 'road.highway',                 elementType: 'geometry.stroke',    stylers: [{ color: '#2A3F5F' }] },
+  { featureType: 'road.highway',                 elementType: 'labels.text.fill',   stylers: [{ color: '#6EE7B7' }] },
+  { featureType: 'road.arterial',                elementType: 'geometry',           stylers: [{ color: '#253A56' }] },
+  { featureType: 'road.local',                   elementType: 'geometry',           stylers: [{ color: '#1E3048' }] },
+  { featureType: 'transit',                      elementType: 'geometry',           stylers: [{ color: '#111827' }] },
+  { featureType: 'transit',                      stylers:                           [{ visibility: 'off' }] },
+  { featureType: 'water',                        elementType: 'geometry',           stylers: [{ color: '#0A1628' }] },
+  { featureType: 'water',                        elementType: 'labels.text.fill',   stylers: [{ color: '#1F2937' }] },
+];
+
 const SIMULATION_STOP_RADIUS_METERS = 35;
 const OXYGEN_PER_KM = 36;
 const FOOD_PER_KM = 4;
@@ -59,6 +89,7 @@ function getSupplyCategory(contents: string[]): SupplyCategory {
 export default function MapScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
+  const { top: safeTop } = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const limit = 20;
@@ -568,7 +599,7 @@ export default function MapScreen() {
     <View style={{ flex: 1, backgroundColor: tc.background }}>
       <Modal visible={isMapFullscreen} animationType="slide" onRequestClose={() => setIsMapFullscreen(false)}>
         <View style={{ flex: 1, backgroundColor: tc.background }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderBottomWidth: 1, borderBottomColor: tc.border }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: safeTop + 12, paddingBottom: 12, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: tc.border }}>
             <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 11, letterSpacing: 1 }}>
               MAPA EN PANTALLA COMPLETA
             </Text>
@@ -583,6 +614,7 @@ export default function MapScreen() {
             initialRegion={region}
             showsUserLocation={true}
             showsMyLocationButton={true}
+            customMapStyle={MAP_DARK_STYLE}
             onRegionChangeComplete={(nextRegion) => {
               setRegion(nextRegion);
             }}
@@ -646,6 +678,7 @@ export default function MapScreen() {
             initialRegion={region}
             showsUserLocation={true}
             showsMyLocationButton={true}
+            customMapStyle={MAP_DARK_STYLE}
             onRegionChangeComplete={(nextRegion) => {
               setRegion(nextRegion);
             }}
