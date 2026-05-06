@@ -16,22 +16,22 @@ progress:
 
 ## Current Position
 
-Phase: 24
+Phase: 25
 Plan: Not started
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Phase 24 PLANNED, ready to execute
+**Status:** Phase 24 COMPLETED, ready for Phase 25
 
 ## Project Reference
 
 **Core Value**: Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
-**Current Focus**: Milestone v1.2 Integración API-Frontend — AI Integration & missing screens
+**Current Focus**: Milestone v1.2 Integración API-Frontend — AI Flow + Audio Narration
 
 ## Current Position
 
 **Current Milestone**: v1.2 Integración API-Frontend
-**Current Phase**: 24-species-detail-camera (COMPLETED)
-**Phase Status**: 3 of 3 plans complete
-**Progress**: 11/13 phases completed (85%)
+**Current Phase**: 25-ai-flow-audio-narration (CURRENT)
+**Phase Status**: Planning
+**Progress**: 12/13 phases completed (92%)
 **Milestone Progress**: 36/57 requirements completed (including new AI/Gesture requirements)
 
 **Phases added 2026-05-05 (AI + Missing Screens):**
