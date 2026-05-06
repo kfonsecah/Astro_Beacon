@@ -29,6 +29,8 @@ export const createSpeciesSchema = z.object({
   description: z.string().optional().default(''),
   imageUrl: z.string().optional().or(z.literal('')),
   notes: z.string().optional().default(''),
+  iaConfidence: z.number().optional().default(0),
+  classifiedByAI: z.boolean().optional().default(false),
 });
 
 // Identify species schema

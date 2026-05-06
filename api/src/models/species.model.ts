@@ -26,6 +26,8 @@ export interface ISpecies extends Document {
   description?: string;
   imageUrl?: string;
   notes?: string;
+  iaConfidence?: number;
+  classifiedByAI?: boolean;
   userId: mongoose.Types.ObjectId;
   lastModified: Date;
   createdAt: Date;
@@ -61,6 +63,14 @@ const SpeciesSchema = new Schema<ISpecies>(
     notes: {
       type: String,
       default: '',
+    },
+    iaConfidence: {
+      type: Number,
+      default: 0,
+    },
+    classifiedByAI: {
+      type: Boolean,
+      default: false,
     },
     userId: {
       type: Schema.Types.ObjectId,

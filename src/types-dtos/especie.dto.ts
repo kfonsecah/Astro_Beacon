@@ -19,6 +19,8 @@ export interface CreateEspecieDTO {
   description?: string;
   notes?: string;
   imageUrl?: string;
+  iaConfidence?: number;
+  classifiedByAI?: boolean;
   location?: { lat: number; lng: number };
 }
 

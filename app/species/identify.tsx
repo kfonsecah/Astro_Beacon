@@ -105,6 +105,8 @@ export default function IdentifyScreen() {
         description: description.trim() || undefined,
         notes: notes.trim() || undefined,
         imageUrl: image?.base64 ?? undefined,
+        iaConfidence: confidence ?? undefined,
+        classifiedByAI: confidence !== null,
       });
       router.back();
     } catch {
