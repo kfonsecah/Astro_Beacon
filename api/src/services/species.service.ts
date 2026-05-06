@@ -1,12 +1,12 @@
-import mongoose from 'mongoose';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Species, ISpecies, SpeciesClassification, DangerLevel } from '../models/species.model.js';
+import mongoose from 'mongoose';
 import { AppError } from '../middlewares/error.middleware.js';
-import { calculatePagination } from '../utils/pagination.js';
+import { DangerLevel, ISpecies, Species, SpeciesClassification } from '../models/species.model.js';
 import type {
   CreateSpeciesInput,
   UpdateSpeciesInput
 } from '../schemas/species.schema.js';
+import { calculatePagination } from '../utils/pagination.js';
 
 export interface IdentifyResult {
   classification: SpeciesClassification;
@@ -168,7 +168,7 @@ export class SpeciesService {
       const mimeMatch = imageBase64.match(/^data:(image\/\w+);base64,/);
       const mimeType = mimeMatch ? mimeMatch[1] : 'image/jpeg';
       const cleanBase64 = imageBase64.replace(/^data:image\/\w+;base64,/, '');
-      
+
       const model = this.genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
       const prompt = `
@@ -187,6 +187,8 @@ export class SpeciesService {
         2. La "description" NO debe ser genérica. Debe sonar como una entrada de enciclopedia galáctica.
         3. El lenguaje debe ser profesional y técnico.
       `;
+      //description puede ser "Descripcion breve del hallazgo"
+      //2. El lenguaje debe ser profesional y técnico, como un reporte de explorador espacial." eliminando 3
 
       const result = await model.generateContent([
         prompt,
@@ -200,7 +202,7 @@ export class SpeciesService {
 
       const response = await result.response;
       const text = response.text();
-      
+
       // Extract JSON from response (handling potential markdown blocks or extra text)
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
