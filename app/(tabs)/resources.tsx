@@ -1,5 +1,4 @@
 import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
 import { ProgressBar } from "@/components/ui/ProgressBar";
@@ -22,7 +21,6 @@ const CATEGORY_CONFIG: Record<string, { color: string; symbol: string }> = {
 export default function ResourcesScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
-  const insets = useSafeAreaInsets();
   const router = useRouter();
 
   const [page, setPage] = useState(1);
@@ -55,16 +53,17 @@ export default function ResourcesScreen() {
 
   const onRefresh = async () => {
     setIsRefreshing(true);
-    setPage(1);
-    setAllResources([]);
     setHasMore(true);
-    await refetch();
+    const result = await refetch();
+    const newItems = result.data?.items ?? [];
+    setAllResources(newItems);
+    setHasMore((result.data?.total ?? 0) > newItems.length);
     setIsRefreshing(false);
   };
 
   if (isLoading && page === 1) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, marginTop: 12 }}>
           CARGANDO RECURSOS...
@@ -75,7 +74,7 @@ export default function ResourcesScreen() {
 
   if (error) {
     return (
-      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 16 }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 16 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           ERROR AL CARGAR RECURSOS
         </Text>
@@ -87,7 +86,7 @@ export default function ResourcesScreen() {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
+    <View style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={allResources}
         keyExtractor={(item, index) => item.id ?? `resource-${index}`}
@@ -107,9 +106,9 @@ export default function ResourcesScreen() {
             <HudHeader title="GESTIÓN DE RECURSOS" subtitle="INVENTARIO ACTUAL" />
 
             {/* Alerts */}
-            {alerts && alerts.length > 0 && (
+            {alerts && alerts.filter((a: any) => a.message).length > 0 && (
               <View style={{ marginBottom: 16 }}>
-                {alerts.map((alert: any) => (
+                {alerts.filter((a: any) => a.message).map((alert: any) => (
                   <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: tc.warningMuted, borderWidth: 1, borderColor: tc.warningBorder, padding: 12, marginBottom: 8 }}>
                     <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
                     <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>

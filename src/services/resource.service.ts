@@ -37,31 +37,39 @@ export interface ResourceService {
   getAlerts(): Promise<ResourceAlert[]>;
 }
 
+function mapResource(r: any): Recurso {
+  return {
+    ...r,
+    id: r._id?.toString() ?? r.id ?? '',
+  };
+}
+
 export const resourceService: ResourceService = {
   async getAll(page = 1, limit = 20): Promise<PaginatedResources> {
-    const response = await api.get<{ success: boolean; data: Recurso[]; pagination: any }>(`/resources`, { params: { page, limit } });
+    const response = await api.get<{ success: boolean; data: any[]; pagination?: { page: number; limit: number; total: number; totalPages: number }; total?: number }>(`/resources`, { params: { page, limit } });
+    const items = (response.data.data ?? []).map(mapResource);
     return {
-      items: response.data.data ?? [],
+      items,
       page: response.data.pagination?.page ?? page,
       limit: response.data.pagination?.limit ?? limit,
-      total: response.data.pagination?.total ?? 0,
+      total: response.data.pagination?.total ?? response.data.total ?? items.length,
       totalPages: response.data.pagination?.totalPages ?? 0,
     };
   },
 
   async getById(resourceId: string): Promise<Recurso | null> {
-    const response = await api.get<{ success: boolean; data: Recurso | null }>(`/resources/${resourceId}`);
-    return response.data.data;
+    const response = await api.get<{ success: boolean; data: any | null }>(`/resources/${resourceId}`);
+    return response.data.data ? mapResource(response.data.data) : null;
   },
 
   async create(data: CreateRecursoDTO): Promise<Recurso> {
-    const response = await api.post<{ success: boolean; data: Recurso }>(`/resources`, data);
-    return response.data.data;
+    const response = await api.post<{ success: boolean; data: any }>(`/resources`, data);
+    return mapResource(response.data.data);
   },
 
   async update(resourceId: string, data: UpdateRecursoDTO): Promise<Recurso> {
-    const response = await api.put<{ success: boolean; data: Recurso }>(`/resources/${resourceId}`, data);
-    return response.data.data;
+    const response = await api.put<{ success: boolean; data: any }>(`/resources/${resourceId}`, data);
+    return mapResource(response.data.data);
   },
 
   async delete(resourceId: string): Promise<void> {
@@ -69,13 +77,13 @@ export const resourceService: ResourceService = {
   },
 
   async recordMovement(resourceId: string, data: CreateRecursoMovimientoDTO): Promise<Recurso> {
-    const response = await api.post<{ success: boolean; data: Recurso }>(`/resources/${resourceId}/movements`, {
+    const response = await api.post<{ success: boolean; data: any }>(`/resources/${resourceId}/movements`, {
       type: data.tipo,
       amount: data.cantidad,
       notes: data.razon,
       tripId: data.viajeId,
     });
-    return response.data.data;
+    return mapResource(response.data.data);
   },
 
   async getAlerts(): Promise<ResourceAlert[]> {

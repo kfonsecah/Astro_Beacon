@@ -11,7 +11,6 @@ import * as Location from "expo-location";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { RouteErrorFallback } from '@/components/common';
 
 const statusColorMap: Record<string, string> = {
@@ -224,21 +223,21 @@ export default function MapScreen() {
 
   if (isLoading && page === 1) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", marginTop: 8 }}>CARGANDO SUMINISTROS...</Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
   if (isError) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 20 }}>
         <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 14, marginBottom: 8 }}>ERROR DE CONEXIÓN</Text>
         <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
           No se pudieron cargar los suministros. Verifica tu conexión.
         </Text>
-      </SafeAreaView>
+      </View>
     );
   }
 
@@ -390,9 +389,9 @@ export default function MapScreen() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+    <View style={{ flex: 1, backgroundColor: tc.background }}>
       <Modal visible={isMapFullscreen} animationType="slide" onRequestClose={() => setIsMapFullscreen(false)}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+        <View style={{ flex: 1, backgroundColor: tc.background }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderBottomWidth: 1, borderBottomColor: tc.border }}>
             <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 11, letterSpacing: 1 }}>
               MAPA EN PANTALLA COMPLETA
@@ -445,7 +444,7 @@ export default function MapScreen() {
               );
             })}
           </MapView>
-        </SafeAreaView>
+        </View>
       </Modal>
 
       {/* Fixed header section with map - outside FlatList for independent panning */}
@@ -688,7 +687,7 @@ export default function MapScreen() {
           </View>
         }
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
