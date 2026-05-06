@@ -2,18 +2,17 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ActivityIndicator, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 import { useResourceById } from '@/hooks/useResources';
-import { HudHeader } from '@/components/ui/HudHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { colors } from '@/constants/colors';
 import type { RecursoMovimiento } from '@/types-dtos';
 
-const CATEGORY_CONFIG: Record<string, { color: string; symbol: string; label: string }> = {
-  oxigeno: { color: colors.categoryOxigeno, symbol: 'O2',  label: 'OXÍGENO' },
-  agua:    { color: colors.categoryAgua,    symbol: 'H2O', label: 'AGUA' },
-  comida:  { color: colors.categoryComida,  symbol: 'ALI', label: 'ALIMENTO' },
-  medico:  { color: colors.categoryMedico,  symbol: 'MED', label: 'MÉDICO' },
-  equipo:  { color: colors.categoryEquipo,  symbol: 'EQP', label: 'EQUIPO' },
-  otro:    { color: colors.categoryOtro,    symbol: 'OTR', label: 'OTRO' },
+const CATEGORY_CONFIG: Record<string, { color: string; symbol: string; label: string; icon: string }> = {
+  oxigeno: { color: colors.categoryOxigeno, symbol: 'O2',  label: 'OXÍGENO',  icon: '⊕' },
+  agua:    { color: colors.categoryAgua,    symbol: 'H2O', label: 'AGUA',     icon: '≋' },
+  comida:  { color: colors.categoryComida,  symbol: 'ALI', label: 'ALIMENTO', icon: '❖' },
+  medico:  { color: colors.categoryMedico,  symbol: 'MED', label: 'MÉDICO',   icon: '✚' },
+  equipo:  { color: colors.categoryEquipo,  symbol: 'EQP', label: 'EQUIPO',   icon: '⚙' },
+  otro:    { color: colors.categoryOtro,    symbol: 'OTR', label: 'OTRO',     icon: '◈' },
 };
 
 function formatDate(ts: Date | string) {
@@ -92,11 +91,25 @@ export default function ResourceDetailScreen() {
           </TouchableOpacity>
         </View>
 
-        <HudHeader
-          title={resource.name.toUpperCase()}
-          subtitle="DETALLE DE RECURSO"
-          style={{ paddingHorizontal: 16, marginBottom: 16 }}
-        />
+        {/* Title with Pip-Boy icon */}
+        <View style={{ paddingHorizontal: 16, marginBottom: 16, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+          <View style={{
+            width: 52, height: 52,
+            borderWidth: 2, borderColor: catConfig.color,
+            backgroundColor: catConfig.color + '18',
+            justifyContent: 'center', alignItems: 'center',
+          }}>
+            <Text style={{ color: catConfig.color, fontSize: 26, lineHeight: 30 }}>{catConfig.icon}</Text>
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 16, letterSpacing: 3, marginBottom: 2 }}>
+              {resource.name.toUpperCase()}
+            </Text>
+            <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, letterSpacing: 2 }}>
+              DETALLE DE RECURSO
+            </Text>
+          </View>
+        </View>
 
         {/* Category badge */}
         <View style={{ flexDirection: 'row', gap: 8, marginHorizontal: 16, marginBottom: 16 }}>
