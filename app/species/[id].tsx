@@ -97,13 +97,21 @@ export default function SpeciesDetailScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-        <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-          <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 8 }}>
-            <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>← VOLVER</Text>
+        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          <TouchableOpacity 
+            onPress={() => router.back()} 
+            style={{ paddingVertical: 12, alignSelf: 'flex-start' }}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+          >
+            <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 13, letterSpacing: 2, fontWeight: 'bold' }}>← VOLVER</Text>
           </TouchableOpacity>
         </View>
 
-        <HudHeader title={species.name.toUpperCase()} subtitle="DETALLE DE ESPECIE" />
+        <HudHeader 
+          title={species.name.toUpperCase()} 
+          subtitle="DETALLE DE ESPECIE" 
+          style={{ paddingHorizontal: 16, marginBottom: 16 }}
+        />
 
         {/* Image section */}
         <View style={{ marginHorizontal: 16, marginBottom: 16 }}>

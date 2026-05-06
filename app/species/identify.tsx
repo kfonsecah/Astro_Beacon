@@ -88,7 +88,7 @@ export default function IdentifyScreen() {
       setClassification(result.classification);
       setDangerLevel(result.dangerLevel);
       setDescription(result.description);
-      setNotes(result.description);
+      setNotes(''); // Leave notes empty for astronaut's manual observations
       setConfidence(result.confidence);
     } catch {
       Alert.alert('ERROR', 'ANÁLISIS NO DISPONIBLE — Completa los datos manualmente.');
@@ -143,13 +143,21 @@ export default function IdentifyScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
           {/* Header */}
-          <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-            <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 8 }}>
-              <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>✕ CERRAR</Text>
+          <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+            <TouchableOpacity 
+              onPress={() => router.back()} 
+              style={{ paddingVertical: 12, alignSelf: 'flex-start' }}
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            >
+              <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 13, letterSpacing: 2, fontWeight: 'bold' }}>✕ CERRAR</Text>
             </TouchableOpacity>
           </View>
 
-          <HudHeader title="IDENTIFICACIÓN DE ESPECIE" subtitle="NUEVO REGISTRO" />
+          <HudHeader 
+            title="IDENTIFICACIÓN DE ESPECIE" 
+            subtitle="NUEVO REGISTRO" 
+            style={{ paddingHorizontal: 16, marginBottom: 16 }}
+          />
 
           {/* Image section */}
           <View style={{ marginHorizontal: 16, marginBottom: 16 }}>
@@ -296,8 +304,8 @@ export default function IdentifyScreen() {
               placeholder="DESCRIPCIÓN DE LA ESPECIE"
               placeholderTextColor={tc.textDisabled}
               multiline
-              numberOfLines={3}
-              style={{ borderWidth: 1, borderColor: tc.border, backgroundColor: tc.surface, color: tc.text, fontFamily: 'monospace', fontSize: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 16, letterSpacing: 1, textAlignVertical: 'top' }}
+              numberOfLines={8}
+              style={{ borderWidth: 1, borderColor: tc.border, backgroundColor: tc.surface, color: tc.text, fontFamily: 'monospace', fontSize: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 16, letterSpacing: 1, textAlignVertical: 'top', minHeight: 160 }}
             />
 
             {/* Notes */}
@@ -308,8 +316,8 @@ export default function IdentifyScreen() {
               placeholder="OBSERVACIONES OPCIONALES"
               placeholderTextColor={tc.textDisabled}
               multiline
-              numberOfLines={4}
-              style={{ borderWidth: 1, borderColor: tc.border, backgroundColor: tc.surface, color: tc.text, fontFamily: 'monospace', fontSize: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 24, letterSpacing: 1, textAlignVertical: 'top', minHeight: 80 }}
+              numberOfLines={6}
+              style={{ borderWidth: 1, borderColor: tc.border, backgroundColor: tc.surface, color: tc.text, fontFamily: 'monospace', fontSize: 12, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 24, letterSpacing: 1, textAlignVertical: 'top', minHeight: 120 }}
             />
 
             {/* Save button */}

@@ -172,19 +172,20 @@ export class SpeciesService {
       const model = this.genAI.getGenerativeModel({ model: 'gemini-flash-latest' });
 
       const prompt = `
-        Analiza esta imagen y clasifícala para una aplicación de supervivencia espacial.
+        Analiza esta imagen y clasifícala para una bitácora de supervivencia espacial.
         Debes responder ESTRICTAMENTE en formato JSON con la siguiente estructura:
         {
           "classification": "animal" | "planta" | "recurso" | "microorganismo",
           "dangerLevel": "amigable" | "cauteloso" | "peligroso" | "letal",
-          "name": "Nombre científico o descriptivo corto",
-          "description": "Descripción breve del hallazgo",
+          "name": "Nombre científico o descriptivo",
+          "description": "Reporte detallado sobre la morfología, hábitat probable y comportamiento observado del espécimen",
           "confidence": número entre 0 y 1
         }
         
         Reglas:
         1. Si no estás seguro, usa "classification": "desconocido" y "dangerLevel": "cauteloso".
-        2. El lenguaje debe ser profesional y técnico, como un reporte de explorador espacial.
+        2. La "description" NO debe ser genérica. Debe sonar como una entrada de enciclopedia galáctica.
+        3. El lenguaje debe ser profesional y técnico.
       `;
 
       const result = await model.generateContent([
