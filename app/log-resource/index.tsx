@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Platform, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, StyleSheet, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/hooks/use-theme';
 import { HudHeader } from '@/components/ui/HudHeader';
 import { useResources, useRecordResourceMovement } from '@/hooks/useResources';
 import type { Recurso } from '@/types-dtos';
+import { useToast } from '@/hooks/useToast';
 
 export default function LogResourceScreen() {
   const theme = useTheme();
@@ -21,18 +22,22 @@ export default function LogResourceScreen() {
 
   const { data: resourcesData, isLoading: isLoadingResources } = useResources(1, 100);
   const recordMovement = useRecordResourceMovement();
+  const toast = useToast();
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const resources = resourcesData?.items || [];
 
   const handleRegister = async () => {
+    setValidationError(null);
+
     if (!selectedResourceId) {
-      Alert.alert('ERROR', 'DEBE SELECCIONAR UN RECURSO');
+      setValidationError('Debe seleccionar un recurso antes de continuar');
       return;
     }
 
     const parsedAmount = parseFloat(amount);
     if (!amount || isNaN(parsedAmount) || parsedAmount <= 0) {
-      Alert.alert('ERROR', 'LA CANTIDAD DEBE SER MAYOR A CERO');
+      setValidationError('La cantidad debe ser un número mayor a cero');
       return;
     }
 
@@ -47,11 +52,11 @@ export default function LogResourceScreen() {
           viajeId: tripId || undefined,
         },
       });
-      Alert.alert('ÉXITO', 'MOVIMIENTO REGISTRADO CORRECTAMENTE');
+      toast.success('MOVIMIENTO REGISTRADO', 'El movimiento fue asentado en el sistema de suministros');
       router.back();
     } catch (error) {
       console.error('Error recording movement:', error);
-      Alert.alert('ERROR', 'NO SE PUDO REGISTRAR EL MOVIMIENTO');
+      toast.error('ERROR DE SISTEMA', 'No se pudo registrar el movimiento. Intenta de nuevo.');
     }
   };
 
@@ -76,7 +81,7 @@ export default function LogResourceScreen() {
                   { borderColor: tc.border },
                   selectedResourceId === resource.id && { backgroundColor: tc.primary, borderColor: tc.primary }
                 ]}
-                onPress={() => setSelectedResourceId(resource.id)}
+                onPress={() => { setSelectedResourceId(resource.id); setValidationError(null); }}
               >
                 <Text
                   style={[
@@ -131,7 +136,7 @@ export default function LogResourceScreen() {
         <TextInput
           style={[styles.input, { borderColor: tc.border, color: tc.text, backgroundColor: tc.surface }]}
           value={amount}
-          onChangeText={setAmount}
+          onChangeText={(v) => { setAmount(v); setValidationError(null); }}
           keyboardType="numeric"
           placeholder="0.00"
           placeholderTextColor={tc.textMuted}
@@ -157,6 +162,28 @@ export default function LogResourceScreen() {
           placeholder="v-xxxxx"
           placeholderTextColor={tc.textMuted}
         />
+
+        {/* Validation error */}
+        {validationError ? (
+          <View
+            style={{
+              marginTop: 24,
+              borderWidth: 1,
+              borderColor: '#EF444440',
+              borderLeftWidth: 3,
+              borderLeftColor: '#EF4444',
+              paddingVertical: 10,
+              paddingHorizontal: 14,
+            }}
+          >
+            <Text style={{ fontFamily: 'monospace', fontSize: 8, letterSpacing: 3, color: '#EF4444', marginBottom: 4 }}>
+              DATO INVALIDO
+            </Text>
+            <Text style={{ fontFamily: 'monospace', fontSize: 11, color: '#E5E7EB' }}>
+              {validationError}
+            </Text>
+          </View>
+        ) : null}
 
         {/* Submit Button */}
         <TouchableOpacity

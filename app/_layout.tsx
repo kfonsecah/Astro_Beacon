@@ -8,6 +8,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/utils/queryClient";
 import { RouteErrorFallback } from '@/components/common';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { ToastContainer } from "@/components/ui";
 
 export default function RootLayout() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
@@ -42,6 +43,7 @@ export default function RootLayout() {
             <Stack.Screen name="log-resource/index" options={{ presentation: 'modal', headerShown: false }} />
           </Stack.Protected>
         </Stack>
+        <ToastContainer />
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

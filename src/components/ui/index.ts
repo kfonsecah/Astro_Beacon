@@ -5,3 +5,5 @@ export { Badge } from './Badge';
 export { ProgressBar } from './ProgressBar';
 export { EmptyState } from './EmptyState';
 export { HudHeader } from './HudHeader';
+export { Toast } from './Toast';
+export { ToastContainer } from './ToastContainer';

@@ -39,3 +39,14 @@ export function useIdentifySpecies() {
       speciesService.identify(imageBase64),
   });
 }
+
+export function useDeleteSpecies() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => 
+      speciesService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['species'] });
+    },
+  });
+}

@@ -21,6 +21,7 @@ export interface SpeciesService {
   getById(speciesId: string): Promise<Especie | null>;
   create(data: CreateEspecieDTO): Promise<Especie>;
   identify(imageBase64: string): Promise<IdentifyResult>;
+  delete(speciesId: string): Promise<void>;
 }
 
 export const speciesService: SpeciesService = {
@@ -61,5 +62,9 @@ export const speciesService: SpeciesService = {
       { imageBase64 }
     );
     return response.data.data;
+  },
+
+  async delete(speciesId: string): Promise<void> {
+    await api.delete(`/species/${speciesId}`);
   },
 };

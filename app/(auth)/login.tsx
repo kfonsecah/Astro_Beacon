@@ -2,6 +2,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { useLogin } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -228,6 +229,17 @@ export default function LoginScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
   const router = useRouter();
+  const toast = useToast();
+
+  useEffect(() => {
+    if (loginMutation.isError) {
+      const detail =
+        loginMutation.error instanceof Error
+          ? loginMutation.error.message
+          : 'Verifica tu email y contraseña';
+      toast.error('ACCESO DENEGADO', detail);
+    }
+  }, [loginMutation.isError, loginMutation.error]);
 
   const handleLogin = useCallback(async () => {
     if (!email.trim() || !password || loginMutation.isPending) return;
@@ -309,15 +321,6 @@ export default function LoginScreen() {
                   </Pressable>
                 </View>
               </View>
-
-              {/* Auth error */}
-              {loginMutation.isError && (
-                <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
-                  {loginMutation.error instanceof Error
-                    ? loginMutation.error.message
-                    : 'Error de autenticación. Intente de nuevo.'}
-                </Text>
-              )}
 
               {/* Auth Button */}
               <Animated.View style={animatedBtnStyle}>

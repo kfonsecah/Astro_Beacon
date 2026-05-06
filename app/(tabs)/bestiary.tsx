@@ -1,9 +1,9 @@
 import { HudHeader } from "@/components/ui/HudHeader";
 import { useTheme } from "@/hooks/use-theme";
-import { useSpecies } from "@/hooks/useSpecies";
+import { useSpecies, useDeleteSpecies } from "@/hooks/useSpecies";
 import type { Especie } from "@/types-dtos";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, RefreshControl, SafeAreaView, Text, TouchableOpacity, View, Image, Modal } from "react-native";
+import { ActivityIndicator, Alert, FlatList, RefreshControl, SafeAreaView, Text, TouchableOpacity, View, Image, Modal } from "react-native";
 import { useRouter } from "expo-router";
 import { RouteErrorFallback } from '@/components/common';
 import { Swipeable } from "react-native-gesture-handler";
@@ -36,28 +36,76 @@ export default function BestiaryScreen() {
   const [hasMore, setHasMore] = useState(true);
   const [previewSpecies, setPreviewSpecies] = useState<Especie | null>(null);
 
+  const { mutateAsync: deleteSpecies } = useDeleteSpecies();
+
+  // FIX: Separate synchronization of items to avoid disappearance on refresh/delete
   useEffect(() => {
-    if (data?.items && data.page === page) {
-      setAllSpecies(prev => {
-        const uniqueMap = new Map(prev.map(a => [a.id, a]));
-        data.items.forEach(a => uniqueMap.set(a.id, a));
-        return Array.from(uniqueMap.values());
-      });
-      setHasMore(page < data.totalPages);
+    if (data?.items) {
+      if (page === 1) {
+        // Reset list for page 1 (refresh)
+        setAllSpecies(data.items);
+      } else {
+        // Append unique items for subsequent pages
+        setAllSpecies(prev => {
+          const uniqueMap = new Map(prev.map(a => [a.id, a]));
+          data.items.forEach(a => uniqueMap.set(a.id, a));
+          return Array.from(uniqueMap.values());
+        });
+      }
+      setHasMore(data.page < data.totalPages);
     }
   }, [data, page]);
 
-  const onRefresh = useCallback(() => {
-    setAllSpecies([]);
+  const onRefresh = useCallback(async () => {
     setPage(1);
     setHasMore(true);
-    refetch();
+    await refetch();
   }, [refetch]);
 
   const loadMore = () => {
     if (!isFetching && hasMore) {
       setPage(prev => prev + 1);
     }
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    Alert.alert(
+      "ELIMINAR ESPECIE",
+      `¿ESTÁS SEGURO DE QUE DESEAS ELIMINAR A ${name.toUpperCase()}?`,
+      [
+        { text: "CANCELAR", style: "cancel" },
+        { 
+          text: "ELIMINAR", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteSpecies(id);
+              // Local update to avoid waiting for query invalidation
+              setAllSpecies(prev => prev.filter(s => s.id !== id));
+            } catch (error) {
+              Alert.alert("ERROR", "NO SE PUDO ELIMINAR LA ESPECIE");
+            }
+          }
+        }
+      ]
+    );
+  };
+
+  const renderLeftActions = (id: string, name: string) => {
+    return (
+      <TouchableOpacity
+        onPress={() => handleDelete(id, name)}
+        style={{
+          backgroundColor: tc.danger,
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: 80,
+          marginBottom: 12,
+        }}
+      >
+        <Text style={{ color: tc.background, fontFamily: 'monospace', fontWeight: 'bold', fontSize: 10 }}>ELIMINAR</Text>
+      </TouchableOpacity>
+    );
   };
 
   const renderRightActions = (id: string) => {
@@ -72,7 +120,7 @@ export default function BestiaryScreen() {
           marginBottom: 12,
         }}
       >
-        <Text style={{ color: tc.background, fontFamily: 'monospace', fontWeight: 'bold' }}>VER</Text>
+        <Text style={{ color: tc.background, fontFamily: 'monospace', fontWeight: 'bold', fontSize: 10 }}>VER</Text>
       </TouchableOpacity>
     );
   };
@@ -111,7 +159,7 @@ export default function BestiaryScreen() {
           <>
             <HudHeader title="BITÁCORA DE ESPECIES" subtitle="BESTIARIO PLANETARIO" />
             <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 8, marginBottom: 8 }}>
-              ← DESLIZA | MANTÉN PRESIONADO PARA PREVIEW
+              ← DESLIZA PARA VER | ELIMINAR →
             </Text>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
               {data?.total || 0} REGISTROS
@@ -124,10 +172,13 @@ export default function BestiaryScreen() {
 
           return (
             <Swipeable 
+              renderLeftActions={() => renderLeftActions(item.id, item.name)}
               renderRightActions={() => renderRightActions(item.id)}
+              overshootLeft={false}
               overshootRight={false}
             >
               <TouchableOpacity
+                activeOpacity={0.7}
                 onPress={() => router.push('/species/' + item.id)}
                 onLongPress={() => setPreviewSpecies(item)}
                 delayLongPress={500}
