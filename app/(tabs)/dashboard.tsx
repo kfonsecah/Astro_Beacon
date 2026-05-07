@@ -5,9 +5,34 @@ import { useTheme } from "@/hooks/use-theme";
 import { useAstronautDashboard, useAstronautProfile } from "@/hooks/useAstronaut";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useResourceAlerts, useResources } from "@/hooks/useResources";
+import { useSupplies } from "@/hooks/useSupplies";
+import { colors } from "@/constants/colors";
+import { astronautService } from "@/services/astronaut.service";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, SafeAreaView, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { RouteErrorFallback } from '@/components/common';
+
+const CATEGORY_CONFIG: Record<string, { color: string; symbol: string }> = {
+  oxigeno: { color: colors.categoryOxigeno, symbol: 'O2'  },
+  agua:    { color: colors.categoryAgua,    symbol: 'H2O' },
+  comida:  { color: colors.categoryComida,  symbol: 'ALI' },
+  medico:  { color: colors.categoryMedico,  symbol: 'MED' },
+  equipo:  { color: colors.categoryEquipo,  symbol: 'EQP' },
+  otro:    { color: colors.categoryOtro,    symbol: 'OTR' },
+};
+
+function formatETA(expiresAt: Date | string): string {
+  const diffMs = new Date(expiresAt).getTime() - Date.now();
+  if (diffMs <= 0) return 'EXPIRADO';
+  const totalMins = Math.floor(diffMs / 60000);
+  const days = Math.floor(totalMins / 1440);
+  const hours = Math.floor((totalMins % 1440) / 60);
+  const mins = totalMins % 60;
+  if (days > 0) return `${days}d ${hours}h`;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
 
 export default function DashboardScreen() {
   const theme = useTheme();
@@ -18,7 +43,20 @@ export default function DashboardScreen() {
   const { data: stats, isLoading: loadingStats, error: errorStats } = useAstronautDashboard();
   const { data: alerts } = useResourceAlerts();
   const { data: resourcesData, isLoading: loadingResources, error: errorResources } = useResources(1, 10);
+  const { data: suppliesData } = useSupplies(1, 50, 'pendiente');
   const networkStatus = useNetworkStatus();
+  const [latencyMs, setLatencyMs] = useState<number | null>(null);
+
+  useEffect(() => {
+    const ping = async () => {
+      try {
+        const start = Date.now();
+        await astronautService.getDashboard();
+        setLatencyMs(Date.now() - start);
+      } catch {}
+    };
+    ping();
+  }, []);
 
   const isLoading = loadingProfile || loadingStats;
   const error = errorProfile || errorStats || errorResources;
@@ -52,7 +90,16 @@ export default function DashboardScreen() {
   const speciesDiscovered = stats?.speciesDiscovered ?? 0;
 
   const resources = resourcesData?.items ?? [];
-  const supplyETA = "2d 14h";
+
+  const missionDay = astronaut?.creadoEn
+    ? Math.max(1, Math.floor((Date.now() - new Date(astronaut.creadoEn).getTime()) / 86400000) + 1)
+    : null;
+
+  const nextSupply = (suppliesData?.items ?? [])
+    .filter(s => s.status === 'pendiente' && s.expiresAt)
+    .sort((a, b) => new Date(a.expiresAt!).getTime() - new Date(b.expiresAt!).getTime())[0];
+
+  const supplyETA = nextSupply?.expiresAt ? formatETA(nextSupply.expiresAt) : '--';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
@@ -64,9 +111,9 @@ export default function DashboardScreen() {
         />
 
         {/* Alerts - only show when there are alerts */}
-        {alerts && alerts.length > 0 && (
+        {alerts && alerts.filter((a: any) => a.message).length > 0 && (
           <View style={{ marginBottom: 16 }}>
-            {alerts.map((alert: any) => (
+            {alerts.filter((a: any) => a.message).map((alert: any) => (
               <View key={alert.resourceId} style={{ flexDirection: "row", alignItems: "center", backgroundColor: "rgba(251,146,60,0.1)", borderWidth: 1, borderColor: "rgba(251,146,60,0.3)", padding: 12, marginBottom: 8 }}>
                 <Text style={{ fontSize: 16, marginRight: 8 }}>⚠️</Text>
                 <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 11, letterSpacing: 1 }}>
@@ -79,42 +126,53 @@ export default function DashboardScreen() {
 
         {/* Signal Status */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 16 }}>
-          <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 3 }}>DÍA 47 · PLANETA DESCONOCIDO</Text>
+          <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 3 }}>
+            {missionDay != null ? `DÍA ${missionDay} · MISIÓN ACTIVA` : 'MISIÓN ACTIVA'}
+          </Text>
           <Text style={{ color: networkStatus.isConnected ? tc.success : tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 1 }}>
-            {networkStatus.isConnected ? 'EN LÍNEA' : 'SIN CONEXIÓN'}
+            {networkStatus.isConnected ? `EN LÍNEA${latencyMs != null ? ` · ${latencyMs}ms` : ''}` : 'SIN CONEXIÓN'}
           </Text>
         </View>
 
         <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12 }}>RECURSOS ACTIVOS</Text>
 
         {resources.length > 0 ? resources.map((resource: any) => {
-            const resId = resource.id || (resource as any)._id;
-            const resName = resource.name || 'UNKNOWN';
+            const resId = resource.id || resource._id;
             const current = resource.currentAmount ?? 0;
             const max = resource.maxCapacity ?? (resource.threshold ? Math.round(resource.threshold / 0.15) : 100);
-            const thresholdPercentage = max > 0 ? ((resource.threshold ?? 0) / max) * 100 : 0;
-            const isCritical = (current / max) * 100 < thresholdPercentage;
+            const thresholdPct = max > 0 ? ((resource.threshold ?? 0) / max) * 100 : 0;
+            const isCritical = (current / max) * 100 < thresholdPct;
+            const catConfig = CATEGORY_CONFIG[resource.category] ?? CATEGORY_CONFIG['otro'];
 
             return (
-              <View key={resId} style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
+              <TouchableOpacity
+                key={resId}
+                onPress={() => router.push(`/resource/${resId}`)}
+                style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, borderLeftWidth: 3, borderLeftColor: catConfig.color, padding: 14, marginBottom: 10 }}
+              >
                 <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
-                  <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
-                    {resName.toUpperCase()}
-                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={{ color: catConfig.color, fontFamily: 'monospace', fontSize: 9, letterSpacing: 1, marginRight: 6 }}>
+                      {catConfig.symbol}
+                    </Text>
+                    <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+                      {(resource.name || 'UNKNOWN').toUpperCase()}
+                    </Text>
+                  </View>
                   <Text style={{ color: isCritical ? tc.danger : tc.primary, fontFamily: "monospace", fontSize: 12 }}>
                     {current}/{max} {resource.unit || ''}
                   </Text>
                 </View>
-                <ProgressBar value={current} max={max} criticalThreshold={thresholdPercentage} showValue={true} />
+                <ProgressBar value={current} max={max} criticalThreshold={thresholdPct} showValue={false} />
                 {isCritical && (
                   <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 6 }}>
-                    ⚠️ NIVEL CRÍTICO
+                    NIVEL CRÍTICO — {Math.round((current / max) * 100)}%
                   </Text>
                 )}
-              </View>
+              </TouchableOpacity>
             );
           }) : (
-            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, marginBottom: 10 }}>NO ACTIVE RESOURCES</Text>
+            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, marginBottom: 10 }}>SIN RECURSOS ACTIVOS</Text>
           )}
 
         <View style={{ marginTop: 8 }}>
@@ -123,7 +181,9 @@ export default function DashboardScreen() {
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>ESTADO</Text>
             <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{(astronaut?.status ?? 'N/A').toUpperCase()}</Text>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>SEÑAL</Text>
-            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>{networkStatus.isConnected ? 'ESTABLE · 847ms' : 'OFFLINE'}</Text>
+            <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>
+              {networkStatus.isConnected ? `ESTABLE · ${latencyMs != null ? `${latencyMs}ms` : '...'}` : 'OFFLINE'}
+            </Text>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>PRÓXIMO SUMINISTRO</Text>
             <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 12, letterSpacing: 1 }}>ETA: {supplyETA}</Text>
             <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginTop: 8 }}>RECURSOS ACTIVOS</Text>
