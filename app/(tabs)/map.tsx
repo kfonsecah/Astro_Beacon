@@ -235,7 +235,6 @@ export default function MapScreen() {
 
     const distances: Record<string, number> = {};
     const collectible = new Set<string>();
-
     const isTripActive = activeTrip?.status === 'activo';
 
     suppliesList.forEach((supply) => {
@@ -256,9 +255,25 @@ export default function MapScreen() {
       }
     });
 
+    if (isTripActive && !isSimulating && activeTrip?.destination) {
+      const distToDestinationKm = calculateDistanceKm(
+        currentRegion.latitude,
+        currentRegion.longitude,
+        activeTrip.destination.lat,
+        activeTrip.destination.lng,
+      );
+      if (distToDestinationKm * 1000 <= 35) {
+        reset();
+        Alert.alert('✓ VIAJE COMPLETADO', 'Has llegado al destino.');
+        queryClient.invalidateQueries({ queryKey: ['supplies'] });
+        queryClient.invalidateQueries({ queryKey: ['resources'] });
+        queryClient.invalidateQueries({ queryKey: ['astronaut', 'dashboard'] });
+      }
+    }
+
     setSupplyDistances(distances);
     setCollectibleSupplies(collectible);
-  }, [effectiveRegion, suppliesList, activeTrip]);
+  }, [effectiveRegion, suppliesList, activeTrip, isSimulating]);
 
   const calculateDistanceKm = (fromLat: number, fromLng: number, toLat: number, toLng: number): number => {
     const toRad = (deg: number) => (deg * Math.PI) / 180;
