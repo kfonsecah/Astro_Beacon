@@ -1,4 +1,5 @@
 import { RouteErrorFallback } from '@/components/common';
+import { SupplyRunGame } from "@/components/game/SupplyRunGame";
 import { CategoryLegend } from "@/components/map/CategoryLegend";
 import { HudHeader } from "@/components/ui/HudHeader";
 import { colors } from "@/constants/colors";
@@ -102,6 +103,7 @@ export default function MapScreen() {
   const [suppliesList, setSuppliesList] = useState<Suministro[]>([]);
   const [selectedSupplyId, setSelectedSupplyId] = useState<string | null>(null);
   const [isMapFullscreen, setIsMapFullscreen] = useState(false);
+  const [showSupplyGame, setShowSupplyGame] = useState(false);
   const [supplyDistances, setSupplyDistances] = useState<Record<string, number>>({});
   const [collectibleSupplies, setCollectibleSupplies] = useState<Set<string>>(new Set());
 
@@ -644,7 +646,7 @@ export default function MapScreen() {
     <>
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
         <TouchableOpacity
-          onPress={handleRequestSupply}
+          onPress={() => setShowSupplyGame(true)}
           disabled={createSupplyMutation.isPending}
           style={{
             flex: 1,
@@ -718,6 +720,16 @@ export default function MapScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: tc.background }}>
+      {/* Minijuego de despliegue: completa el run para solicitar el suministro */}
+      <SupplyRunGame
+        visible={showSupplyGame}
+        onComplete={() => {
+          setShowSupplyGame(false);
+          handleRequestSupply();
+        }}
+        onAbort={() => setShowSupplyGame(false)}
+      />
+
       <Modal visible={isMapFullscreen} animationType="slide" onRequestClose={() => setIsMapFullscreen(false)}>
         <View style={{ flex: 1, backgroundColor: tc.background }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingTop: safeTop + 12, paddingBottom: 12, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: tc.border }}>
