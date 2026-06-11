@@ -7,5 +7,6 @@ export { EmptyState } from './EmptyState';
 export { HudHeader } from './HudHeader';
 export { Toast } from './Toast';
 export { VitalsMonitor } from './VitalsMonitor';
-export { GyroOrbit, SpinDiamond, WarnTriangle } from './Holo3D';
+export { GyroOrbit, RadarSweep, SpinDiamond, WarnTriangle } from './Holo3D';
+export { TankGauge } from './TankGauge';
 export { ToastContainer } from './ToastContainer';

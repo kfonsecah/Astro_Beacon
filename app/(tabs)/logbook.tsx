@@ -1,11 +1,49 @@
-import { HudHeader } from "@/components/ui/HudHeader";
 import { useTheme } from "@/hooks/use-theme";
 import { useLogbookEntries, useDeleteLogbookEntry } from "@/hooks/useLogbook";
 import type { BitacoraEntradaResponse } from "@/types-dtos";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, RefreshControl, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated";
 import { RouteErrorFallback } from '@/components/common';
 import { Swipeable, FlatList } from "react-native-gesture-handler";
+
+function RecDot({ color }: { color: string }) {
+  const opacity = useSharedValue(1);
+
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withSequence(
+        withTiming(0.15, { duration: 600, easing: Easing.out(Easing.ease) }),
+        withTiming(1, { duration: 600, easing: Easing.in(Easing.ease) }),
+      ),
+      -1,
+      false,
+    );
+  }, []);
+
+  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
+
+  return (
+    <Animated.View
+      style={[{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }, style]}
+    />
+  );
+}
+
+function formatEntryDate(value?: string | Date): string {
+  if (!value) return '';
+  const d = new Date(value);
+  const date = d.toLocaleDateString();
+  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return `${date} · ${time}`;
+}
 
 export default function LogbookScreen() {
   const theme = useTheme();
@@ -120,60 +158,106 @@ export default function LogbookScreen() {
     );
   }
 
+  const listHeader = (
+    <>
+      {/* Indicador de grabación estilo HUD */}
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: tc.surface,
+          borderWidth: 1,
+          borderColor: tc.border,
+          borderLeftWidth: 3,
+          borderLeftColor: tc.danger,
+          paddingHorizontal: 14,
+          paddingVertical: 12,
+          marginBottom: 12,
+          gap: 10,
+        }}
+      >
+        <RecDot color={tc.danger} />
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 9, letterSpacing: 3 }}>
+            REC · BITÁCORA ACTIVA
+          </Text>
+          <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 8, letterSpacing: 1, marginTop: 3 }}>
+            ← DESLIZA PARA ELIMINAR →
+          </Text>
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 18, lineHeight: 22 }}>
+            {data?.total || 0}
+          </Text>
+          <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 7, letterSpacing: 2 }}>
+            ENTRADAS
+          </Text>
+        </View>
+      </View>
+    </>
+  );
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
       <FlatList
         data={allEntries}
         keyExtractor={(item, index) => item.id ?? `entry-fallback-${index}`}
         contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+        removeClippedSubviews={false}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
         }
-        ListHeaderComponent={() => (
-          <>
-            <HudHeader title="REGISTROS DE MISIÓN" subtitle="BITÁCORA ACTUAL" />
-            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 8, marginBottom: 8 }}>
-              ← DESLIZA PARA ELIMINAR →
-            </Text>
-            <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: 16 }}>
-              {data?.total || 0} ENTRADAS
-            </Text>
-          </>
-        )}
-        renderItem={({ item }) => (
-          <Swipeable 
+        ListHeaderComponent={listHeader}
+        renderItem={({ item, index }) => (
+          <Swipeable
             renderLeftActions={() => renderDeleteAction(item.id)}
             renderRightActions={() => renderDeleteAction(item.id)}
             overshootLeft={false}
             overshootRight={false}
           >
-            <TouchableOpacity 
+            <TouchableOpacity
               activeOpacity={0.7}
               onPress={() => {}}
-              style={{ 
-                backgroundColor: tc.surface, 
-                borderWidth: 1, 
-                borderColor: tc.border, 
-                padding: 14, 
-                marginBottom: 10, 
-                borderLeftWidth: 3, 
-                borderLeftColor: tc.primary 
+              style={{
+                backgroundColor: tc.surface,
+                borderWidth: 1,
+                borderColor: tc.border,
+                padding: 14,
+                marginBottom: 10,
+                borderLeftWidth: 3,
+                borderLeftColor: tc.primary
               }}
             >
+              {/* Encabezado: número de registro + título + fecha/hora */}
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
-                  {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
+                  <View style={{ backgroundColor: tc.primaryMuted, paddingHorizontal: 6, paddingVertical: 2, marginRight: 8 }}>
+                    <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 8, letterSpacing: 1 }}>
+                      REG-{String((data?.total || allEntries.length) - index).padStart(3, '0')}
+                    </Text>
+                  </View>
+                  <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, flex: 1 }} numberOfLines={1}>
+                    {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
+                  </Text>
+                </View>
                 <Text style={{ fontFamily: "monospace", fontSize: 8, color: tc.textMuted }}>
-                  {item.updatedAt ? new Date(item.updatedAt).toLocaleDateString() : ""}
+                  {formatEntryDate(item.updatedAt ?? item.createdAt)}
                 </Text>
               </View>
-              <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18, marginBottom: 6 }}>{item.description}</Text>
-              {item.title && (
-                <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, marginBottom: 6 }}>{item.title}</Text>
-              )}
+
+              <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18 }}>
+                {item.description}
+              </Text>
+
               {item.speciesName && (
-                <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>🏷️ {item.speciesName}</Text>
+                <View style={{ flexDirection: 'row', marginTop: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: tc.primaryBorder, paddingHorizontal: 8, paddingVertical: 3, gap: 6 }}>
+                    <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 10 }}>◈</Text>
+                    <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 9, letterSpacing: 1 }}>
+                      {item.speciesName.toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
               )}
             </TouchableOpacity>
           </Swipeable>
@@ -184,6 +268,13 @@ export default function LogbookScreen() {
           isFetching && page > 1 ? (
             <ActivityIndicator size="small" color={tc.primary} style={{ marginVertical: 16 }} />
           ) : null
+        )}
+        ListEmptyComponent={() => (
+          <View style={{ alignItems: 'center', paddingVertical: 40 }}>
+            <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>
+              SIN ENTRADAS REGISTRADAS
+            </Text>
+          </View>
         )}
       />
     </SafeAreaView>

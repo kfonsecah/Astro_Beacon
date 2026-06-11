@@ -84,6 +84,7 @@ export default function TabLayout() {
         name="resources"
         options={{
           title: "Recursos",
+          headerTitle: "GESTIÓN DE RECURSOS",
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? "cube" : "cube-outline"} size={size} color={color} />
           ),
@@ -102,6 +103,7 @@ export default function TabLayout() {
         name="logbook"
         options={{
           title: "Registros",
+          headerTitle: "REGISTROS DE MISIÓN",
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? "journal" : "journal-outline"} size={size} color={color} />
           ),

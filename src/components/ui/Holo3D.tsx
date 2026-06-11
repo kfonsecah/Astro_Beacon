@@ -92,6 +92,50 @@ export function SpinDiamond({ size = 40, color }: HoloProps) {
   );
 }
 
+// Radar sweep: only Z-axis rotation, safe inside scrolling lists
+// (perspective transforms can glitch with FlatList redraws on Android)
+export function RadarSweep({ size = 40, color }: HoloProps) {
+  const spin = useSpinValue(2400);
+
+  const style = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${spin.value}deg` }],
+  }));
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        borderWidth: 1.5,
+        borderColor: color + '66',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          width: size * 0.55,
+          height: size * 0.55,
+          borderRadius: size * 0.275,
+          borderWidth: 1,
+          borderColor: color + '33',
+        }}
+      />
+      <Animated.View
+        style={[
+          { position: 'absolute', width: size, height: size, alignItems: 'center' },
+          style,
+        ]}
+      >
+        <View style={{ width: 1.5, height: size / 2, backgroundColor: color }} />
+      </Animated.View>
+      <View style={{ width: size * 0.12, height: size * 0.12, borderRadius: size * 0.06, backgroundColor: color }} />
+    </View>
+  );
+}
+
 // Pulsing warning triangle with exclamation mark
 export function WarnTriangle({ size = 16, color }: HoloProps) {
   const opacity = useSharedValue(1);
