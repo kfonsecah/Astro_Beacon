@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { resourceService, type ResourceAlert } from '../services/resource.service';
+import { offlineQueue, checkOnline } from '@/services/offlineQueue';
 import type { Recurso, CreateRecursoDTO, UpdateRecursoDTO, CreateRecursoMovimientoDTO } from '@/types-dtos';
 
 const QUERY_KEYS = {
@@ -60,8 +61,19 @@ export function useDeleteResource() {
 export function useRecordResourceMovement() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CreateRecursoMovimientoDTO }) => 
-      resourceService.recordMovement(id, data),
+    networkMode: 'always',
+    mutationFn: async ({ id, data }: { id: string; data: CreateRecursoMovimientoDTO }) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: `/resources/${id}/movements`,
+          data: { type: data.tipo, amount: data.cantidad, notes: data.razon, tripId: data.viajeId },
+        });
+        return { id: `_offline_${Date.now()}` } as Recurso;
+      }
+      return resourceService.recordMovement(id, data);
+    },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['resources', 'list'] });

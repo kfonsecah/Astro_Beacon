@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { speciesService } from '../services/species.service';
+import { offlineQueue, checkOnline } from '@/services/offlineQueue';
 import type { Especie, CreateEspecieDTO } from '@/types-dtos';
 
 const QUERY_KEYS = {
@@ -25,8 +26,19 @@ export function useSpeciesById(id: string) {
 export function useCreateSpecies() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateEspecieDTO) => 
-      speciesService.create(data),
+    networkMode: 'always',
+    mutationFn: async (data: CreateEspecieDTO) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: '/species',
+          data,
+        });
+        return { id: `_offline_${Date.now()}` } as Especie;
+      }
+      return speciesService.create(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['species'] });
     },
@@ -43,8 +55,18 @@ export function useIdentifySpecies() {
 export function useDeleteSpecies() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => 
-      speciesService.delete(id),
+    networkMode: 'always',
+    mutationFn: async (id: string) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'DELETE',
+          url: `/species/${id}`,
+        });
+        return;
+      }
+      return speciesService.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['species'] });
     },

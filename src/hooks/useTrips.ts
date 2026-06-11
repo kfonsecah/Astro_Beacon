@@ -1,7 +1,8 @@
 import { useTripStore } from '@/stores/trip.store';
-import type { CreateViajeDTO, UpdateViajeDTO } from '@/types-dtos';
+import type { CreateViajeDTO, UpdateViajeDTO, Viaje } from '@/types-dtos';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tripService } from '../services/trip.service';
+import { offlineQueue, checkOnline } from '@/services/offlineQueue';
 
 const QUERY_KEYS = {
   list: (page = 1, limit = 20, status?: string) =>
@@ -27,8 +28,19 @@ export function useTripById(id: string) {
 export function useCreateTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateViajeDTO) =>
-      tripService.create(data),
+    networkMode: 'always',
+    mutationFn: async (data: CreateViajeDTO) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: '/trips',
+          data,
+        });
+        return { id: `_offline_${Date.now()}` } as Viaje;
+      }
+      return tripService.create(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trips'] });
     },
@@ -38,8 +50,19 @@ export function useCreateTrip() {
 export function useUpdateTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateViajeDTO }) =>
-      tripService.update(id, data),
+    networkMode: 'always',
+    mutationFn: async ({ id, data }: { id: string; data: UpdateViajeDTO }) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'PUT',
+          url: `/trips/${id}`,
+          data,
+        });
+        return { id } as Viaje;
+      }
+      return tripService.update(id, data);
+    },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['trips', 'list'] });
@@ -50,8 +73,19 @@ export function useUpdateTrip() {
 export function useStartTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data?: { notes?: string } }) =>
-      tripService.start(id, data),
+    networkMode: 'always',
+    mutationFn: async ({ id, data }: { id: string; data?: { notes?: string } }) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: `/trips/${id}/start`,
+          data,
+        });
+        return { id, status: 'activo', destination: { lat: 0, lng: 0 }, oxygenBudgeted: 0, oxygenConsumed: 0, resourcesCollected: 0, astronautId: '' } as Viaje;
+      }
+      return tripService.start(id, data);
+    },
     onSuccess: (updatedTrip, { id }) => {
       const currentActive = useTripStore.getState().activeTrip;
       if (currentActive && currentActive.id !== id) {
@@ -67,8 +101,19 @@ export function useStartTrip() {
 export function useCompleteTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data?: { notes?: string; resourcesUsed?: string[] } }) =>
-      tripService.complete(id, data),
+    networkMode: 'always',
+    mutationFn: async ({ id, data }: { id: string; data?: { notes?: string; resourcesUsed?: string[] } }) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: `/trips/${id}/complete`,
+          data,
+        });
+        return { id } as Viaje;
+      }
+      return tripService.complete(id, data);
+    },
     onSuccess: (_, { id }) => {
       useTripStore.getState().setActiveTrip(null);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
@@ -80,8 +125,19 @@ export function useCompleteTrip() {
 export function useAbortTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data?: { notes?: string } }) =>
-      tripService.abort(id, data),
+    networkMode: 'always',
+    mutationFn: async ({ id, data }: { id: string; data?: { notes?: string } }) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: `/trips/${id}/abort`,
+          data,
+        });
+        return { id } as Viaje;
+      }
+      return tripService.abort(id, data);
+    },
     onSuccess: (_, { id }) => {
       useTripStore.getState().setActiveTrip(null);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
@@ -93,8 +149,18 @@ export function useAbortTrip() {
 export function useDeleteTrip() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      tripService.delete(id),
+    networkMode: 'always',
+    mutationFn: async (id: string) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'DELETE',
+          url: `/trips/${id}`,
+        });
+        return;
+      }
+      return tripService.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trips'] });
     },

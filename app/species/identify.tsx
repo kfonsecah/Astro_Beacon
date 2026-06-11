@@ -24,6 +24,7 @@ import Animated, {
 import { useTheme } from '@/hooks/use-theme';
 import { useImagePicker } from '@/hooks/useImagePicker';
 import { useCreateSpecies, useIdentifySpecies } from '@/hooks/useSpecies';
+import { useToast } from '@/hooks/useToast';
 import { HudHeader } from '@/components/ui/HudHeader';
 import { SpeciesClassification, DangerLevel } from '@/types-dtos/enums';
 
@@ -38,6 +39,7 @@ export default function IdentifyScreen() {
   const { pickFromCamera, pickFromGallery, image, clearImage } = useImagePicker();
   const createSpecies = useCreateSpecies();
   const identifySpecies = useIdentifySpecies();
+  const toast = useToast();
 
   const [name, setName] = useState('');
   const [classification, setClassification] = useState<SpeciesClassification | null>(null);
@@ -118,7 +120,7 @@ export default function IdentifyScreen() {
   const handleSave = async () => {
     if (!isValid || isSubmitting || isTyping) return;
     try {
-      await createSpecies.mutateAsync({
+      const result = await createSpecies.mutateAsync({
         name: name.trim(),
         classification: classification!,
         dangerLevel: dangerLevel!,
@@ -128,6 +130,9 @@ export default function IdentifyScreen() {
         iaConfidence: confidence ?? undefined,
         classifiedByAI: confidence !== null,
       });
+      if (result?.id?.startsWith('_offline_')) {
+        toast.warning('EN COLA OFFLINE', 'La especie se registrará cuando recuperes conexión');
+      }
       router.back();
     } catch {
       Alert.alert('ERROR', 'No se pudo guardar la especie. Intenta de nuevo.');

@@ -15,7 +15,11 @@ export default function TabLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      {!isConnected && <OfflineBanner />}
+      {!isConnected && (
+        <View style={{ paddingTop: insets.top, backgroundColor: tc.background }}>
+          <OfflineBanner />
+        </View>
+      )}
       <Tabs
         screenOptions={{
         tabBarActiveTintColor: tc.primary,
@@ -48,6 +52,7 @@ export default function TabLayout() {
         headerStyle: {
           backgroundColor: tc.background,
         },
+        headerStatusBarHeight: !isConnected ? 0 : undefined,
         headerTintColor: tc.primary,
         headerTitleStyle: {
           fontFamily: "monospace",

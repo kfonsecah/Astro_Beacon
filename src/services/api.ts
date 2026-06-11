@@ -3,8 +3,11 @@ import axios, { AxiosError, AxiosInstance } from "axios";
 import * as SecureStore from "expo-secure-store";
 import { API_BASE_URL } from "@/config/api";
 import { authService } from "./auth.service";
+import { offlineQueue } from "./offlineQueue";
 
-const API_TIMEOUT = 15000;
+const WRITE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+const API_TIMEOUT = 3000;
 
 // Refresh token queue mechanism
 let isRefreshing = false;
@@ -63,6 +66,24 @@ api.interceptors.response.use(
 
     // Handle network errors
     if (!error.response) {
+      const method = (error.config?.method ?? '').toUpperCase();
+      if (WRITE_METHODS.has(method) && error.config?.url) {
+        let data: any;
+        try {
+          data = error.config.data ? JSON.parse(error.config.data) : undefined;
+        } catch {
+          data = error.config.data;
+        }
+        await offlineQueue.enqueue({ method, url: error.config.url, data });
+        // Return synthetic success so service layer doesn't crash
+        return {
+          data: { success: true, queued: true, data: { _id: `_offline_${Date.now()}` } },
+          status: 202,
+          statusText: 'Queued',
+          headers: {},
+          config: error.config,
+        };
+      }
       return Promise.reject({
         message: 'Network error. Please check your connection.',
         status: null,

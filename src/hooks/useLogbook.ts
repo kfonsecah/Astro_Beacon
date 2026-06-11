@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { logbookService } from '../services/logbook.service';
+import { offlineQueue, checkOnline } from '@/services/offlineQueue';
 import type { BitacoraEntrada, CreateBitacoraEntradaDTO } from '@/types-dtos';
 
 const QUERY_KEYS = {
@@ -26,8 +27,19 @@ export function useLogbookEntryById(id: string) {
 export function useCreateLogbookEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ data, speciesId }: { data: CreateBitacoraEntradaDTO; speciesId?: string }) => 
-      logbookService.create(data, speciesId),
+    networkMode: 'always',
+    mutationFn: async ({ data, speciesId }: { data: CreateBitacoraEntradaDTO; speciesId?: string }) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: '/logbook',
+          data: { ...data, speciesId },
+        });
+        return { id: `_offline_${Date.now()}` } as BitacoraEntrada;
+      }
+      return logbookService.create(data, speciesId);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['logbook'] });
     },
@@ -37,8 +49,19 @@ export function useCreateLogbookEntry() {
 export function useUpdateLogbookEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: CreateBitacoraEntradaDTO }) => 
-      logbookService.update(id, data),
+    networkMode: 'always',
+    mutationFn: async ({ id, data }: { id: string; data: CreateBitacoraEntradaDTO }) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'PUT',
+          url: `/logbook/${id}`,
+          data,
+        });
+        return { id } as BitacoraEntrada;
+      }
+      return logbookService.update(id, data);
+    },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['logbook', 'list'] });
@@ -49,8 +72,18 @@ export function useUpdateLogbookEntry() {
 export function useDeleteLogbookEntry() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => 
-      logbookService.delete(id),
+    networkMode: 'always',
+    mutationFn: async (id: string) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'DELETE',
+          url: `/logbook/${id}`,
+        });
+        return;
+      }
+      return logbookService.delete(id);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['logbook'] });
     },

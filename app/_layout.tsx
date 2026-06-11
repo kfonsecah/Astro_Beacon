@@ -1,24 +1,39 @@
-import { Stack, usePathname } from "expo-router";
+import { Stack } from "expo-router";
 import { useAuthStore } from "@/stores/auth.store";
 import { StatusBar } from "expo-status-bar";
 import { View, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { useEffect } from "react";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { queryClient } from "@/utils/queryClient";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { queryClient, asyncStoragePersister } from "@/utils/queryClient";
 import { RouteErrorFallback } from '@/components/common';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ToastContainer } from "@/components/ui";
+import { useOfflineSync } from "@/hooks/useOfflineSync";
+import { resourceService } from "@/services/resource.service";
+
+function OfflineSyncMount() {
+  useOfflineSync();
+  return null;
+}
 
 export default function RootLayout() {
   const { isAuthenticated, isLoading, checkAuth } = useAuthStore();
   const theme = useTheme();
   const { colors: tc } = theme;
-  const pathname = usePathname();
 
   useEffect(() => {
     checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    // Pre-warm cache for offline use — uses same key as resources tab (1, 10)
+    queryClient.prefetchQuery({
+      queryKey: ['resources', 'list', 1, 10],
+      queryFn: () => resourceService.getAll(1, 10),
+    });
+  }, [isAuthenticated]);
 
   if (isLoading) {
     return (
@@ -30,7 +45,11 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{ persister: asyncStoragePersister }}
+      >
+        <OfflineSyncMount />
         <StatusBar style={theme.isDark ? "light" : "dark"} />
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="(auth)" />
@@ -45,7 +64,7 @@ export default function RootLayout() {
           </Stack.Protected>
         </Stack>
         <ToastContainer />
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </GestureHandlerRootView>
   );
 }

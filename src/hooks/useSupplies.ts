@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supplyService } from '../services/supply.service';
+import { offlineQueue, checkOnline } from '@/services/offlineQueue';
 import type { Suministro, CreateSuministroDTO, SuministroConDistancia } from '@/types-dtos';
 
 const QUERY_KEYS = {
@@ -28,8 +29,19 @@ export function useSupplyById(id: string) {
 export function useCollectSupply() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data?: { notes?: string } }) => 
-      supplyService.collect(id, data),
+    networkMode: 'always',
+    mutationFn: async ({ id, data }: { id: string; data?: { notes?: string } }) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: `/supplies/${id}/collect`,
+          data,
+        });
+        return { id } as Suministro;
+      }
+      return supplyService.collect(id, data);
+    },
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.detail(id) });
       queryClient.invalidateQueries({ queryKey: ['supplies'] });
@@ -40,9 +52,20 @@ export function useCollectSupply() {
 export function useCreateSupply() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateSuministroDTO) => supplyService.create(data),
+    networkMode: 'always',
+    mutationFn: async (data: CreateSuministroDTO) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'POST',
+          url: '/supplies',
+          data,
+        });
+        return { id: `_offline_${Date.now()}` } as Suministro;
+      }
+      return supplyService.create(data);
+    },
     onSuccess: () => {
-      // Invalidate and refetch all supply list queries
       queryClient.invalidateQueries({ queryKey: ['supplies', 'list'] });
       queryClient.refetchQueries({ queryKey: ['supplies', 'list'] });
     },

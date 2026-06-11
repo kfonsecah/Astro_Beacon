@@ -16,6 +16,26 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 
+// Isolated component — only re-renders when simulationRegion changes (4x/sec during sim)
+function SimMarker() {
+  const simulationRegion = useTripStore(s => s.simulationRegion);
+  const isSimulating = useTripStore(s => s.isSimulating);
+  const tc = useTheme().colors;
+  if (!isSimulating || !simulationRegion) return null;
+  return (
+    <Marker
+      coordinate={{ latitude: simulationRegion.latitude, longitude: simulationRegion.longitude }}
+      anchor={{ x: 0.5, y: 0.5 }}
+      tracksViewChanges={false}
+      zIndex={10}
+    >
+      <View style={{ backgroundColor: tc.primary, borderRadius: 14, width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'white' }}>
+        <Text style={{ fontSize: 14 }}>🚀</Text>
+      </View>
+    </Marker>
+  );
+}
+
 const statusColorMap: Record<string, string> = {
   pendiente: colors.supplyPendiente,
   entregado: colors.supplyEntregado,
@@ -117,14 +137,25 @@ export default function MapScreen() {
 
   // Trip store integration
   const { activeTrip, isTracking, startTracking, setActiveTrip, reset } = useTripStore();
+  const { isSimulating, startSimulation, stopSimulation, oxygenRemaining } = useTripStore();
+  const simulationRegion = useTripStore(s => s.simulationRegion);
 
-  // Simulation state from store (persists across tab switches)
-  const {
-    simulationRegion, isSimulating, startSimulation, stopSimulation,
-  } = useTripStore();
+  const [tripInitialDistKm, setTripInitialDistKm] = useState<number | null>(null);
 
   // Use simulation region from store when simulating, otherwise use local region
   const effectiveRegion = isSimulating ? simulationRegion || region : region;
+
+  // Capture initial distance when trip becomes active for progress tracking
+  useEffect(() => {
+    if (activeTrip?.status === 'activo' && tripInitialDistKm === null) {
+      const d = calculateDistanceKm(
+        effectiveRegion.latitude, effectiveRegion.longitude,
+        activeTrip.destination.lat, activeTrip.destination.lng,
+      );
+      if (d > 0) setTripInitialDistKm(d);
+    }
+    if (activeTrip?.status !== 'activo') setTripInitialDistKm(null);
+  }, [activeTrip?.id, activeTrip?.status]);
 
   // Map refs for auto-centering during active trips
   const mapRef = useRef<MapView>(null);
@@ -139,8 +170,8 @@ export default function MapScreen() {
     }
     const { latitude, longitude } = effectiveRegion;
     const prev = lastAutoCenter.current;
-    // Skip tiny movements to avoid re-animating on camera settle jitter
-    if (prev && Math.abs(prev.lat - latitude) < 0.0001 && Math.abs(prev.lng - longitude) < 0.0001) {
+    // Skip if movement is negligible — allow ~5m to let simulation animate smoothly
+    if (prev && Math.abs(prev.lat - latitude) < 0.000045 && Math.abs(prev.lng - longitude) < 0.000045) {
       return;
     }
     lastAutoCenter.current = { lat: latitude, lng: longitude };
@@ -150,8 +181,10 @@ export default function MapScreen() {
       latitudeDelta: Math.min(effectiveRegion.latitudeDelta, 0.02),
       longitudeDelta: Math.min(effectiveRegion.longitudeDelta, 0.02),
     };
-    mapRef.current?.animateToRegion(target, 700);
-    fullscreenMapRef.current?.animateToRegion(target, 700);
+    // Use shorter animation during simulation so camera tracks marker without lag
+    const animDuration = isSimulating ? 220 : 700;
+    mapRef.current?.animateToRegion(target, animDuration);
+    fullscreenMapRef.current?.animateToRegion(target, animDuration);
   }, [effectiveRegion, activeTrip?.status]);
 
   const oxygenResource = useMemo(() => {
@@ -324,38 +357,6 @@ export default function MapScreen() {
     }
   }, [simulationRegion, isSimulating]);
 
-  // Calculate distances and detect proximity (100m) - use effectiveRegion
-  useEffect(() => {
-    const currentRegion = effectiveRegion;
-    if (!currentRegion) return;
-
-    const distances: Record<string, number> = {};
-    const collectible = new Set<string>();
-
-    const isTripActive = activeTrip?.status === 'activo';
-
-    suppliesList.forEach((supply) => {
-      const distKm = calculateDistanceKm(
-        currentRegion.latitude,
-        currentRegion.longitude,
-        supply.location.lat,
-        supply.location.lng,
-      );
-      const distMeters = distKm * 1000;
-      distances[String(supply.id)] = distKm;
-
-      const isInRange = distMeters < 1000;
-      const isPendiente = supply.status === 'pendiente';
-
-      if (isInRange && isPendiente && isTripActive) {
-        collectible.add(String(supply.id));
-      }
-    });
-
-    setSupplyDistances(distances);
-    setCollectibleSupplies(collectible);
-  }, [effectiveRegion, suppliesList, activeTrip]);
-
   const onRefresh = () => {
     if (page === 1) {
       refetch();
@@ -423,6 +424,15 @@ export default function MapScreen() {
 
   const supplies = sortedSupplies;
   const availableOxygen = oxygenResource?.currentAmount ?? 0;
+  const currentDistKm = activeTrip?.status === 'activo'
+    ? calculateDistanceKm(
+        effectiveRegion.latitude, effectiveRegion.longitude,
+        activeTrip.destination.lat, activeTrip.destination.lng,
+      )
+    : 0;
+  const tripProgressPct = tripInitialDistKm && tripInitialDistKm > 0
+    ? Math.round(Math.min(100, Math.max(0, (1 - currentDistKm / tripInitialDistKm) * 100)))
+    : 0;
   const oxygenToDestination = activeTrip?.status === 'activo'
     ? Math.max(
       0,
@@ -753,6 +763,22 @@ export default function MapScreen() {
               setRegion(nextRegion);
             }}
           >
+            {/* Destination marker */}
+            {activeTrip?.status === 'activo' && activeTrip.destination.lat !== 0 && (
+              <Marker
+                key="fs-trip-destination"
+                coordinate={{ latitude: activeTrip.destination.lat, longitude: activeTrip.destination.lng }}
+                title="DESTINO"
+                anchor={{ x: 0.5, y: 0.5 }}
+              >
+                <View style={{ backgroundColor: tc.danger, borderRadius: 14, width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'white' }}>
+                  <Text style={{ fontSize: 14 }}>🎯</Text>
+                </View>
+              </Marker>
+            )}
+
+            <SimMarker />
+
             {supplies.map((supply) => {
               const isSelected = String(selectedSupplyId) === String(supply.id);
               const isCollected = supply.status === 'recogido';
@@ -823,6 +849,22 @@ export default function MapScreen() {
               setRegion(nextRegion);
             }}
           >
+            {/* Destination marker */}
+            {activeTrip?.status === 'activo' && activeTrip.destination.lat !== 0 && (
+              <Marker
+                key="trip-destination"
+                coordinate={{ latitude: activeTrip.destination.lat, longitude: activeTrip.destination.lng }}
+                title="DESTINO"
+                anchor={{ x: 0.5, y: 0.5 }}
+              >
+                <View style={{ backgroundColor: tc.danger, borderRadius: 14, width: 28, height: 28, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'white' }}>
+                  <Text style={{ fontSize: 14 }}>🎯</Text>
+                </View>
+              </Marker>
+            )}
+
+            <SimMarker />
+
             {supplies.map((supply) => {
               const isSelected = String(selectedSupplyId) === String(supply.id);
               const isCollected = supply.status === 'recogido';
@@ -887,26 +929,68 @@ export default function MapScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Active trip indicator */}
+          {/* Status badge — top left */}
           {activeTrip?.status === 'activo' && (
-            <View style={{ position: 'absolute', top: 10, left: 10, right: 170, zIndex: 1000 }}>
-              <View style={{ backgroundColor: tc.success + 'CC', padding: 8, borderRadius: 4 }}>
-                <Text style={{ color: 'white', fontFamily: 'monospace', fontSize: 10, textAlign: 'center' }}>
-                  🚀 VIAJE ACTIVO - Rastreo GPS activo
+            <View style={{ position: 'absolute', top: 10, left: 10, zIndex: 1000 }}>
+              <View style={{
+                backgroundColor: isSimulating ? tc.warning + 'EE' : tc.success + 'EE',
+                paddingHorizontal: 10, paddingVertical: 5, borderRadius: 4,
+                flexDirection: 'row', alignItems: 'center', gap: 6,
+              }}>
+                <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: 'white' }} />
+                <Text style={{ color: 'white', fontFamily: 'monospace', fontSize: 9, letterSpacing: 1 }}>
+                  {isSimulating ? 'SIMULANDO' : 'GPS ACTIVO'}
                 </Text>
               </View>
             </View>
           )}
 
+          {/* Trip HUD — bottom of map */}
           {activeTrip?.status === 'activo' && (
-            <View style={{ position: 'absolute', bottom: 14, left: 14, right: 14, zIndex: 1000 }}>
-              <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 10, borderRadius: 8 }}>
-                <Text style={{ color: tc.text, fontFamily: 'monospace', fontSize: 12, textAlign: 'center' }}>
-                  O₂ TANQUE: {availableOxygen}
-                </Text>
-                <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 11, textAlign: 'center', marginTop: 4 }}>
-                  O₂ LLEGADA: ~{oxygenToDestination}
-                </Text>
+            <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 1000, backgroundColor: tc.background + 'F0', borderTopWidth: 1, borderTopColor: tc.primaryBorder, padding: 10 }}>
+              {/* Route progress */}
+              <View style={{ marginBottom: 6 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                  <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 8, letterSpacing: 1 }}>RUTA</Text>
+                  <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 8 }}>{tripProgressPct}% · {currentDistKm > 0.035 ? currentDistKm.toFixed(2) + ' km' : '< 35m'}</Text>
+                </View>
+                <View style={{ height: 4, backgroundColor: tc.border, borderRadius: 2 }}>
+                  <View style={{ width: `${tripProgressPct}%` as any, height: 4, backgroundColor: tc.primary, borderRadius: 2 }} />
+                </View>
+              </View>
+              {/* O₂ budget */}
+              <View style={{ marginBottom: 8 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 3 }}>
+                  <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 8, letterSpacing: 1 }}>O₂ PRESUPUESTO</Text>
+                  <Text style={{ color: activeTrip.oxygenBudgeted > 0 && oxygenRemaining / activeTrip.oxygenBudgeted < 0.2 ? tc.danger : tc.success, fontFamily: 'monospace', fontSize: 8 }}>
+                    {Math.round(oxygenRemaining)}/{activeTrip.oxygenBudgeted}
+                  </Text>
+                </View>
+                <View style={{ height: 4, backgroundColor: tc.border, borderRadius: 2 }}>
+                  <View style={{
+                    width: `${activeTrip.oxygenBudgeted > 0 ? Math.min(100, (oxygenRemaining / activeTrip.oxygenBudgeted) * 100) : 0}%` as any,
+                    height: 4,
+                    backgroundColor: activeTrip.oxygenBudgeted > 0 && oxygenRemaining / activeTrip.oxygenBudgeted < 0.2 ? tc.danger : tc.success,
+                    borderRadius: 2
+                  }} />
+                </View>
+              </View>
+              {/* Stats row */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                <View style={{ alignItems: 'center' }}>
+                  <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 7, letterSpacing: 1 }}>O₂ TANQUE</Text>
+                  <Text style={{ color: tc.text, fontFamily: 'monospace', fontSize: 12 }}>{availableOxygen}</Text>
+                </View>
+                <View style={{ width: 1, backgroundColor: tc.border }} />
+                <View style={{ alignItems: 'center' }}>
+                  <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 7, letterSpacing: 1 }}>DIST DESTINO</Text>
+                  <Text style={{ color: tc.text, fontFamily: 'monospace', fontSize: 12 }}>{currentDistKm > 0.035 ? currentDistKm.toFixed(2) + 'km' : 'LLEGÓ'}</Text>
+                </View>
+                <View style={{ width: 1, backgroundColor: tc.border }} />
+                <View style={{ alignItems: 'center' }}>
+                  <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 7, letterSpacing: 1 }}>O₂ DESTINO</Text>
+                  <Text style={{ color: oxygenToDestination > availableOxygen ? tc.danger : tc.success, fontFamily: 'monospace', fontSize: 12 }}>~{oxygenToDestination}</Text>
+                </View>
               </View>
             </View>
           )}

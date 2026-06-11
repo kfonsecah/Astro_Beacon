@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { astronautService } from '../services/astronaut.service';
+import { offlineQueue, checkOnline } from '@/services/offlineQueue';
 import type { Astronauta, CreateAstronautaDTO } from '@/types-dtos';
 
 const QUERY_KEYS = {
@@ -25,8 +26,19 @@ export function useAstronautDashboard() {
 export function useUpdateAstronautProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreateAstronautaDTO) => 
-      astronautService.createOrUpdate(data),
+    networkMode: 'always',
+    mutationFn: async (data: CreateAstronautaDTO) => {
+      const isOnline = await checkOnline();
+      if (!isOnline) {
+        await offlineQueue.enqueue({
+          method: 'PUT',
+          url: '/astronaut',
+          data,
+        });
+        return { id: `_offline_${Date.now()}` } as Astronauta;
+      }
+      return astronautService.createOrUpdate(data);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.profile });
     },

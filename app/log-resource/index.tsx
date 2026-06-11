@@ -20,7 +20,7 @@ export default function LogResourceScreen() {
   const [reason, setReason] = useState<string>('');
   const [tripId, setTripId] = useState<string>('');
 
-  const { data: resourcesData, isLoading: isLoadingResources } = useResources(1, 100);
+  const { data: resourcesData, isLoading: isLoadingResources } = useResources(1, 10);
   const recordMovement = useRecordResourceMovement();
   const toast = useToast();
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function LogResourceScreen() {
     }
 
     try {
-      await recordMovement.mutateAsync({
+      const result = await recordMovement.mutateAsync({
         id: selectedResource.id,
         data: {
           recursoId: selectedResource.id,
@@ -59,7 +59,11 @@ export default function LogResourceScreen() {
           viajeId: tripId || undefined,
         },
       });
-      toast.success('MOVIMIENTO REGISTRADO', 'El movimiento fue asentado en el sistema de suministros');
+      if (result?.id?.startsWith('_offline_')) {
+        toast.warning('EN COLA OFFLINE', 'Sin conexión. Se sincronizará al reconectar.');
+      } else {
+        toast.success('MOVIMIENTO REGISTRADO', 'El movimiento fue asentado en el sistema de suministros');
+      }
       router.back();
     } catch (error) {
       console.error('Error recording movement:', error);
