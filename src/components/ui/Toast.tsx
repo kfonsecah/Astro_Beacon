@@ -23,25 +23,25 @@ const TOAST_CONFIG: Record<
   error: {
     label: 'ERROR DEL SISTEMA',
     color: '#EF4444',
-    bg: 'rgba(239,68,68,0.07)',
+    bg: 'rgba(239,68,68,0.14)',
     symbol: '⬡',
   },
   warning: {
     label: 'ADVERTENCIA',
     color: '#FB923C',
-    bg: 'rgba(251,146,60,0.07)',
+    bg: 'rgba(251,146,60,0.14)',
     symbol: '◈',
   },
   success: {
     label: 'OPERACION EXITOSA',
     color: '#22C55E',
-    bg: 'rgba(34,197,94,0.07)',
+    bg: 'rgba(34,197,94,0.14)',
     symbol: '◉',
   },
   info: {
     label: 'TRANSMISION',
     color: '#6EE7B7',
-    bg: 'rgba(110,231,183,0.07)',
+    bg: 'rgba(110,231,183,0.14)',
     symbol: '◎',
   },
 };
@@ -81,8 +81,8 @@ function ProgressBar({ color, duration }: { color: string; duration: number }) {
   }));
 
   return (
-    <View style={{ height: 1, backgroundColor: color + '20', overflow: 'hidden' }}>
-      <Animated.View style={[{ height: 1, backgroundColor: color + '60' }, style]} />
+    <View style={{ height: 2, backgroundColor: color + '20', overflow: 'hidden' }}>
+      <Animated.View style={[{ height: 2, backgroundColor: color + '90' }, style]} />
     </View>
   );
 }
@@ -102,18 +102,28 @@ export function Toast({ id, type, title, message }: ToastMessage) {
       entering={FadeInDown.duration(300).easing(Easing.out(Easing.back(1.4)))}
       exiting={FadeOutUp.duration(220).easing(Easing.in(Easing.ease))}
       style={{
-        backgroundColor: tc.surface,
+        backgroundColor: tc.surfaceElevated,
         borderWidth: 1,
-        borderColor: config.color + '25',
-        borderLeftWidth: 3,
+        borderColor: config.color + '55',
+        borderLeftWidth: 4,
         borderLeftColor: config.color,
         marginBottom: 8,
         overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.4,
+        shadowRadius: 8,
+        elevation: 8,
       }}
     >
       <Pressable
         onPress={() => dismiss(id)}
-        style={{ paddingHorizontal: 14, paddingTop: 12, paddingBottom: 10 }}
+        style={{
+          paddingHorizontal: 14,
+          paddingTop: 12,
+          paddingBottom: 10,
+          backgroundColor: config.bg,
+        }}
         android_ripple={{ color: config.color + '15' }}
       >
         {/* Header row */}
@@ -129,9 +139,10 @@ export function Toast({ id, type, title, message }: ToastMessage) {
           <Text
             style={{
               fontFamily: 'monospace',
-              fontSize: 8,
-              letterSpacing: 3,
+              fontSize: 11,
+              letterSpacing: 2.5,
               color: config.color,
+              fontWeight: '700',
               flex: 1,
             }}
           >
@@ -140,7 +151,7 @@ export function Toast({ id, type, title, message }: ToastMessage) {
           <Text
             style={{
               fontFamily: 'monospace',
-              fontSize: 7,
+              fontSize: 9,
               letterSpacing: 1,
               color: tc.textMuted,
             }}
@@ -151,17 +162,18 @@ export function Toast({ id, type, title, message }: ToastMessage) {
 
         {/* Symbol + title row */}
         <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
-          <Text style={{ color: config.color, fontSize: 14, lineHeight: 20 }}>
+          <Text style={{ color: config.color, fontSize: 17, lineHeight: 24 }}>
             {config.symbol}
           </Text>
           <View style={{ flex: 1 }}>
             <Text
               style={{
                 fontFamily: 'monospace',
-                fontSize: 12,
+                fontSize: 15,
                 color: tc.text,
                 letterSpacing: 0.5,
-                lineHeight: 19,
+                lineHeight: 22,
+                fontWeight: '600',
               }}
             >
               {title}
@@ -170,10 +182,10 @@ export function Toast({ id, type, title, message }: ToastMessage) {
               <Text
                 style={{
                   fontFamily: 'monospace',
-                  fontSize: 9,
-                  color: tc.textMuted,
-                  marginTop: 3,
-                  lineHeight: 14,
+                  fontSize: 12,
+                  color: tc.textSecondary,
+                  marginTop: 4,
+                  lineHeight: 18,
                   letterSpacing: 0.3,
                 }}
               >

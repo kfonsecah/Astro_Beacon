@@ -125,7 +125,7 @@ export default function LogbookScreen() {
       <FlatList
         data={allEntries}
         keyExtractor={(item, index) => item.id ?? `entry-fallback-${index}`}
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
         }

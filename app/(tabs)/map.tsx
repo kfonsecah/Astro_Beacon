@@ -11,7 +11,7 @@ import type { CreateSuministroDTO, Recurso, Suministro, Viaje } from "@/types-dt
 import { useQueryClient } from "@tanstack/react-query";
 import * as Location from "expo-location";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Modal, RefreshControl, Text, TouchableOpacity, View } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE, type Region } from "react-native-maps";
 
@@ -123,6 +123,34 @@ export default function MapScreen() {
 
   // Use simulation region from store when simulating, otherwise use local region
   const effectiveRegion = isSimulating ? simulationRegion || region : region;
+
+  // Map refs for auto-centering during active trips
+  const mapRef = useRef<MapView>(null);
+  const fullscreenMapRef = useRef<MapView>(null);
+  const lastAutoCenter = useRef<{ lat: number; lng: number } | null>(null);
+
+  // Auto-scroll: follow the astronaut's position while a trip is active
+  useEffect(() => {
+    if (activeTrip?.status !== 'activo') {
+      lastAutoCenter.current = null;
+      return;
+    }
+    const { latitude, longitude } = effectiveRegion;
+    const prev = lastAutoCenter.current;
+    // Skip tiny movements to avoid re-animating on camera settle jitter
+    if (prev && Math.abs(prev.lat - latitude) < 0.0001 && Math.abs(prev.lng - longitude) < 0.0001) {
+      return;
+    }
+    lastAutoCenter.current = { lat: latitude, lng: longitude };
+    const target = {
+      latitude,
+      longitude,
+      latitudeDelta: Math.min(effectiveRegion.latitudeDelta, 0.02),
+      longitudeDelta: Math.min(effectiveRegion.longitudeDelta, 0.02),
+    };
+    mapRef.current?.animateToRegion(target, 700);
+    fullscreenMapRef.current?.animateToRegion(target, 700);
+  }, [effectiveRegion, activeTrip?.status]);
 
   const oxygenResource = useMemo(() => {
     const items = resourcesData?.items ?? [];
@@ -610,6 +638,84 @@ export default function MapScreen() {
     }
   };
 
+  // Action buttons shared between the normal view and the fullscreen map
+  // (same shapes/styles in both places)
+  const renderActionButtons = () => (
+    <>
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
+        <TouchableOpacity
+          onPress={handleRequestSupply}
+          disabled={createSupplyMutation.isPending}
+          style={{
+            flex: 1,
+            backgroundColor: createSupplyMutation.isPending ? tc.textMuted : tc.primary,
+            borderRadius: 6,
+            paddingVertical: 10,
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
+            {createSupplyMutation.isPending ? '⏳ SOLICITANDO...' : '📦 SOLICITAR SUMINISTRO'}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleStartTripFromSupply}
+          disabled={!selectedSupply || activeTrip?.status === 'activo'}
+          style={{
+            flex: 1,
+            backgroundColor: !selectedSupply || activeTrip?.status === 'activo' ? tc.textMuted : tc.success,
+            borderRadius: 6,
+            paddingVertical: 10,
+            alignItems: 'center',
+          }}
+        >
+          <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
+            {activeTrip?.status === 'activo'
+              ? '🚀 VIAJE ACTIVO'
+              : selectedSupply
+                ? '🚀 INICIAR VIAJE'
+                : 'SELECCIONA SUMINISTRO'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {activeTrip?.status === 'activo' && (
+        <TouchableOpacity
+          onPress={handleToggleSimulation}
+          style={{
+            backgroundColor: isSimulating ? tc.danger : tc.primary,
+            borderRadius: 6,
+            paddingVertical: 10,
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
+            {isSimulating ? '⏸ DETENER SIMULACIÓN' : '▶ SIMULAR CAMINATA'}
+          </Text>
+        </TouchableOpacity>
+      )}
+
+      {activeTrip?.status === 'activo' && (
+        <TouchableOpacity
+          onPress={handleCancelTrip}
+          style={{
+            backgroundColor: tc.danger,
+            borderRadius: 6,
+            paddingVertical: 10,
+            alignItems: 'center',
+            marginBottom: 10,
+          }}
+        >
+          <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
+            ✖ CANCELAR VIAJE
+          </Text>
+        </TouchableOpacity>
+      )}
+    </>
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: tc.background }}>
       <Modal visible={isMapFullscreen} animationType="slide" onRequestClose={() => setIsMapFullscreen(false)}>
@@ -624,6 +730,7 @@ export default function MapScreen() {
           </View>
 
           <MapView
+            ref={fullscreenMapRef}
             provider={PROVIDER_GOOGLE}
             style={{ flex: 1 }}
             initialRegion={region}
@@ -675,6 +782,11 @@ export default function MapScreen() {
               );
             })}
           </MapView>
+
+          {/* Same action buttons as the normal view, overlaid at the bottom */}
+          <View style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
+            {renderActionButtons()}
+          </View>
         </View>
       </Modal>
 
@@ -688,6 +800,7 @@ export default function MapScreen() {
         {/* Map View with supply markers - fixed section */}
         <View style={{ height: 260, marginBottom: 12, position: 'relative' }}>
           <MapView
+            ref={mapRef}
             provider={PROVIDER_GOOGLE}
             style={{ flex: 1 }}
             initialRegion={region}
@@ -788,89 +901,19 @@ export default function MapScreen() {
 
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 8, marginBottom: 10 }}>
-          <TouchableOpacity
-            onPress={handleRequestSupply}
-            disabled={createSupplyMutation.isPending}
-            style={{
-              flex: 1,
-              backgroundColor: createSupplyMutation.isPending ? tc.textMuted : tc.primary,
-              borderRadius: 6,
-              paddingVertical: 10,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
-              {createSupplyMutation.isPending ? '⏳ SOLICITANDO...' : '📦 SOLICITAR SUMINISTRO'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={handleStartTripFromSupply}
-            disabled={!selectedSupply || activeTrip?.status === 'activo'}
-            style={{
-              flex: 1,
-              backgroundColor: !selectedSupply || activeTrip?.status === 'activo' ? tc.textMuted : tc.success,
-              borderRadius: 6,
-              paddingVertical: 10,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
-              {activeTrip?.status === 'activo'
-                ? '🚀 VIAJE ACTIVO'
-                : selectedSupply
-                  ? '🚀 INICIAR VIAJE'
-                  : 'SELECCIONA SUMINISTRO'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {activeTrip?.status === 'activo' && (
-          <TouchableOpacity
-            onPress={handleToggleSimulation}
-            style={{
-              backgroundColor: isSimulating ? tc.danger : tc.primary,
-              borderRadius: 6,
-              paddingVertical: 10,
-              alignItems: 'center',
-              marginBottom: 10,
-            }}
-          >
-            <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
-              {isSimulating ? '⏸ DETENER SIMULACIÓN' : '▶ SIMULAR CAMINATA'}
-            </Text>
-          </TouchableOpacity>
-        )}
-
-        {activeTrip?.status === 'activo' && (
-          <TouchableOpacity
-            onPress={handleCancelTrip}
-            style={{
-              backgroundColor: tc.danger,
-              borderRadius: 6,
-              paddingVertical: 10,
-              alignItems: 'center',
-              marginBottom: 10,
-            }}
-          >
-            <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 10, letterSpacing: 1 }}>
-              ✖ CANCELAR VIAJE
-            </Text>
-          </TouchableOpacity>
-        )}
+        {renderActionButtons()}
 
         {/* Category Legend */}
         <CategoryLegend />
 
-        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 12, letterSpacing: 3, marginBottom: 12, marginTop: 12 }}>LISTA DE SUMINISTROS</Text>
+        <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 11, letterSpacing: 2, opacity: 0.9, marginBottom: 12, marginTop: 12 }}>LISTA DE SUMINISTROS</Text>
       </View>
 
       {/* Scrollable FlatList for supply list only */}
       <FlatList
         data={supplies}
         keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 130 }}
         refreshControl={
           <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
         }

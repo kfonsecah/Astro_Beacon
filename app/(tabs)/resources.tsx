@@ -1,5 +1,6 @@
 import { View, Text, FlatList, RefreshControl, ActivityIndicator, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { HudHeader } from "@/components/ui/HudHeader";
@@ -22,6 +23,7 @@ export default function ResourcesScreen() {
   const theme = useTheme();
   const { colors: tc } = theme;
   const router = useRouter();
+  const insets = useSafeAreaInsets();
 
   const [page, setPage] = useState(1);
   const [allResources, setAllResources] = useState<Recurso[]>([]);
@@ -89,7 +91,7 @@ export default function ResourcesScreen() {
       <FlatList
         data={allResources}
         keyExtractor={(item, index) => item.id ?? `resource-${index}`}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
         refreshControl={
           <RefreshControl
             refreshing={isLoading && page === 1}
@@ -196,7 +198,22 @@ export default function ResourcesScreen() {
 
       {/* FAB to register movement */}
       <TouchableOpacity
-        style={{ position: 'absolute', right: 20, bottom: 30, width: 52, height: 52, backgroundColor: tc.primary, justifyContent: 'center', alignItems: 'center' }}
+        style={{
+          position: 'absolute',
+          right: 20,
+          bottom: insets.bottom + 84,
+          width: 52,
+          height: 52,
+          borderRadius: 26,
+          backgroundColor: tc.primary,
+          justifyContent: 'center',
+          alignItems: 'center',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.35,
+          shadowRadius: 10,
+          elevation: 10,
+        }}
         onPress={() => router.push('/log-resource')}
       >
         <Text style={{ color: tc.background, fontFamily: 'monospace', fontSize: 24, lineHeight: 26 }}>+</Text>

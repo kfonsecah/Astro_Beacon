@@ -3,6 +3,7 @@ import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/use-theme";
 import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { OfflineBanner } from "@/components/common";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
@@ -10,6 +11,7 @@ export default function TabLayout() {
   const theme = useTheme();
   const { colors: tc } = theme;
   const { isConnected } = useNetworkStatus();
+  const insets = useSafeAreaInsets();
 
   return (
     <View style={{ flex: 1 }}>
@@ -18,10 +20,30 @@ export default function TabLayout() {
         screenOptions={{
         tabBarActiveTintColor: tc.primary,
         tabBarInactiveTintColor: tc.textMuted,
+        tabBarActiveBackgroundColor: tc.primaryMuted,
         tabBarStyle: {
-          backgroundColor: tc.background,
-          borderTopColor: tc.primaryBorder,
-          borderTopWidth: 1,
+          position: "absolute",
+          bottom: insets.bottom + 4,
+          marginHorizontal: 16,
+          height: 64,
+          borderRadius: 32,
+          backgroundColor: tc.surfaceElevated,
+          borderTopWidth: 0,
+          borderWidth: 1,
+          borderColor: tc.primaryBorder,
+          paddingTop: 0,
+          paddingBottom: 0,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.35,
+          shadowRadius: 16,
+          elevation: 12,
+        },
+        tabBarItemStyle: {
+          marginHorizontal: 6,
+          marginVertical: 8,
+          borderRadius: 24,
+          overflow: "hidden",
         },
         headerStyle: {
           backgroundColor: tc.background,
@@ -34,7 +56,8 @@ export default function TabLayout() {
         },
         tabBarLabelStyle: {
           fontFamily: "monospace",
-          fontSize: 10,
+          fontSize: 9,
+          fontWeight: "600",
         },
       }}
     >
@@ -42,8 +65,9 @@ export default function TabLayout() {
         name="dashboard"
         options={{
           title: "Panel",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="planet-outline" size={size} color={color} />
+          headerTitle: "PANEL DE CONTROL",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "planet" : "planet-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -51,8 +75,8 @@ export default function TabLayout() {
         name="bestiary"
         options={{
           title: "Bitácora",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bug-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "bug" : "bug-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -60,8 +84,8 @@ export default function TabLayout() {
         name="resources"
         options={{
           title: "Recursos",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="cube-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "cube" : "cube-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -69,8 +93,8 @@ export default function TabLayout() {
         name="map"
         options={{
           title: "Mapa",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "map" : "map-outline"} size={size} color={color} />
           ),
         }}
       />
@@ -78,8 +102,8 @@ export default function TabLayout() {
         name="logbook"
         options={{
           title: "Registros",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="journal-outline" size={size} color={color} />
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "journal" : "journal-outline"} size={size} color={color} />
           ),
         }}
       />

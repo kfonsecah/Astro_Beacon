@@ -14,8 +14,8 @@ export function HudHeader({ title, subtitle, style }: HudHeaderProps) {
 
   return (
     <View style={style}>
-      <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 16, letterSpacing: 3, marginBottom: 4 }}>{title}</Text>
-      {subtitle && <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, letterSpacing: 2 }}>{subtitle}</Text>}
+      <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 14, letterSpacing: 2, opacity: 0.9, marginBottom: 4 }}>{title}</Text>
+      {subtitle && <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 9, letterSpacing: 1.5 }}>{subtitle}</Text>}
     </View>
   );
 }

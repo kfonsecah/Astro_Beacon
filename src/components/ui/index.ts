@@ -6,4 +6,6 @@ export { ProgressBar } from './ProgressBar';
 export { EmptyState } from './EmptyState';
 export { HudHeader } from './HudHeader';
 export { Toast } from './Toast';
+export { VitalsMonitor } from './VitalsMonitor';
+export { GyroOrbit, SpinDiamond, WarnTriangle } from './Holo3D';
 export { ToastContainer } from './ToastContainer';
