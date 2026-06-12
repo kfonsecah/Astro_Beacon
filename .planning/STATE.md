@@ -7,8 +7,8 @@ last_updated: "2026-06-11"
 progress:
   total_phases: 15
   completed_phases: 14
-  total_plans: 34
-  completed_plans: 33
+  total_plans: 35
+  completed_plans: 34
   percent: 97
 ---
 
@@ -17,9 +17,9 @@ progress:
 ## Current Position
 
 Phase: 28-missions-page
-Plan: Not planned
+Plan: 28-01 (completed)
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Context gathered, ready for planning
+**Status:** Missions tab screen + detail screen + navigation wiring completed
 
 ## Project Reference
 
@@ -88,8 +88,11 @@ Plan: Not planned
 
 - Phase 28 added: missions page
 - Phase 28 context gathered: 2026-06-11
+- Phase 28 UI-SPEC approved: 2026-06-11
+- Phase 28 PLAN 28-01 executed: 2026-06-11
 
 ## Session
 
-- **Last activity:** Phase 28 context gathered
+- **Last activity:** Phase 28 — missions tab screen + detail screen + navigation wiring completed
 - **Resume file:** `.planning/phases/28-missions-page/28-CONTEXT.md`
+- **Outstanding:** Details screen for [id].tsx should be verified manually; INICIAR EXPEDICIÓN navigates to `/missions/new` (placeholder — form not yet implemented)
