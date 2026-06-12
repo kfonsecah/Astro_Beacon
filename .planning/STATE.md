@@ -2,37 +2,29 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: milestone
-status: milestone_complete
-last_updated: "2026-05-06T06:43:29.851Z"
+status: in_progress
+last_updated: "2026-06-11"
 progress:
-  total_phases: 14
+  total_phases: 15
   completed_phases: 14
   total_plans: 34
   completed_plans: 33
-  percent: 100
+  percent: 97
 ---
 
 # State: Astro_Beacon
 
 ## Current Position
 
-Phase: 27-resources-tab-complete
-Plan: Not started
+Phase: 28-missions-page
+Plan: Not planned
 **Milestone:** v1.2 Integración API-Frontend
-**Status:** Milestone complete
+**Status:** Context gathered, ready for planning
 
 ## Project Reference
 
 **Core Value**: Ayudar al astronauta a sobrevivir en un planeta desconocido mediante información accesible, gestión de recursos y comunicación con la Tierra.
-**Current Focus**: Milestone v1.2 Integración API-Frontend — AI Flow + Audio Narration
-
-## Current Position
-
-**Current Milestone**: v1.2 Integración API-Frontend
-**Current Phase**: 25-ai-flow-audio-narration (CURRENT)
-**Phase Status**: Planning
-**Progress**: 12/13 phases completed (92%)
-**Milestone Progress**: 36/57 requirements completed (including new AI/Gesture requirements)
+**Current Focus**: Milestone v1.2 Integración API-Frontend — Missions Page
 
 **Phases added 2026-05-05 (AI + Missing Screens):**
 
@@ -91,3 +83,13 @@ Plan: Not started
 
 - Extended colors.ts with domain-specific sections for Trip status and Supply category.
 - Replacement of all hardcoded hex values in map.tsx and trips.tsx with references to colors.* constants.
+
+### Roadmap Evolution
+
+- Phase 28 added: missions page
+- Phase 28 context gathered: 2026-06-11
+
+## Session
+
+- **Last activity:** Phase 28 context gathered
+- **Resume file:** `.planning/phases/28-missions-page/28-CONTEXT.md`
