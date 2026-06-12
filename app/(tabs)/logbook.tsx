@@ -220,7 +220,7 @@ export default function LogbookScreen() {
             <Button
               title="INICIAR EXPEDICIÓN"
               variant="primary"
-              onPress={() => router.push("/missions/new")}
+              onPress={() => Alert.alert("PRÓXIMAMENTE", "Las caminatas estarán disponibles pronto.")}
               style={{ marginTop: spacing.lg, marginBottom: spacing["2xl"] }}
             />
 
