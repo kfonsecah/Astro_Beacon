@@ -1,6 +1,12 @@
 import { api } from './api';
 import type { BitacoraEntrada, BitacoraEntradaResponse, CreateBitacoraEntradaDTO } from '@/types-dtos';
 
+type RawEntry = Record<string, unknown> & { id?: string; _id?: string | { toString(): string } };
+
+function normalizeEntry<T extends RawEntry>(entry: T): T & { id: string } {
+  return { ...entry, id: entry.id ?? (entry._id != null ? String(entry._id) : '') };
+}
+
 /**
  * PaginatedLogbookEntries defines the structure for paginated logbook entries.
  */
@@ -33,9 +39,9 @@ export const logbookService: LogbookService = {
     }>(`/logbook`, {
       params: { page, limit, speciesId }
     });
-    // Flatten populated speciesId fields
+    // Flatten populated speciesId fields and normalize _id → id
     const items = response.data.data.map(entry => ({
-      ...entry,
+      ...normalizeEntry(entry),
       speciesName: entry.speciesId?.name,
       speciesClassification: entry.speciesId?.classification,
     }));
@@ -50,17 +56,17 @@ export const logbookService: LogbookService = {
 
   async getById(entryId: string): Promise<BitacoraEntrada | null> {
     const response = await api.get<{ success: boolean; data: BitacoraEntrada | null }>(`/logbook/${entryId}`);
-    return response.data.data;
+    return response.data.data ? normalizeEntry(response.data.data) : null;
   },
 
   async create(data: CreateBitacoraEntradaDTO, speciesId?: string): Promise<BitacoraEntrada> {
     const response = await api.post<{ success: boolean; data: BitacoraEntrada }>(`/logbook`, { ...data, speciesId });
-    return response.data.data;
+    return normalizeEntry(response.data.data);
   },
 
   async update(entryId: string, data: CreateBitacoraEntradaDTO): Promise<BitacoraEntrada> {
     const response = await api.put<{ success: boolean; data: BitacoraEntrada }>(`/logbook/${entryId}`, data);
-    return response.data.data;
+    return normalizeEntry(response.data.data);
   },
 
   async delete(entryId: string): Promise<void> {
