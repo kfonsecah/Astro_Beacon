@@ -276,13 +276,13 @@ Plans:
 
 ### Phase 28: missions page
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** New missions tab screen showing active mission status with real-time monitoring, past mission history with pagination, and the ability to plan new expeditions — separate from the GPS/simulation flow in `/trips`.
+**Requirements**: N/A (new screen, not in original v1.2 scope)
 **Depends on:** Phase 27
-**Plans:** 0 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 28 to break down)
+- [ ] 28-01-PLAN.md — Create missions tab screen + detail screen + navigation wiring
 
 ---
 
