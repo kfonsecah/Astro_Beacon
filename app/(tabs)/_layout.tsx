@@ -96,6 +96,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="missions"
+        options={{
+          title: "Misiones",
+          headerTitle: "MISIONES",
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? "flag" : "flag-outline"} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="map"
         options={{
           title: "Mapa",
