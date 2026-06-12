@@ -32,7 +32,7 @@ export class WalkChallengeService {
     await this.seedIfEmpty(userId);
     return WalkChallenge.find({ userId: new mongoose.Types.ObjectId(userId) })
       .sort({ distance: 1 })
-      .lean();
+      .lean() as unknown as IWalkChallenge[];
   }
 
   async startWalk(userId: string, challengeId: string): Promise<IWalkChallenge> {

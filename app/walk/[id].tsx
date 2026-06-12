@@ -3,6 +3,7 @@ import { spacing } from "@/constants/spacing";
 import { Card } from "@/components/ui/Card";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { useStartWalk, useUpdateWalkGps, useCompleteWalk } from "@/hooks/useWalks";
+import type { WalkChallenge } from "@/types-dtos";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { ActivityIndicator, Alert, AppState, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
@@ -49,7 +50,7 @@ export default function WalkTrackingScreen() {
   useEffect(() => {
     if (!id) return;
     startWalkMutation.mutate(id, {
-      onSuccess: (data) => {
+      onSuccess: (data: WalkChallenge) => {
         setTargetKm(data.distance);
         setChallengeName(data.name);
         setReward(data.reward);

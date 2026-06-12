@@ -70,12 +70,12 @@ export default function LogbookScreen() {
   useEffect(() => {
     const newItems = data?.items ?? [];
     const filtered = newItems.filter(
-      (t) => t.status === "completado" || t.status === "abortado"
+      (t: Viaje) => t.status === "completado" || t.status === "abortado"
     );
     if (filtered.length > 0) {
       setAllMissions(prev => {
         const existingIds = new Set(prev.map(t => t.id));
-        const deduped = filtered.filter(t => !existingIds.has(t.id));
+        const deduped = filtered.filter((t: Viaje) => !existingIds.has(t.id));
         const next = deduped.length > 0 ? [...prev, ...deduped] : prev;
         setHasMore((data?.total ?? 0) > next.length);
         return next;
@@ -257,7 +257,7 @@ export default function LogbookScreen() {
                     </View>
                     {walk.status === "available" && (
                       <TouchableOpacity
-                        onPress={() => router.push(`/walk/${walk._id}`)}
+                        onPress={() => router.push(`/walk/${walk._id}` as any)}
                         style={{ backgroundColor: tc.primary, padding: 8, alignItems: "center" }}
                       >
                         <Text style={{ color: tc.background, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>
@@ -267,7 +267,7 @@ export default function LogbookScreen() {
                     )}
                     {walk.status === "in_progress" && (
                       <TouchableOpacity
-                        onPress={() => router.push(`/walk/${walk._id}`)}
+                        onPress={() => router.push(`/walk/${walk._id}` as any)}
                         style={{ borderWidth: 1, borderColor: tc.warning, padding: 8, alignItems: "center" }}
                       >
                         <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>

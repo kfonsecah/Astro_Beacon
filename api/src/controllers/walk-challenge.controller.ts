@@ -23,7 +23,7 @@ export async function startWalk(req: Request, res: Response, next: NextFunction)
       res.status(401).json({ success: false, error: 'Unauthorized' });
       return;
     }
-    const challenge = await walkChallengeService.startWalk(userId, req.params.id);
+    const challenge = await walkChallengeService.startWalk(userId, req.params.id as string);
     res.status(200).json({ success: true, data: challenge });
   } catch (error) {
     next(error);
@@ -38,7 +38,7 @@ export async function updateGps(req: Request, res: Response, next: NextFunction)
       return;
     }
     const body = updateGpsPointsSchema.parse(req.body);
-    const challenge = await walkChallengeService.updateGps(userId, req.params.id, body.gpsPoints);
+    const challenge = await walkChallengeService.updateGps(userId, req.params.id as string, body.gpsPoints);
     res.status(200).json({ success: true, data: challenge });
   } catch (error) {
     next(error);
@@ -52,7 +52,7 @@ export async function completeWalk(req: Request, res: Response, next: NextFuncti
       res.status(401).json({ success: false, error: 'Unauthorized' });
       return;
     }
-    const challenge = await walkChallengeService.completeWalk(userId, req.params.id);
+    const challenge = await walkChallengeService.completeWalk(userId, req.params.id as string);
     res.status(200).json({ success: true, data: challenge });
   } catch (error) {
     next(error);
