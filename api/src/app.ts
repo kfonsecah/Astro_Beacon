@@ -13,6 +13,7 @@ import logbookRoutes from './routes/logbook.routes.js';
 import astronautRoutes from './routes/astronaut.routes.js';
 import tripRoutes from './routes/trip.routes.js';
 import supplyRoutes from './routes/supply.routes.js';
+import walkChallengeRoutes from './routes/walk-challenge.routes.js';
 import { authenticate } from './middlewares/auth.middleware.js';
 
 const app = express();
@@ -73,6 +74,7 @@ app.use('/api/v1/logbook', authenticate, logbookRoutes);
 app.use('/api/v1/astronaut', authenticate, astronautRoutes);
 app.use('/api/v1/trips', authenticate, tripRoutes);
 app.use('/api/v1/supplies', authenticate, supplyRoutes);
+app.use('/api/v1/walks', authenticate, walkChallengeRoutes);
 
 // 404 handler
 app.use((req, res) => {

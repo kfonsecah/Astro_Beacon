@@ -71,3 +71,7 @@ export type {
   LoginResponse,
   RefreshTokenDTO,
 } from './sesion.dto';
+
+export type {
+  WalkChallenge,
+} from './walk-challenge.dto';

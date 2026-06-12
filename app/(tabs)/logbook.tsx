@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useTrips, useCompleteTrip, useAbortTrip } from "@/hooks/useTrips";
 import { useTripStore } from "@/stores/trip.store";
+import { useWalks } from "@/hooks/useWalks";
 import type { Viaje } from "@/types-dtos";
+import type { WalkChallenge } from "@/types-dtos";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
@@ -43,6 +45,8 @@ export default function LogbookScreen() {
   const [hasMore, setHasMore] = useState(true);
   const [completing, setCompleting] = useState(false);
   const [aborting, setAborting] = useState(false);
+
+  const { data: walksData, isLoading: walksLoading } = useWalks();
 
   const activeTrip = useTripStore(state => state.activeTrip);
   const oxygenRemaining = useTripStore(state => state.oxygenRemaining);
@@ -220,9 +224,61 @@ export default function LogbookScreen() {
             <Button
               title="INICIAR EXPEDICIÓN"
               variant="primary"
-              onPress={() => Alert.alert("PRÓXIMAMENTE", "Las caminatas estarán disponibles pronto.")}
-              style={{ marginTop: spacing.lg, marginBottom: spacing["2xl"] }}
+              onPress={() => router.push("/trips")}
+              style={{ marginTop: spacing.lg }}
             />
+
+            {!walksLoading && walksData && walksData.filter((w: WalkChallenge) => w.status !== "completed").length > 0 && (
+              <View style={{ marginTop: spacing["2xl"], marginBottom: spacing.lg }}>
+                <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, marginBottom: spacing.sm }}>
+                  CAMINATAS
+                </Text>
+                {walksData.filter((w: WalkChallenge) => w.status !== "completed").map((walk: WalkChallenge) => (
+                  <View key={walk._id} style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, borderLeftWidth: 3, borderLeftColor: walk.status === "in_progress" ? tc.warning : tc.primary, padding: 14, marginBottom: spacing.sm }}>
+                    <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                      <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+                        {walk.name}
+                      </Text>
+                      <Badge
+                        label={walk.status === "in_progress" ? "EN CURSO" : "DISPONIBLE"}
+                        color={walk.status === "in_progress" ? tc.warning : tc.primary}
+                      />
+                    </View>
+                    <View style={{ flexDirection: "row", gap: spacing.sm, marginBottom: 8 }}>
+                      {Object.entries(walk.reward).map(([key, val]) => {
+                        if (val <= 0) return null;
+                        const labels: Record<string, string> = { oxigeno: "O₂", agua: "H₂O", comida: "ALI", equipo: "EQP" };
+                        return (
+                          <View key={key} style={{ backgroundColor: tc.surfaceElevated, borderWidth: 1, borderColor: tc.border, paddingHorizontal: 8, paddingVertical: 4 }}>
+                            <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 8, letterSpacing: 1 }}>+{val} {labels[key] || key.toUpperCase()}</Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                    {walk.status === "available" && (
+                      <TouchableOpacity
+                        onPress={() => router.push(`/walk/${walk._id}`)}
+                        style={{ backgroundColor: tc.primary, padding: 8, alignItems: "center" }}
+                      >
+                        <Text style={{ color: tc.background, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>
+                          INICIAR CAMINATA
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {walk.status === "in_progress" && (
+                      <TouchableOpacity
+                        onPress={() => router.push(`/walk/${walk._id}`)}
+                        style={{ borderWidth: 1, borderColor: tc.warning, padding: 8, alignItems: "center" }}
+                      >
+                        <Text style={{ color: tc.warning, fontFamily: "monospace", fontSize: 10, letterSpacing: 1 }}>
+                          CONTINUAR CAMINATA
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                ))}
+              </View>
+            )}
 
             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.lg }}>
               <View style={{ flex: 1, height: 1, backgroundColor: tc.border }} />
