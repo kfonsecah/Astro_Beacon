@@ -274,6 +274,16 @@ Plans:
 | 26. Gestures + Log Resource Screen | 2/2 | Complete | 2026-05-05 |
 | 27. Resources Tab — Fix, Complete & Enhance | 2/2 | Complete   | 2026-05-06 |
 
+### Phase 28: missions page
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 27
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 28 to break down)
+
 ---
 
 **Coverage**: 45/45 v1.2 requirements mapped ✓ + 12 new requirements (AI-01→AI-09, GEST-01→GEST-02, LOGR-01)

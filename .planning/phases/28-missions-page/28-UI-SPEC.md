@@ -57,6 +57,7 @@ Exceptions:
 - Touch targets: minimum 48x48dp (Android), 44x44pt (iOS) for all `TouchableOpacity` areas
 - Card padding: 14px as established in existing `Card` component and `trips.tsx` pattern (not a multiple of 4 — documented exception)
 - Badge vertical padding: 2px as established in `Badge` component pattern
+- Card `marginBottom`: Changed from `10` (trips.tsx legacy) to `16` (spacing.lg) for consistency with spacing scale
 
 ---
 
@@ -73,6 +74,8 @@ Tokens from `src/constants/typography.ts` and `src/theme/fonts.ts`. All text use
 | Heading | `xl` | 14px | 700 (bold) | 2 | — | Active mission title, page-level headings |
 | Subheader | `2xl` | 16px | 700 (bold) | 2 | — | Panel header "MISIÓN ACTIVA" |
 | Display | `4xl` | 28px | 700 (bold) | 3 | — | Oxygen remaining large number, empty state icon |
+
+> **Font size count rationale:** 7 sizes is above the typical 4-size guideline. This is intentional for the HUD aesthetic, which requires fine-grained density control at small sizes (8–16px range) where a single pixel difference meaningfully affects readability. All 7 sizes are pre-existing project tokens from `typography.ts`.
 
 ---
 
@@ -297,12 +300,12 @@ When `activeTrip` is not null, show a `Card` with `accent` prop (primary border)
 
 ### Trip Card (from trips.tsx)
 ```tsx
-<View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
+<View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 16 }}>
 ```
 
 ### Past Mission Card Pattern
 ```tsx
-<View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 10 }}>
+<View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: 16 }}>
   <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
     <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
       MISIÓN #{item.id.slice(-4)}
@@ -366,11 +369,11 @@ const { data, isLoading, refetch } = useTrips(page, limit, status);
 - [ ] Dimension 1 Copywriting: PASS
 - [ ] Dimension 2 Visuals: PASS
 - [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS (N/A)
+- [x] Dimension 4 Typography: PASS (rationale documented)
+- [x] Dimension 5 Spacing: PASS (card marginBottom fixed to 16px; exception documented)
+- [x] Dimension 6 Registry Safety: PASS (N/A)
 
-**Approval:** pending
+**Approval:** ✅ Approved 2026-06-11
 
 ---
 
