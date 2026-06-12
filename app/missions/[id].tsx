@@ -113,10 +113,10 @@ export default function MissionDetailScreen() {
         )}
 
         <TouchableOpacity
-          onPress={() => router.push("/(tabs)/missions")}
+          onPress={() => router.push("/(tabs)/logbook")}
           style={{ marginTop: 24, alignItems: "center", borderWidth: 1, borderColor: tc.border, paddingVertical: 14 }}
         >
-          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>← VOLVER A MISIONES</Text>
+          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>← VOLVER A EXPEDICIONES</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

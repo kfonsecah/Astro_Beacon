@@ -280,7 +280,7 @@ export default function DashboardScreen() {
         <View style={{ flexDirection: "row", marginTop: 24, marginBottom: 12 }}>
           <TouchableOpacity
             style={{ flex: 1, backgroundColor: "transparent", borderWidth: 1, borderColor: tc.border, paddingVertical: 20, alignItems: "center" }}
-            onPress={() => router.push("/missions")}
+            onPress={() => router.push("/logbook")}
           >
             <View style={{ marginBottom: 10 }}>
               <GyroOrbit size={38} color={tc.primary} />

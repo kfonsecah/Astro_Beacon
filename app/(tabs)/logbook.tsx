@@ -1,283 +1,293 @@
 import { useTheme } from "@/hooks/use-theme";
-import { useLogbookEntries, useDeleteLogbookEntry } from "@/hooks/useLogbook";
-import type { BitacoraEntradaResponse } from "@/types-dtos";
+import { colors } from "@/constants/colors";
+import { spacing } from "@/constants/spacing";
+import { Card } from "@/components/ui/Card";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { useTrips, useCompleteTrip, useAbortTrip } from "@/hooks/useTrips";
+import { useTripStore } from "@/stores/trip.store";
+import type { Viaje } from "@/types-dtos";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, Alert, RefreshControl, SafeAreaView, Text, TouchableOpacity, View } from "react-native";
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming,
-} from "react-native-reanimated";
+import { ActivityIndicator, Alert, FlatList, RefreshControl, Text, TouchableOpacity, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { RouteErrorFallback } from '@/components/common';
-import { Swipeable, FlatList } from "react-native-gesture-handler";
 
-function RecDot({ color }: { color: string }) {
-  const opacity = useSharedValue(1);
+const statusColorMap: Record<string, string> = {
+  planificado: colors.tripPlanificado,
+  activo: colors.tripActivo,
+  completado: colors.tripCompletado,
+  abortado: colors.tripAbortado,
+};
 
-  useEffect(() => {
-    opacity.value = withRepeat(
-      withSequence(
-        withTiming(0.15, { duration: 600, easing: Easing.out(Easing.ease) }),
-        withTiming(1, { duration: 600, easing: Easing.in(Easing.ease) }),
-      ),
-      -1,
-      false,
-    );
-  }, []);
-
-  const style = useAnimatedStyle(() => ({ opacity: opacity.value }));
-
-  return (
-    <Animated.View
-      style={[{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }, style]}
-    />
-  );
-}
-
-function formatEntryDate(value?: string | Date): string {
-  if (!value) return '';
-  const d = new Date(value);
-  const date = d.toLocaleDateString();
-  const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  return `${date} · ${time}`;
-}
+const statusLabelMap: Record<string, string> = {
+  planificado: "PLANIFICADO",
+  activo: "ACTIVO",
+  completado: "COMPLETADO",
+  abortado: "ABORTADO",
+};
 
 export default function LogbookScreen() {
   const theme = useTheme();
-  const { colors: tc } = theme;
+  const tc = theme.colors;
+  const insets = useSafeAreaInsets();
+  const router = useRouter();
+
   const [page, setPage] = useState(1);
   const limit = 20;
-
-  const { data, isLoading, isError, refetch, isFetching } = useLogbookEntries(page, limit);
-  const [allEntries, setAllEntries] = useState<BitacoraEntradaResponse[]>([]);
+  const { data, isLoading, isError, refetch, isFetching } = useTrips(page, limit);
+  const completeMutation = useCompleteTrip();
+  const abortMutation = useAbortTrip();
+  const [allMissions, setAllMissions] = useState<Viaje[]>([]);
   const [hasMore, setHasMore] = useState(true);
+  const [completing, setCompleting] = useState(false);
+  const [aborting, setAborting] = useState(false);
 
-  const { mutateAsync: deleteEntry } = useDeleteLogbookEntry();
+  const activeTrip = useTripStore(state => state.activeTrip);
+  const oxygenRemaining = useTripStore(state => state.oxygenRemaining);
+  const startTime = useTripStore(state => state.startTime);
+
+  const [elapsed, setElapsed] = useState("0m");
+
+  useEffect(() => {
+    if (!startTime) return;
+    const tick = () => {
+      const elapsedMin = Math.floor((Date.now() - startTime) / 60000);
+      const h = Math.floor(elapsedMin / 60);
+      const m = elapsedMin % 60;
+      setElapsed(h > 0 ? `${h}h ${m}m` : `${m}m`);
+    };
+    tick();
+    const id = setInterval(tick, 10000);
+    return () => clearInterval(id);
+  }, [startTime]);
 
   useEffect(() => {
     const newItems = data?.items ?? [];
-    if (newItems.length > 0) {
-      setAllEntries(prev => {
-        const existingIds = new Set(prev.map(e => e.id));
-        const filtered = newItems.filter(e => !existingIds.has(e.id));
-        const next = filtered.length > 0 ? [...prev, ...filtered] : prev;
+    const filtered = newItems.filter(
+      (t) => t.status === "completado" || t.status === "abortado"
+    );
+    if (filtered.length > 0) {
+      setAllMissions(prev => {
+        const existingIds = new Set(prev.map(t => t.id));
+        const deduped = filtered.filter(t => !existingIds.has(t.id));
+        const next = deduped.length > 0 ? [...prev, ...deduped] : prev;
         setHasMore((data?.total ?? 0) > next.length);
         return next;
       });
     }
   }, [data]);
 
+  const getStatusColor = (status: string) => statusColorMap[status] || tc.textMuted;
+  const getStatusLabel = (status: string) => statusLabelMap[status] || status.toUpperCase();
+
+  const handleComplete = () => {
+    if (!activeTrip) return;
+    Alert.alert(
+      "COMPLETAR MISIÓN",
+      "La misión activa se marcará como completada. ¿Confirmar?",
+      [
+        { text: "CANCELAR" },
+        {
+          text: "COMPLETAR",
+          onPress: () => {
+            setCompleting(true);
+            completeMutation.mutate(
+              { id: activeTrip.id },
+              {
+                onSettled: () => setCompleting(false),
+                onError: () => Alert.alert("ERROR", "No se pudo completar la misión"),
+              }
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const handleAbort = () => {
+    if (!activeTrip) return;
+    Alert.alert(
+      "ABORTAR MISIÓN",
+      "Se perderá el oxígeno restante y el progreso de la misión actual. ¿Continuar?",
+      [
+        { text: "CANCELAR", style: "cancel" },
+        {
+          text: "ABORTAR",
+          style: "destructive",
+          onPress: () => {
+            setAborting(true);
+            abortMutation.mutate(
+              { id: activeTrip.id },
+              {
+                onSettled: () => setAborting(false),
+                onError: () => Alert.alert("ERROR", "No se pudo abortar la misión"),
+              }
+            );
+          },
+        },
+      ]
+    );
+  };
+
   const onRefresh = useCallback(async () => {
     setPage(1);
-    setAllEntries([]);
+    setAllMissions([]);
     setHasMore(true);
     await refetch();
   }, [refetch]);
 
   const loadMore = () => {
-    if (hasMore && !isFetching && !isError && allEntries.length < (data?.total ?? 0)) {
+    if (hasMore && !isFetching && allMissions.length < (data?.total ?? 0)) {
       setPage(p => p + 1);
     }
   };
 
-  const handleDelete = (id: string) => {
-    Alert.alert(
-      "ELIMINAR ENTRADA",
-      "¿ESTÁS SEGURO DE QUE DESEAS ELIMINAR ESTA ENTRADA DE LA BITÁCORA?",
-      [
-        { text: "CANCELAR", style: "cancel" },
-        { 
-          text: "ELIMINAR", 
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await deleteEntry(id);
-              setAllEntries(prev => prev.filter(e => e.id !== id));
-            } catch (error) {
-              Alert.alert("ERROR", "NO SE PUDO ELIMINAR LA ENTRADA");
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const renderDeleteAction = (id: string) => {
-    return (
-      <TouchableOpacity
-        onPress={() => handleDelete(id)}
-        style={{
-          backgroundColor: tc.danger,
-          justifyContent: 'center',
-          alignItems: 'center',
-          width: 80,
-          marginBottom: 10,
-        }}
-      >
-        <Text style={{ color: tc.background, fontFamily: 'monospace', fontWeight: 'bold', fontSize: 10 }}>ELIMINAR</Text>
-      </TouchableOpacity>
-    );
-  };
+  const pastMissionsCount = allMissions.length || data?.total || 0;
 
   if (isLoading && page === 1) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center" }}>
+      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color={tc.primary} />
-        <Text style={{ color: tc.textMuted, fontFamily: "monospace", marginTop: 8 }}>CARGANDO BITÁCORA...</Text>
-      </SafeAreaView>
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, marginTop: 12 }}>
+          CARGANDO EXPEDICIONES...
+        </Text>
+      </View>
     );
   }
 
   if (isError) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: tc.background, justifyContent: "center", alignItems: "center", padding: 32 }}>
-        <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 32, marginBottom: 20 }}>⬡</Text>
-        <View style={{ borderWidth: 1, borderColor: tc.danger + '40', borderLeftWidth: 3, borderLeftColor: tc.danger, padding: 20, width: '100%' }}>
-          <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 8, letterSpacing: 3, marginBottom: 10 }}>
-            ERROR DEL SISTEMA
-          </Text>
-          <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 13, marginBottom: 8 }}>
-            SEÑAL PERDIDA
-          </Text>
-          <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, lineHeight: 16 }}>
-            No se pudo cargar la bitácora.{'\n'}Verifica tu conexión e intenta de nuevo.
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={onRefresh}
-          style={{ marginTop: 24, borderWidth: 1, borderColor: tc.primaryBorder, paddingVertical: 12, paddingHorizontal: 24 }}
-        >
-          <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 11, letterSpacing: 2 }}>
-            [ REINTENTAR ]
-          </Text>
-        </TouchableOpacity>
-      </SafeAreaView>
+      <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top, justifyContent: "center", alignItems: "center", padding: 20 }}>
+        <Text style={{ color: tc.danger, fontFamily: "monospace", fontSize: 14, marginBottom: 8 }}>ERROR DE CONEXIÓN</Text>
+        <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, textAlign: "center" }}>
+          No se pudieron cargar las expediciones. Verifica tu conexión.
+        </Text>
+      </View>
     );
   }
 
-  const listHeader = (
-    <>
-      {/* Indicador de grabación estilo HUD */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          backgroundColor: tc.surface,
-          borderWidth: 1,
-          borderColor: tc.border,
-          borderLeftWidth: 3,
-          borderLeftColor: tc.danger,
-          paddingHorizontal: 14,
-          paddingVertical: 12,
-          marginBottom: 12,
-          gap: 10,
-        }}
-      >
-        <RecDot color={tc.danger} />
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: tc.danger, fontFamily: 'monospace', fontSize: 9, letterSpacing: 3 }}>
-            REC · BITÁCORA ACTIVA
-          </Text>
-          <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 8, letterSpacing: 1, marginTop: 3 }}>
-            ← DESLIZA PARA ELIMINAR →
-          </Text>
-        </View>
-        <View style={{ alignItems: 'flex-end' }}>
-          <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 18, lineHeight: 22 }}>
-            {data?.total || 0}
-          </Text>
-          <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 7, letterSpacing: 2 }}>
-            ENTRADAS
-          </Text>
-        </View>
-      </View>
-    </>
-  );
-
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: tc.background }}>
+    <View style={{ flex: 1, backgroundColor: tc.background, paddingTop: insets.top }}>
       <FlatList
-        data={allEntries}
-        keyExtractor={(item, index) => item.id ?? `entry-fallback-${index}`}
-        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
-        removeClippedSubviews={false}
-        refreshControl={
-          <RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />
-        }
-        ListHeaderComponent={listHeader}
-        renderItem={({ item, index }) => (
-          <Swipeable
-            renderLeftActions={() => renderDeleteAction(item.id)}
-            renderRightActions={() => renderDeleteAction(item.id)}
-            overshootLeft={false}
-            overshootRight={false}
-          >
-            <TouchableOpacity
-              activeOpacity={0.7}
-              onPress={() => {}}
-              style={{
-                backgroundColor: tc.surface,
-                borderWidth: 1,
-                borderColor: tc.border,
-                padding: 14,
-                marginBottom: 10,
-                borderLeftWidth: 3,
-                borderLeftColor: tc.primary
-              }}
-            >
-              {/* Encabezado: número de registro + título + fecha/hora */}
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1, marginRight: 8 }}>
-                  <View style={{ backgroundColor: tc.primaryMuted, paddingHorizontal: 6, paddingVertical: 2, marginRight: 8 }}>
-                    <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 8, letterSpacing: 1 }}>
-                      REG-{String((data?.total || allEntries.length) - index).padStart(3, '0')}
-                    </Text>
-                  </View>
-                  <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, flex: 1 }} numberOfLines={1}>
-                    {item.title ? item.title.toUpperCase() : `DÍA ${item.createdAt ? new Date(item.createdAt).getDate() : '?'}`}
+        data={allMissions}
+        keyExtractor={(item, index) => item.id || `mission-${index}`}
+        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
+        refreshControl={<RefreshControl refreshing={isFetching && page === 1} onRefresh={onRefresh} tintColor={tc.primary} />}
+        ListHeaderComponent={() => (
+          <>
+            {activeTrip ? (
+              <Card accent>
+                <Text style={{ color: tc.primary, fontSize: 10, letterSpacing: 2, fontFamily: "monospace" }}>
+                  {activeTrip.destination
+                    ? `LAT: ${activeTrip.destination.lat.toFixed(2)} LNG: ${activeTrip.destination.lng.toFixed(2)}`
+                    : "EXPEDICIÓN ACTIVA"}
+                </Text>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginVertical: spacing.sm }}>
+                  <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 9, letterSpacing: 1 }}>
+                    O₂: {oxygenRemaining.toFixed(0)}/{activeTrip.oxygenBudgeted}
+                  </Text>
+                  <Text style={{ color: tc.textSecondary, fontFamily: "monospace", fontSize: 9, letterSpacing: 1 }}>
+                    DURACIÓN: {elapsed}
                   </Text>
                 </View>
-                <Text style={{ fontFamily: "monospace", fontSize: 8, color: tc.textMuted }}>
-                  {formatEntryDate(item.updatedAt ?? item.createdAt)}
+                <View style={{ flexDirection: "row", gap: spacing.sm }}>
+                  <Button
+                    title={completing ? "COMPLETANDO..." : "COMPLETAR MISIÓN"}
+                    variant="primary"
+                    onPress={handleComplete}
+                    disabled={completing || aborting}
+                    style={{ flex: 1 }}
+                  />
+                  <Button
+                    title={aborting ? "ABORTANDO..." : "ABORTAR"}
+                    variant="danger"
+                    onPress={handleAbort}
+                    disabled={completing || aborting}
+                    style={{ flex: 1 }}
+                  />
+                </View>
+              </Card>
+            ) : (
+              <Card>
+                <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 10, letterSpacing: 2, textAlign: "center" }}>
+                  SIN EXPEDICIÓN ACTIVA
+                </Text>
+              </Card>
+            )}
+
+            <Button
+              title="INICIAR EXPEDICIÓN"
+              variant="primary"
+              onPress={() => router.push("/missions/new")}
+              style={{ marginTop: spacing.lg, marginBottom: spacing["2xl"] }}
+            />
+
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: spacing.lg }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: tc.border }} />
+              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginHorizontal: 12 }}>
+                HISTORIAL
+              </Text>
+              <View style={{ flex: 1, height: 1, backgroundColor: tc.border }} />
+            </View>
+
+            {pastMissionsCount > 0 && (
+              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9, letterSpacing: 2, marginBottom: spacing.lg }}>
+                {pastMissionsCount} MISIONES
+              </Text>
+            )}
+          </>
+        )}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => router.push(`/missions/${item.id}`)}>
+            <View style={{ backgroundColor: tc.surface, borderWidth: 1, borderColor: tc.border, padding: 14, marginBottom: spacing.lg }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 10, letterSpacing: 2 }}>
+                  MISIÓN #{item.id.slice(-4).toUpperCase()}
+                </Text>
+                <Badge label={getStatusLabel(item.status)} color={getStatusColor(item.status)} />
+              </View>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
+                <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>
+                  O₂: {item.oxygenConsumed}/{item.oxygenBudgeted}
+                </Text>
+                <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 9 }}>
+                  RECURSOS: {item.resourcesCollected || 0}
                 </Text>
               </View>
-
-              <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18 }}>
-                {item.description}
-              </Text>
-
-              {item.speciesName && (
-                <View style={{ flexDirection: 'row', marginTop: 8 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: tc.primaryBorder, paddingHorizontal: 8, paddingVertical: 3, gap: 6 }}>
-                    <Text style={{ color: tc.primary, fontFamily: 'monospace', fontSize: 10 }}>◈</Text>
-                    <Text style={{ color: tc.primary, fontFamily: "monospace", fontSize: 9, letterSpacing: 1 }}>
-                      {item.speciesName.toUpperCase()}
-                    </Text>
-                  </View>
-                </View>
+              {item.notes && (
+                <Text style={{ color: tc.text, fontFamily: "monospace", fontSize: 11, lineHeight: 18 }}>
+                  {item.notes}
+                </Text>
               )}
-            </TouchableOpacity>
-          </Swipeable>
+            </View>
+          </TouchableOpacity>
         )}
         onEndReached={loadMore}
         onEndReachedThreshold={0.5}
         ListFooterComponent={() => (
           isFetching && page > 1 ? (
-            <ActivityIndicator size="small" color={tc.primary} style={{ marginVertical: 16 }} />
+            <ActivityIndicator size="small" color={tc.primary} style={{ marginVertical: spacing.lg }} />
           ) : null
         )}
-        ListEmptyComponent={() => (
-          <View style={{ alignItems: 'center', paddingVertical: 40 }}>
-            <Text style={{ color: tc.textMuted, fontFamily: 'monospace', fontSize: 10, letterSpacing: 2 }}>
-              SIN ENTRADAS REGISTRADAS
-            </Text>
-          </View>
-        )}
+        ListEmptyComponent={
+          pastMissionsCount === 0 && !activeTrip ? (
+            <EmptyState
+              icon="🚀"
+              title="SIN EXPEDICIONES"
+              description="Sin expediciones registradas. Inicia tu primera expedición."
+            />
+          ) : (
+            <View style={{ alignItems: "center", paddingTop: spacing["5xl"] }}>
+              <Text style={{ color: tc.textMuted, fontFamily: "monospace", fontSize: 12 }}>
+                SIN REGISTROS DE MISIÓN
+              </Text>
+            </View>
+          )
+        }
       />
-    </SafeAreaView>
+    </View>
   );
 }
 

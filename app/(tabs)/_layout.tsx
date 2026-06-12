@@ -96,16 +96,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="missions"
-        options={{
-          title: "Misiones",
-          headerTitle: "MISIONES",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? "flag" : "flag-outline"} size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="map"
         options={{
           title: "Mapa",
@@ -117,10 +107,10 @@ export default function TabLayout() {
       <Tabs.Screen
         name="logbook"
         options={{
-          title: "Registros",
-          headerTitle: "REGISTROS DE MISIÓN",
+          title: "Expediciones",
+          headerTitle: "REGISTRO DE EXPEDICIONES",
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? "journal" : "journal-outline"} size={size} color={color} />
+            <Ionicons name={focused ? "document-text" : "document-text-outline"} size={size} color={color} />
           ),
         }}
       />
